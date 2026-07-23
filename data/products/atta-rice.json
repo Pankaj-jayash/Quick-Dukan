@@ -1,0 +1,11 @@
+{
+    "category": { "id": "atta-rice", "name": "Atta & Rice", "icon": "🍚", "priority": true, "totalProducts": 30 },
+    "products": [
+        { "id": "ar-001", "name": "Tata Sampann Atta", "weight": "5kg", "price": 300, "mrp": 350, "image": "", "icon": "🍚", "rating": 4.2, "reviews": 120, "inStock": true, "mostOrdered": true, "badge": null },
+        { "id": "ar-002", "name": "Aashirvaad Atta", "weight": "5kg", "price": 280, "mrp": 320, "image": "", "icon": "🍚", "rating": 4.5, "reviews": 200, "inStock": true, "mostOrdered": true, "badge": "best-seller" },
+        { "id": "ar-003", "name": "Patanjali Atta", "weight": "5kg", "price": 290, "mrp": 310, "image": "", "icon": "🍚", "rating": 4.0, "reviews": 90, "inStock": true, "mostOrdered": false, "badge": null },
+        { "id": "ar-004", "name": "India Gate Basmati Rice", "weight": "5kg", "price": 380, "mrp": 420, "image": "", "icon": "🍚", "rating": 4.6, "reviews": 300, "inStock": true, "mostOrdered": true, "badge": "popular" },
+        { "id": "ar-005", "name": "Daawat Rice", "weight": "5kg", "price": 350, "mrp": 380, "image": "", "icon": "🍚", "rating": 4.4, "reviews": 250, "inStock": true, "mostOrdered": false, "badge": null },
+        { "id": "ar-006", "name": "Fortune Rice", "weight": "5kg", "price": 320, "mrp": 350, "image": "", "icon": "🍚", "rating": 4.1, "reviews": 180, "inStock": true, "mostOrdered": false, "badge": null }
+    ]
+}

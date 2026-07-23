@@ -1,0 +1,109 @@
+/* ═══════════════════════════════════════════ */
+/* DARK MODE OVERRIDES                        */
+/* ═══════════════════════════════════════════ */
+
+body.dark-mode {
+    --bg: #121212;
+    --bg-white: #1E1E1E;
+    --bg-card: #1E1E1E;
+    --text-dark: #E0E0E0;
+    --text-medium: #B0B0B0;
+    --text-grey: #808080;
+    --text-light: #606060;
+}
+
+/* Header */
+body.dark-mode .top-header {
+    background: #050F05;
+    border-bottom: 1px solid rgba(255,255,255,0.04);
+}
+
+body.dark-mode .road-lines {
+    background: repeating-linear-gradient(
+        90deg,
+        rgba(212,168,83,0.18) 0px,
+        rgba(212,168,83,0.18) 12px,
+        transparent 12px,
+        transparent 22px
+    );
+}
+
+body.dark-mode .road-car {
+    filter: drop-shadow(0 0 3px rgba(255,255,255,0.2));
+}
+
+/* Bottom Nav */
+body.dark-mode .bottom-nav {
+    background: rgba(30, 30, 30, 0.95);
+    border-top: 1px solid rgba(255,255,255,0.05);
+    box-shadow: 
+        0 -1px 0 rgba(255,255,255,0.02),
+        0 -4px 20px rgba(0,0,0,0.4),
+        0 -8px 40px rgba(0,0,0,0.3);
+}
+
+body.dark-mode .nav-item.active {
+    background: rgba(76, 175, 80, 0.1);
+}
+
+body.dark-mode .cart-badge {
+    border-color: #1E1E1E;
+}
+
+/* Search */
+body.dark-mode .search-container {
+    background: #1E1E1E;
+    border-color: #333333;
+    box-shadow: 
+        0 2px 4px rgba(0,0,0,0.2),
+        0 8px 20px rgba(0,0,0,0.3),
+        0 20px 40px rgba(0,0,0,0.2);
+}
+
+body.dark-mode .search-input {
+    color: #E0E0E0;
+}
+
+body.dark-mode .search-input::placeholder {
+    color: #606060;
+}
+
+body.dark-mode .search-dropdown {
+    background: #252525;
+    border-color: #333333;
+}
+
+body.dark-mode .dropdown-result-item:hover {
+    background: rgba(255,255,255,0.03);
+}
+
+body.dark-mode .dropdown-header,
+body.dark-mode .dropdown-footer {
+    border-color: rgba(255,255,255,0.05);
+}
+
+body.dark-mode .trending-item {
+    background: rgba(255,255,255,0.04);
+}
+
+body.dark-mode .cart-toast {
+    background: #252525;
+    border-left-color: #66BB6A;
+}
+
+body.dark-mode .toast-product {
+    color: #E0E0E0;
+}
+
+body.dark-mode .empty-fallback {
+    border-top-color: rgba(255,255,255,0.06);
+}
+
+body.dark-mode .search-container:focus-within {
+    border-color: #66BB6A;
+    box-shadow: 
+        0 4px 8px rgba(102,187,106,0.08),
+        0 12px 28px rgba(102,187,106,0.12),
+        0 24px 48px rgba(102,187,106,0.06),
+        0 0 0 6px rgba(102,187,106,0.03);
+}

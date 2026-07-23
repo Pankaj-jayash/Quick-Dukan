@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Product Detail — Quick Dukan</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800;900&family=Nunito:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <link rel="stylesheet" href="css/reset.css">
+    <link rel="stylesheet" href="css/variables.css">
+    <link rel="stylesheet" href="css/global.css">
+    <link rel="stylesheet" href="css/animations.css">
+    <link rel="stylesheet" href="css/responsive.css">
+</head>
+<body>
+    
+    <!-- ==================== TOP HEADER ==================== -->
+    <header class="top-header" id="topHeader">
+        <div class="header-brand" id="headerBrand" onclick="window.location.href='index.html'">
+            <span class="brand-icon">🛒</span>
+            <div class="brand-text-wrapper">
+                <span class="brand-text">
+                    <span class="quick-text">QUICK</span>
+                    <span class="dukan-text">DUKAN</span>
+                </span>
+            </div>
+        </div>
+        <div class="free-delivery">
+            <div class="truck-icon-wrapper">
+                <span class="truck-icon">🚚</span>
+                <span class="exhaust-puff">💨</span>
+            </div>
+            <span class="free-text">Free Delivery*</span>
+            <div class="road-lines"></div>
+        </div>
+        <button class="theme-toggle" id="themeToggle" aria-label="Toggle theme">
+            <span class="toggle-icon" id="toggleIcon">🌙</span>
+        </button>
+    </header>
+    
+    <!-- ==================== SEARCH BAR ==================== -->
+    <div class="search-wrapper" id="searchWrapper">
+        <div class="search-container" id="searchContainer">
+            <span class="search-icon">🔍</span>
+            <input type="text" class="search-input" id="searchInput" placeholder="Search atta, chawal, sabun..." autocomplete="off">
+            <span class="voice-icon">🎤</span>
+        </div>
+        <div class="suggestions-dropdown" id="suggestionsDropdown"></div>
+    </div>
+    
+    <!-- ==================== PRODUCT DETAIL ==================== -->
+    <div class="main-content-full">
+        
+        <!-- Loading -->
+        <div class="products-loading" id="productsLoading">
+            <div class="loading-spinner">
+                <div class="spinner-circle"></div>
+                <div class="spinner-circle spinner-inner"></div>
+                <div class="spinner-icon">🛒</div>
+            </div>
+            <p class="loading-text">Loading product...</p>
+        </div>
+        
+        <!-- Breadcrumb -->
+        <div class="product-breadcrumb" id="productBreadcrumb" style="display:none;">
+            <a href="index.html">Home</a> › <span id="breadcrumbCategory"></span> › <span id="breadcrumbName"></span>
+        </div>
+        
+        <!-- Product Detail -->
+        <div class="product-detail-container" id="productDetail" style="display:none;">
+            <div class="product-detail-image">
+                <div class="detail-image-wrapper" id="detailImageWrapper">
+                    <div class="detail-image-placeholder" id="detailImagePlaceholder">📦</div>
+                </div>
+            </div>
+            <div class="product-detail-info">
+                <h1 class="detail-name" id="detailName"></h1>
+                <div class="detail-rating" id="detailRating"></div>
+                <div class="detail-price-section">
+                    <span class="detail-price" id="detailPrice"></span>
+                    <span class="detail-mrp" id="detailMrp"></span>
+                    <span class="detail-discount" id="detailDiscount"></span>
+                </div>
+                <div class="detail-weight" id="detailWeight"></div>
+                <div class="detail-desc" id="detailDesc"></div>
+                
+                <div class="detail-quantity">
+                    <span>Qty:</span>
+                    <button class="qty-btn" onclick="changeQty(-1)">−</button>
+                    <span class="qty-value" id="qtyValue">1</span>
+                    <button class="qty-btn" onclick="changeQty(1)">+</button>
+                </div>
+                
+                <div class="detail-actions">
+                    <button class="detail-add-btn" id="detailAddBtn" onclick="addProductToCart()">🛒 Add to Cart</button>
+                   <button class="detail-add-btn" style="background:#FF6F00;" onclick="buyNowProduct()">⚡ Buy Now</button>
+                </div>
+                
+                <button class="detail-share-btn" onclick="shareProduct()">📤 Share this product</button>
+            </div>
+        </div>
+        
+        <!-- Related Products -->
+        <div class="related-products-section" id="relatedSection" style="display:none;">
+            <h2 class="section-heading">🔗 Related Products</h2>
+            <div class="products-grid" id="relatedGrid"></div>
+        </div>
+        
+    </div>
+    
+    <!-- ==================== CART TOAST ==================== -->
+    <div class="cart-toast" id="cartToast">
+        <span class="toast-icon">✅</span>
+        <div class="toast-content">
+            <span class="toast-title">Added to Cart!</span>
+            <span class="toast-product" id="toastProduct"></span>
+        </div>
+        <span class="toast-close" onclick="document.getElementById('cartToast').classList.remove('show')">✕</span>
+    </div>
+    
+    <!-- ==================== BOTTOM NAVBAR ==================== -->
+    <nav class="bottom-nav" id="bottomNav">
+        <div class="bottom-nav-inner">
+            <button class="nav-item" data-page="home" onclick="navigateTo('index.html')" aria-label="Home">
+                <span class="nav-icon">🏠</span><span class="nav-label">Home</span>
+                <span class="nav-dot"></span><span class="nav-ripple-container"></span>
+            </button>
+            <button class="nav-item" data-page="shop" onclick="navigateTo('shop.html')" aria-label="Shop">
+                <span class="nav-icon">🛍️</span><span class="nav-label">Shop</span>
+                <span class="nav-dot"></span><span class="nav-ripple-container"></span>
+            </button>
+            <button class="nav-item nav-cart" data-page="cart" onclick="navigateTo('cart.html')" aria-label="Cart">
+                <span class="nav-icon-wrapper">
+                    <span class="nav-icon">🛒</span>
+                    <span class="cart-badge" id="cartBadge">0</span>
+                    <span class="cart-sparkle-container" id="cartSparkles"></span>
+                </span>
+                <span class="nav-label">Cart</span>
+                <span class="nav-dot"></span><span class="nav-ripple-container"></span>
+            </button>
+            <button class="nav-item nav-whatsapp" data-page="whatsapp" onclick="openWhatsApp()" aria-label="WhatsApp">
+                <span class="nav-icon-wrapper">
+                    <span class="nav-icon">💬</span>
+                    <span class="whatsapp-ring" id="whatsappRing"></span>
+                </span>
+                <span class="nav-label">Whats</span>
+                <span class="nav-dot"></span><span class="nav-ripple-container"></span>
+            </button>
+            <button class="nav-item nav-top" id="navTop" data-page="top" onclick="scrollToTop()" aria-label="Back to Top">
+                <span class="nav-icon-wrapper">
+                    <span class="nav-icon" id="topIcon">⬆️</span>
+                    <span class="top-sparkle-container" id="topSparkles"></span>
+                </span>
+                <span class="nav-label">Top</span>
+                <span class="nav-dot"></span><span class="nav-ripple-container"></span>
+            </button>
+        </div>
+    </nav>
+    
+    <script src="js/config.js"></script>
+    <script src="js/ui.js"></script>
+    <script src="js/theme.js"></script>
+    <script src="js/cart.js"></script>
+    <script src="js/products.js"></script>
+    
+    <script>
+        let currentProduct = null;
+        let currentQty = 1;
+        
+        function navigateTo(url) { window.location.href = url; }
+        
+        function openWhatsApp() {
+            const cart = Cart.getCart();
+            let message;
+            if (cart.totalItems > 0) {
+                message = '🛒 *Quick Dukan — Order*\n\n';
+                cart.items.forEach((item, i) => { message += `${i+1}. ${item.name} × ${item.quantity} = ₹${item.price * item.quantity}\n`; });
+                message += `\n💰 Total: ₹${cart.totalAmount}`;
+            } else { message = 'Hi Quick Dukan, I want to order groceries...'; }
+            window.open(`https://wa.me/${CONFIG.store.phone}?text=${encodeURIComponent(message)}`, '_blank');
+        }
+        
+        function scrollToTop() { window.scrollTo({ top: 0, behavior: 'smooth' }); }
+        
+        function changeQty(delta) {
+            currentQty = Math.max(1, currentQty + delta);
+            document.getElementById('qtyValue').textContent = currentQty;
+        }
+        
+        function addProductToCart() {
+            if (!currentProduct) return;
+            Cart.addItem(currentProduct, currentQty);
+            UI.showCartToast(currentProduct.name);
+            UI.addToRecentlyViewed(currentProduct);
+            UI.updateCartBadge(Cart.getCart().totalItems);
+        }
+        
+        function orderViaWhatsApp() {
+            if (!currentProduct) return;
+            const message = `🛒 *Quick Dukan — Order*\n\n${currentProduct.name}\nQty: ${currentQty}\nPrice: ₹${currentProduct.price} × ${currentQty} = ₹${currentProduct.price * currentQty}\n\n💰 Total: ₹${currentProduct.price * currentQty}`;
+            window.open(`https://wa.me/${CONFIG.store.phone}?text=${encodeURIComponent(message)}`, '_blank');
+        }
+        
+        function shareProduct() {
+            if (!currentProduct) return;
+            if (navigator.share) {
+                navigator.share({ title: currentProduct.name, text: `${currentProduct.name} — ₹${currentProduct.price}`, url: window.location.href });
+            } else {
+                alert(`Share: ${currentProduct.name} — ₹${currentProduct.price}\n${window.location.href}`);
+            }
+        }
+        
+        async function loadProduct() {
+            const params = new URLSearchParams(window.location.search);
+            const productId = params.get('id');
+            
+            if (!productId) {
+                document.getElementById('productsLoading').innerHTML = '<p style="text-align:center;padding:40px;">Product not found.</p>';
+                return;
+            }
+            
+            // Load all products to find this one
+            await Products.loadAllProducts();
+            const product = Products.allProducts.find(p => p.id === productId);
+            
+            if (!product) {
+                document.getElementById('productsLoading').innerHTML = '<p style="text-align:center;padding:40px;">Product not found.</p>';
+                return;
+            }
+            
+            currentProduct = product;
+            UI.hideLoading();
+            
+            document.getElementById('productBreadcrumb').style.display = 'block';
+            document.getElementById('productDetail').style.display = 'grid';
+            document.getElementById('detailImagePlaceholder').textContent = product.icon || '📦';
+            document.getElementById('detailName').textContent = product.name;
+            document.getElementById('detailPrice').textContent = `₹${product.price}`;
+            document.getElementById('detailWeight').textContent = product.weight || '';
+            document.getElementById('detailDesc').textContent = product.description || 'Fresh and quality product from Quick Dukan.';
+            
+            if (product.mrp) {
+                document.getElementById('detailMrp').textContent = `₹${product.mrp}`;
+                const discount = Math.round(((product.mrp - product.price) / product.mrp) * 100);
+                document.getElementById('detailDiscount').textContent = `${discount}% OFF`;
+            }
+            
+            if (product.rating) {
+                document.getElementById('detailRating').innerHTML = `<span>${'⭐'.repeat(Math.round(product.rating))}</span> <span>${product.rating} (${product.reviews || 0} reviews)</span>`;
+            }
+            
+            // Breadcrumb
+            const cat = Categories ? Categories.categoriesList.find(c => c.id === product.category) : null;
+            document.getElementById('breadcrumbCategory').textContent = cat ? cat.name : 'Category';
+            document.getElementById('breadcrumbName').textContent = product.name;
+            
+            // Related products
+            const related = Products.allProducts.filter(p => p.category === product.category && p.id !== product.id).slice(0, 4);
+            if (related.length > 0) {
+                document.getElementById('relatedSection').style.display = 'block';
+                Products.renderProductCards(related, 'relatedGrid');
+            }
+            
+            UI.addToRecentlyViewed(product);
+        }
+        
+        // Init
+        Theme.init();
+        
+        // Scroll shadow
+        window.addEventListener('scroll', () => {
+            const header = document.getElementById('topHeader');
+            const search = document.getElementById('searchWrapper');
+            const navTop = document.getElementById('navTop');
+            if (window.scrollY > 10) { header.classList.add('scrolled'); if (search) search.classList.add('scrolled'); }
+            else { header.classList.remove('scrolled'); if (search) search.classList.remove('scrolled'); }
+            if (navTop) { navTop.classList.toggle('visible', window.scrollY > 300); }
+        });
+        
+        // Cart badge
+        const cart = Cart.getCart();
+        UI.updateCartBadge(cart.totalItems);
+        window.addEventListener('cartUpdated', (e) => { UI.updateCartBadge(e.detail.cart.totalItems); });
+        
+        // Theme toggle
+        document.getElementById('themeToggle').addEventListener('click', function() {
+            document.body.classList.toggle('dark-mode');
+            localStorage.setItem('quickdukan_theme', document.body.classList.contains('dark-mode') ? 'dark' : 'light');
+            document.getElementById('toggleIcon').textContent = document.body.classList.contains('dark-mode') ? '☀️' : '🌙';
+        });
+        
+        // Nav items
+        document.querySelectorAll('.nav-item').forEach(item => {
+            item.addEventListener('click', function(e) {
+                const ripple = document.createElement('span');
+                ripple.classList.add('nav-ripple');
+                const rect = this.getBoundingClientRect();
+                const size = Math.max(rect.width, rect.height) * 2;
+                ripple.style.width = ripple.style.height = size + 'px';
+                ripple.style.left = (e.clientX - rect.left - size/2) + 'px';
+                ripple.style.top = (e.clientY - rect.top - size/2) + 'px';
+                this.querySelector('.nav-ripple-container').appendChild(ripple);
+                ripple.addEventListener('animationend', () => ripple.remove());
+            });
+        });
+        
+        loadProduct();
+    
+function buyNowProduct() {
+    if (!currentProduct) return;
+    const qty = currentQty || 1;
+    const productWithQty = { ...currentProduct, quantity: qty };
+    CheckoutModal.open(productWithQty);
+}
+    <script src="js/checkout-modal.js"></script>
+    </script>
+</body>
+</html>

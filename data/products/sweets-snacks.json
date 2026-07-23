@@ -1,0 +1,11 @@
+{
+    "category": { "id": "sweets-snacks", "name": "Sweets & Snacks", "icon": "🍬", "priority": false, "totalProducts": 25 },
+    "products": [
+        { "id": "sw-001", "name": "Cadbury Dairy Milk", "weight": "150g", "price": 80, "mrp": 90, "image": "", "icon": "🍫", "rating": 4.7, "reviews": 500, "inStock": true, "mostOrdered": true, "badge": "popular" },
+        { "id": "sw-002", "name": "KitKat", "weight": "4-Finger", "price": 35, "mrp": 40, "image": "", "icon": "🍫", "rating": 4.5, "reviews": 350, "inStock": true, "mostOrdered": false, "badge": null },
+        { "id": "sw-003", "name": "Haldiram Rasgulla", "weight": "500g", "price": 120, "mrp": 140, "image": "", "icon": "🍬", "rating": 4.3, "reviews": 180, "inStock": true, "mostOrdered": false, "badge": null },
+        { "id": "sw-004", "name": "Bikaji Soan Papdi", "weight": "250g", "price": 65, "mrp": 75, "image": "", "icon": "🍬", "rating": 4.2, "reviews": 150, "inStock": true, "mostOrdered": false, "badge": null },
+        { "id": "sw-005", "name": "Munch", "weight": "40g", "price": 20, "mrp": 22, "image": "", "icon": "🍫", "rating": 4.4, "reviews": 280, "inStock": true, "mostOrdered": false, "badge": null },
+        { "id": "sw-006", "name": "Snickers", "weight": "50g", "price": 40, "mrp": 45, "image": "", "icon": "🍫", "rating": 4.6, "reviews": 320, "inStock": true, "mostOrdered": false, "badge": null }
+    ]
+}

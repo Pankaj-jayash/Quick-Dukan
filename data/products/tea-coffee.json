@@ -1,0 +1,9 @@
+{
+    "category": { "id": "tea-coffee", "name": "Tea & Coffee", "icon": "☕", "priority": false, "totalProducts": 15 },
+    "products": [
+        { "id": "tc-001", "name": "Taj Mahal Tea", "weight": "250g", "price": 130, "mrp": 150, "image": "", "icon": "☕", "rating": 4.4, "reviews": 78, "inStock": true, "mostOrdered": true, "badge": null },
+        { "id": "tc-002", "name": "Red Label Tea", "weight": "250g", "price": 120, "mrp": 135, "image": "", "icon": "☕", "rating": 4.3, "reviews": 200, "inStock": true, "mostOrdered": false, "badge": null },
+        { "id": "tc-003", "name": "Nescafe Coffee", "weight": "50g", "price": 95, "mrp": 110, "image": "", "icon": "☕", "rating": 4.5, "reviews": 300, "inStock": true, "mostOrdered": true, "badge": "popular" },
+        { "id": "tc-004", "name": "Bru Coffee", "weight": "100g", "price": 150, "mrp": 170, "image": "", "icon": "☕", "rating": 4.2, "reviews": 150, "inStock": true, "mostOrdered": false, "badge": null }
+    ]
+}

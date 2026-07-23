@@ -1,0 +1,13 @@
+{
+    "category": { "id": "biscuit-namkeen", "name": "Biscuit & Namkeen", "icon": "🍪", "priority": true, "totalProducts": 35 },
+    "products": [
+        { "id": "bn-001", "name": "Parle-G Biscuit", "weight": "800g", "price": 65, "mrp": 70, "image": "", "icon": "🍪", "rating": 4.8, "reviews": 250, "inStock": true, "mostOrdered": true, "badge": "best-seller" },
+        { "id": "bn-002", "name": "Maggi Noodles", "weight": "4-Pack", "price": 55, "mrp": 60, "image": "", "icon": "🍜", "rating": 4.7, "reviews": 500, "inStock": true, "mostOrdered": true, "badge": "popular" },
+        { "id": "bn-003", "name": "Kurkure Masala Munch", "weight": "100g", "price": 20, "mrp": 22, "image": "", "icon": "🍿", "rating": 4.3, "reviews": 180, "inStock": true, "mostOrdered": false, "badge": null },
+        { "id": "bn-004", "name": "Britannia Good Day", "weight": "200g", "price": 35, "mrp": 40, "image": "", "icon": "🍰", "rating": 4.5, "reviews": 200, "inStock": true, "mostOrdered": false, "badge": null },
+        { "id": "bn-005", "name": "Haldiram Bhujia", "weight": "400g", "price": 85, "mrp": 95, "image": "", "icon": "🥜", "rating": 4.6, "reviews": 320, "inStock": true, "mostOrdered": true, "badge": "best-seller" },
+        { "id": "bn-006", "name": "Lays Classic Salted", "weight": "52g", "price": 20, "mrp": 22, "image": "", "icon": "🍟", "rating": 4.4, "reviews": 190, "inStock": true, "mostOrdered": false, "badge": null },
+        { "id": "bn-007", "name": "Oreo Biscuit", "weight": "120g", "price": 30, "mrp": 35, "image": "", "icon": "🍪", "rating": 4.6, "reviews": 210, "inStock": true, "mostOrdered": false, "badge": null },
+        { "id": "bn-008", "name": "Haldiram Aloo Bhujia", "weight": "200g", "price": 45, "mrp": 50, "image": "", "icon": "🥔", "rating": 4.3, "reviews": 150, "inStock": true, "mostOrdered": false, "badge": null }
+    ]
+}

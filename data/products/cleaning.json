@@ -1,0 +1,9 @@
+{
+    "category": { "id": "cleaning", "name": "Cleaning Items", "icon": "🧹", "priority": false, "totalProducts": 20 },
+    "products": [
+        { "id": "cl-001", "name": "Harpic Toilet Cleaner", "weight": "500ml", "price": 85, "mrp": 99, "image": "", "icon": "🧹", "rating": 4.2, "reviews": 180, "inStock": true, "mostOrdered": true, "badge": "discount" },
+        { "id": "cl-002", "name": "Lizol Floor Cleaner", "weight": "500ml", "price": 95, "mrp": 110, "image": "", "icon": "🧹", "rating": 4.3, "reviews": 150, "inStock": true, "mostOrdered": false, "badge": null },
+        { "id": "cl-003", "name": "Vim Dishwash Bar", "weight": "200g", "price": 30, "mrp": 35, "image": "", "icon": "🍽️", "rating": 4.1, "reviews": 200, "inStock": true, "mostOrdered": false, "badge": null },
+        { "id": "cl-004", "name": "Colin Glass Cleaner", "weight": "500ml", "price": 75, "mrp": 85, "image": "", "icon": "🪟", "rating": 4.0, "reviews": 120, "inStock": true, "mostOrdered": false, "badge": null }
+    ]
+}

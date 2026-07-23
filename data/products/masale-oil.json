@@ -1,0 +1,13 @@
+{
+    "category":{"id":"masale-oil","name":"Masale & Oil","icon":"🧂","priority":true,"totalProducts":8},
+    "products":[
+        {"id":"mo-001","name":"Fortune Sunflower Oil","weight":"1L","price":165,"mrp":180,"image":"🧂","rating":4.1,"reviews":95,"inStock":true,"mostOrdered":true,"badge":"popular"},
+        {"id":"mo-002","name":"Saffola Oil","weight":"1L","price":175,"mrp":195,"image":"🧂","rating":4.3,"reviews":120,"inStock":true,"mostOrdered":true,"badge":null},
+        {"id":"mo-003","name":"Everest Garam Masala","weight":"100g","price":95,"mrp":110,"image":"🧂","rating":4.5,"reviews":180,"inStock":true,"mostOrdered":false,"badge":null},
+        {"id":"mo-004","name":"MDH Masala","weight":"100g","price":85,"mrp":95,"image":"🧂","rating":4.4,"reviews":160,"inStock":true,"mostOrdered":false,"badge":null},
+        {"id":"mo-005","name":"Tata Salt","weight":"1kg","price":28,"mrp":30,"image":"🧂","rating":4.8,"reviews":500,"inStock":true,"mostOrdered":true,"badge":"best-seller"},
+        {"id":"mo-006","name":"Catch Turmeric","weight":"200g","price":45,"mrp":52,"image":"🧂","rating":4.2,"reviews":90,"inStock":true,"mostOrdered":false,"badge":null},
+        {"id":"mo-007","name":"Chings Schezwan","weight":"250g","price":65,"mrp":75,"image":"🧂","rating":4.1,"reviews":80,"inStock":true,"mostOrdered":false,"badge":null},
+        {"id":"mo-008","name":"Kissan Tomato Ketchup","weight":"500g","price":85,"mrp":95,"image":"🍅","rating":4.3,"reviews":140,"inStock":true,"mostOrdered":false,"badge":null}
+    ]
+}

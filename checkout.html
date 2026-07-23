@@ -1,0 +1,519 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Checkout — Quick Dukan</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800;900&family=Nunito:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <link rel="stylesheet" href="css/reset.css">
+    <link rel="stylesheet" href="css/variables.css">
+    <link rel="stylesheet" href="css/global.css">
+    <link rel="stylesheet" href="css/animations.css">
+    <link rel="stylesheet" href="css/responsive.css">
+    
+    <style>
+        .checkout-container { max-width: 700px; margin: 0 auto; padding: 20px 0 40px; }
+        .checkout-heading { font-family: var(--font-heading); font-size: var(--text-xl); font-weight: 700; color: var(--text-dark); margin-bottom: 24px; display: flex; align-items: center; gap: 10px; }
+        
+        /* Delivery Option */
+        .delivery-options { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 24px; }
+        .delivery-option-card { background: var(--bg-white); border: 2px solid rgba(0,0,0,0.06); border-radius: var(--radius-base); padding: 16px; cursor: pointer; transition: all 0.3s ease; text-align: center; font-family: var(--font-heading); }
+        .delivery-option-card:hover { border-color: var(--blue-light); transform: translateY(-2px); box-shadow: var(--shadow-base); }
+        .delivery-option-card.selected { border-color: var(--blue-mid); background: var(--blue-pale); box-shadow: 0 4px 16px rgba(74,111,165,0.15); }
+        .delivery-option-card .option-icon { font-size: 32px; display: block; margin-bottom: 8px; }
+        .delivery-option-card .option-title { font-size: 15px; font-weight: 700; color: var(--text-dark); }
+        .delivery-option-card .option-desc { font-size: 11px; color: var(--text-grey); margin-top: 4px; }
+        .delivery-option-card.selected .option-title { color: var(--blue-mid); }
+        
+        /* Form */
+        .checkout-form { background: var(--bg-white); border-radius: var(--radius-lg); padding: 24px; box-shadow: var(--shadow-sm); margin-bottom: 24px; }
+        .form-group { margin-bottom: 16px; }
+        .form-group:last-child { margin-bottom: 0; }
+        .form-label { display: block; font-family: var(--font-heading); font-size: 13px; font-weight: 600; color: var(--text-dark); margin-bottom: 6px; }
+        .form-label .required { color: #F44336; }
+        .form-input, .form-textarea { width: 100%; padding: 12px 16px; border: 2px solid rgba(0,0,0,0.08); border-radius: var(--radius-sm); font-family: var(--font-body); font-size: 14px; color: var(--text-input); background: var(--bg-white); transition: all 0.3s ease; }
+        .form-input:focus, .form-textarea:focus { border-color: var(--blue-mid); box-shadow: 0 0 0 3px rgba(74,111,165,0.08); outline: none; }
+        .form-textarea { resize: vertical; min-height: 70px; }
+        .form-input.error { border-color: #F44336; animation: shake 0.4s ease; }
+        @keyframes shake { 0%,100%{transform:translateX(0)} 25%{transform:translateX(-5px)} 50%{transform:translateX(5px)} 75%{transform:translateX(-3px)} }
+        
+        /* Auto-location */
+        .location-status { display: flex; align-items: center; gap: 8px; padding: 10px 14px; background: #F0FDF4; border: 1px solid #BBF7D0; border-radius: var(--radius-sm); font-size: 13px; color: #166534; margin-bottom: 16px; }
+        .location-status.loading { background: #FFF8E1; border-color: #FFE082; color: #E65100; }
+        .location-status.error { background: #FFF0F0; border-color: #FFCDD2; color: #C62828; }
+        .location-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+        .location-dot.found { background: #4CAF50; animation: locationPulse 1.5s infinite; }
+        .location-dot.searching { background: #FF9800; animation: locationPulse 0.8s infinite; }
+        .location-dot.error { background: #F44336; }
+        @keyframes locationPulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:0.5;transform:scale(1.4)} }
+        
+        /* Payment Options */
+        .payment-section { margin-bottom: 24px; }
+        .payment-section h3 { font-family: var(--font-heading); font-size: 15px; font-weight: 700; color: var(--text-dark); margin-bottom: 12px; }
+        .payment-options { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+        .payment-option { background: var(--bg-white); border: 2px solid rgba(0,0,0,0.06); border-radius: var(--radius-base); padding: 14px 10px; cursor: pointer; transition: all 0.3s ease; text-align: center; font-family: var(--font-heading); }
+        .payment-option:hover { border-color: var(--blue-light); transform: translateY(-2px); box-shadow: var(--shadow-base); }
+        .payment-option.selected { border-color: var(--blue-mid); background: var(--blue-pale); box-shadow: 0 4px 16px rgba(74,111,165,0.15); }
+        .payment-option .pay-icon { font-size: 28px; display: block; margin-bottom: 6px; }
+        .payment-option .pay-title { font-size: 12px; font-weight: 700; color: var(--text-dark); }
+        
+        /* QR Code Display */
+        .qr-display { display: none; background: var(--bg-white); border-radius: var(--radius-lg); padding: 20px; text-align: center; margin-bottom: 20px; box-shadow: var(--shadow-sm); }
+        .qr-display.show { display: block; }
+        .qr-display img { width: 180px; height: 180px; margin: 0 auto; display: block; }
+        .qr-display .qr-amount { font-family: var(--font-heading); font-size: 20px; font-weight: 800; color: var(--primary); margin: 12px 0 4px; }
+        .qr-display .qr-note { font-size: 12px; color: var(--text-grey); }
+        
+        /* PhonePe Button */
+        .phonepe-btn { display: none; width: 100%; padding: 16px; background: #5F259F; color: #FFF; border: none; border-radius: var(--radius-base); font-size: 16px; font-weight: 700; cursor: pointer; font-family: var(--font-heading); transition: all 0.3s; margin-bottom: 20px; text-align: center; }
+        .phonepe-btn.show { display: block; }
+        .phonepe-btn:hover { background: #4B1D7E; transform: translateY(-2px); box-shadow: 0 4px 16px rgba(95,37,159,0.3); }
+        
+        /* Store Pickup Info */
+        .pickup-info { background: #F0FDF4; border: 1px solid #BBF7D0; border-radius: var(--radius-base); padding: 16px; margin-bottom: 24px; display: none; }
+        .pickup-info.show { display: block; }
+        .pickup-info p { font-size: 13px; color: #166534; margin: 4px 0; font-family: var(--font-body); }
+        
+        /* Order Summary */
+        .order-summary { background: var(--bg-white); border-radius: var(--radius-lg); padding: 20px; box-shadow: var(--shadow-sm); margin-bottom: 20px; }
+        .order-summary h3 { font-family: var(--font-heading); font-size: 16px; font-weight: 700; margin-bottom: 12px; color: var(--text-dark); }
+        .order-item { display: flex; justify-content: space-between; padding: 8px 0; font-size: 13px; color: var(--text-grey); border-bottom: 1px solid rgba(0,0,0,0.03); }
+        .order-total { display: flex; justify-content: space-between; padding-top: 12px; margin-top: 8px; border-top: 2px solid var(--blue-pale); font-size: 18px; font-weight: 700; color: var(--text-dark); }
+        
+        /* WhatsApp Button */
+        .whatsapp-order-btn { width: 100%; padding: 18px; background: #25D366; color: #FFF; border: none; border-radius: var(--radius-base); font-size: 18px; font-weight: 700; cursor: pointer; font-family: var(--font-heading); transition: all 0.3s; display: flex; align-items: center; justify-content: center; gap: 10px; box-shadow: 0 4px 20px rgba(37,211,102,0.3); }
+        .whatsapp-order-btn:hover { transform: translateY(-3px); box-shadow: 0 8px 30px rgba(37,211,102,0.4); background: #20BD5A; }
+        .whatsapp-order-btn:active { transform: scale(0.97); }
+        .whatsapp-order-btn:disabled { background: #A0A0A0; cursor: not-allowed; box-shadow: none; transform: none; }
+        
+        .form-error-msg { color: #F44336; font-size: 12px; margin-top: 4px; display: none; }
+        .form-error-msg.show { display: block; }
+        
+        @media (max-width: 480px) {
+            .delivery-options { grid-template-columns: 1fr; }
+            .payment-options { grid-template-columns: 1fr; }
+            .checkout-form { padding: 16px; }
+            .whatsapp-order-btn { font-size: 16px; padding: 14px; }
+        }
+    </style>
+</head>
+<body>
+    
+    <!-- ==================== TOP HEADER ==================== -->
+    <header class="top-header" id="topHeader">
+        <div class="header-brand" onclick="window.location.href='index.html'">
+            <span class="brand-icon">🛒</span>
+            <div class="brand-text-wrapper">
+                <span class="brand-text"><span class="quick-text">QUICK</span><span class="dukan-text">DUKAN</span></span>
+            </div>
+        </div>
+        <div class="free-delivery"><div class="truck-icon-wrapper"><span class="truck-icon">🚚</span><span class="exhaust-puff">💨</span></div><span class="free-text">Free Delivery*</span><div class="road-lines"></div></div>
+        <button class="theme-toggle" id="themeToggle" aria-label="Toggle theme"><span class="toggle-icon" id="toggleIcon">🌙</span></button>
+    </header>
+    
+    <!-- ==================== CHECKOUT CONTENT ==================== -->
+    <div class="main-content-full">
+        <div class="checkout-container">
+            
+            <h1 class="checkout-heading">📦 Checkout</h1>
+            
+            <div id="emptyCartMsg" style="display:none;text-align:center;padding:40px;">
+                <span style="font-size:64px;">🛒</span>
+                <h2 style="margin:16px 0;">Your cart is empty</h2>
+                <a href="index.html" style="color:var(--blue-mid);font-weight:700;">🛍️ Start Shopping</a>
+            </div>
+            
+            <div id="checkoutForm">
+                
+                <!-- Delivery Option -->
+                <div class="delivery-options">
+                    <div class="delivery-option-card selected" id="homeDeliveryOption" onclick="selectDelivery('home')">
+                        <span class="option-icon">🚚</span><span class="option-title">Home Delivery</span><span class="option-desc">Delivery in 45-60 mins</span>
+                    </div>
+                    <div class="delivery-option-card" id="storePickupOption" onclick="selectDelivery('pickup')">
+                        <span class="option-icon">🏬</span><span class="option-title">Store Pickup</span><span class="option-desc">Ready in 15 mins</span>
+                    </div>
+                </div>
+                
+                <!-- Store Pickup Info -->
+                <div class="pickup-info" id="pickupInfo">
+                    <p>📍 <strong>Pickup Location:</strong> Quick Dukan, Near Ram Mandir, Bhopal</p>
+                    <p>📞 98765-43210</p>
+                    <p>⏰ Subah 8 Baje — Raat 9 Baje</p>
+                </div>
+                
+                <!-- Customer Form -->
+                <div class="checkout-form">
+                    <div class="form-group">
+                        <label class="form-label">Full Name <span class="required">*</span></label>
+                        <input type="text" class="form-input" id="customerName" placeholder="Enter your full name" required>
+                        <span class="form-error-msg" id="nameError">Please enter your name</span>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">Phone Number <span class="required">*</span></label>
+                        <input type="tel" class="form-input" id="customerPhone" placeholder="10-digit mobile number" required maxlength="10">
+                        <span class="form-error-msg" id="phoneError">Please enter a valid 10-digit phone number</span>
+                    </div>
+                    
+                    <!-- Auto-Location Status -->
+                    <div class="location-status loading" id="locationStatus">
+                        <span class="location-dot searching" id="locationDot"></span>
+                        <span id="locationText">Detecting your location...</span>
+                    </div>
+                    
+                    <div class="form-group" id="addressGroup">
+                        <label class="form-label">Delivery Address <span class="required">*</span></label>
+                        <input type="text" class="form-input" id="customerAddress" placeholder="Auto-detecting your address..." required>
+                        <span class="form-error-msg" id="addressError">Please enter your delivery address</span>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">Order Instructions (Optional)</label>
+                        <textarea class="form-textarea" id="orderInstructions" placeholder="e.g., Gate no. 3 ke paas, 2nd floor, Ring the bell..."></textarea>
+                    </div>
+                </div>
+                
+                <!-- Payment Options -->
+                <div class="payment-section">
+                    <h3>💳 Payment Method</h3>
+                    <div class="payment-options">
+                        <div class="payment-option selected" id="payCash" onclick="selectPayment('cash')">
+                            <span class="pay-icon">💵</span><span class="pay-title">Cash on Delivery</span>
+                        </div>
+                        <div class="payment-option" id="payQR" onclick="selectPayment('qr')">
+                            <span class="pay-icon">📱</span><span class="pay-title">QR Code / UPI</span>
+                        </div>
+                        <div class="payment-option" id="payPhonePe" onclick="selectPayment('phonepe')">
+                            <span class="pay-icon">💸</span><span class="pay-title">PhonePe</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- QR Code Display -->
+                <div class="qr-display" id="qrDisplay">
+                    <img src="https://i.ibb.co/YOUR-QR-CODE.png" alt="UPI QR Code" id="qrImage" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22180%22 height=%22180%22><rect width=%22180%22 height=%22180%22 fill=%22%23f0f0f0%22/><text x=%2250%25%22 y=%2250%25%22 text-anchor=%22middle%22 dy=%22.3em%22 font-size=%2214%22 fill=%22%23999%22>QR Code</text></svg>'">
+                    <div class="qr-amount" id="qrAmount">₹0</div>
+                    <p class="qr-note">Scan & Pay with any UPI app</p>
+                    <p class="qr-note" style="color:#F44336;margin-top:4px;">⚠️ After payment, click "Order via WhatsApp" to confirm</p>
+                </div>
+                
+                <!-- PhonePe Button -->
+                <button class="phonepe-btn" id="phonepeBtn" onclick="openPhonePe()">
+                    💸 Pay via PhonePe
+                </button>
+                
+                <!-- Order Summary -->
+                <div class="order-summary" id="orderSummary">
+                    <h3>📋 Order Summary</h3>
+                    <div id="orderItemsList"></div>
+                    <div class="order-total"><span>Total</span><span id="orderTotal">₹0</span></div>
+                </div>
+                
+                <!-- WhatsApp Button -->
+                <button class="whatsapp-order-btn" id="whatsappOrderBtn" onclick="placeOrder()">
+                    💬 Order via WhatsApp
+                </button>
+                
+            </div>
+        </div>
+    </div>
+    
+    <!-- ==================== JAVASCRIPT ==================== -->
+    <script src="js/config.js"></script>
+    <script src="js/cart.js"></script>
+    <script src="js/whatsapp.js"></script>
+    
+    <script>
+        let deliveryType = 'home';
+        let paymentMethod = 'cash';
+        let detectedLocation = null;
+        
+        // ========== INIT ==========
+        function init() {
+            const cart = Cart.getCart();
+            
+            if (cart.totalItems === 0) {
+                document.getElementById('emptyCartMsg').style.display = 'block';
+                document.getElementById('checkoutForm').style.display = 'none';
+                return;
+            }
+            
+            renderOrderSummary(cart);
+            updateQR();
+            autoDetectLocation();
+            loadSavedDetails();
+        }
+        
+        function renderOrderSummary(cart) {
+            const list = document.getElementById('orderItemsList');
+            list.innerHTML = cart.items.map(item => `
+                <div class="order-item">
+                    <span>${item.icon || '📦'} ${item.name} × ${item.quantity}</span>
+                    <span>₹${item.price * item.quantity}</span>
+                </div>
+            `).join('');
+            document.getElementById('orderTotal').textContent = `₹${cart.totalAmount}`;
+        }
+        
+        // ========== LOAD SAVED DETAILS ==========
+        function loadSavedDetails() {
+            const saved = JSON.parse(localStorage.getItem('quickdukan_customer') || '{}');
+            if (saved.name) document.getElementById('customerName').value = saved.name || '';
+            if (saved.phone) document.getElementById('customerPhone').value = saved.phone || '';
+            // Address will be auto-filled by location
+        }
+        
+        // ========== AUTO DETECT LOCATION ==========
+        function autoDetectLocation() {
+            const statusEl = document.getElementById('locationStatus');
+            const dotEl = document.getElementById('locationDot');
+            const textEl = document.getElementById('locationText');
+            const addressInput = document.getElementById('customerAddress');
+            
+            if (!navigator.geolocation) {
+                statusEl.classList.add('error');
+                statusEl.classList.remove('loading');
+                dotEl.classList.add('error');
+                dotEl.classList.remove('searching');
+                textEl.textContent = 'Location not supported in this browser. Please enter address manually.';
+                addressInput.placeholder = 'Enter your full address';
+                return;
+            }
+            
+            statusEl.classList.add('loading');
+            dotEl.classList.add('searching');
+            textEl.textContent = 'Detecting your location...';
+            
+            navigator.geolocation.getCurrentPosition(
+                async (position) => {
+                    const { latitude, longitude } = position.coords;
+                    detectedLocation = { lat: latitude, lng: longitude };
+                    
+                    try {
+                        // Try reverse geocoding using free API
+                        const response = await fetch(
+                            `https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}&addressdetails=1`
+                        );
+                        const data = await response.json();
+                        
+                        if (data && data.display_name) {
+                            const shortAddress = formatAddress(data);
+                            addressInput.value = shortAddress;
+                            addressInput.placeholder = shortAddress;
+                            
+                            statusEl.classList.remove('loading', 'error');
+                            statusEl.classList.add('found');
+                            dotEl.classList.remove('searching', 'error');
+                            dotEl.classList.add('found');
+                            textEl.textContent = '📍 Location detected: ' + shortAddress.substring(0, 50) + '...';
+                        } else {
+                            throw new Error('No address found');
+                        }
+                    } catch (e) {
+                        // Fallback — show coordinates
+                        addressInput.value = `Lat: ${latitude.toFixed(4)}, Lng: ${longitude.toFixed(4)}`;
+                        addressInput.placeholder = `Lat: ${latitude.toFixed(4)}, Lng: ${longitude.toFixed(4)}`;
+                        
+                        statusEl.classList.remove('loading', 'error');
+                        statusEl.classList.add('found');
+                        dotEl.classList.remove('searching', 'error');
+                        dotEl.classList.add('found');
+                        textEl.textContent = '📍 Location coordinates detected. Please verify address.';
+                    }
+                },
+                (error) => {
+                    statusEl.classList.add('error');
+                    statusEl.classList.remove('loading');
+                    dotEl.classList.add('error');
+                    dotEl.classList.remove('searching');
+                    
+                    switch(error.code) {
+                        case error.PERMISSION_DENIED:
+                            textEl.textContent = 'Location permission denied. Please enter address manually.';
+                            break;
+                        case error.TIMEOUT:
+                            textEl.textContent = 'Location request timed out. Please enter address manually.';
+                            break;
+                        default:
+                            textEl.textContent = 'Could not detect location. Please enter address manually.';
+                    }
+                    addressInput.placeholder = 'Enter your full address';
+                },
+                { timeout: 10000, enableHighAccuracy: true }
+            );
+        }
+        
+        function formatAddress(data) {
+            const addr = data.address;
+            const parts = [];
+            if (addr.road) parts.push(addr.road);
+            if (addr.suburb) parts.push(addr.suburb);
+            if (addr.city || addr.town || addr.village) parts.push(addr.city || addr.town || addr.village);
+            if (addr.state) parts.push(addr.state);
+            if (addr.postcode) parts.push(addr.postcode);
+            return parts.join(', ') || data.display_name;
+        }
+        
+        // ========== DELIVERY SELECTION ==========
+        function selectDelivery(type) {
+            deliveryType = type;
+            document.getElementById('homeDeliveryOption').classList.toggle('selected', type === 'home');
+            document.getElementById('storePickupOption').classList.toggle('selected', type === 'pickup');
+            document.getElementById('pickupInfo').classList.toggle('show', type === 'pickup');
+            document.getElementById('addressGroup').style.display = type === 'pickup' ? 'none' : 'block';
+        }
+        
+        // ========== PAYMENT SELECTION ==========
+        function selectPayment(method) {
+            paymentMethod = method;
+            
+            document.getElementById('payCash').classList.toggle('selected', method === 'cash');
+            document.getElementById('payQR').classList.toggle('selected', method === 'qr');
+            document.getElementById('payPhonePe').classList.toggle('selected', method === 'phonepe');
+            
+            document.getElementById('qrDisplay').classList.toggle('show', method === 'qr' || method === 'cash');
+            document.getElementById('phonepeBtn').classList.toggle('show', method === 'phonepe');
+            
+            if (method === 'qr' || method === 'cash') {
+                updateQR();
+            }
+        }
+        
+        function updateQR() {
+            const cart = Cart.getCart();
+            document.getElementById('qrAmount').textContent = `₹${cart.totalAmount}`;
+        }
+        
+        function openPhonePe() {
+            const cart = Cart.getCart();
+            const phone = document.getElementById('customerPhone').value.trim();
+            const upiID = CONFIG.payments.phonePeUPI || 'quickdukan@upi';
+            const name = CONFIG.store.name;
+            
+            // Try PhonePe deep link first
+            const phonePeURL = `phonepe://pay?pa=${upiID}&pn=${encodeURIComponent(name)}&am=${cart.totalAmount}&tn=Quick%20Dukan%20Order`;
+            
+            // Fallback: UPI intent
+            const upiURL = `upi://pay?pa=${upiID}&pn=${encodeURIComponent(name)}&am=${cart.totalAmount}&tn=Quick%20Dukan%20Order`;
+            
+            // Try opening PhonePe
+            const startTime = Date.now();
+            window.location.href = phonePeURL;
+            
+            // If PhonePe doesn't open within 2 seconds, try UPI
+            setTimeout(() => {
+                if (Date.now() - startTime < 2500) {
+                    window.location.href = upiURL;
+                }
+            }, 2000);
+        }
+        
+        // ========== VALIDATE ==========
+        function validateForm() {
+            let isValid = true;
+            
+            const name = document.getElementById('customerName').value.trim();
+            const nameError = document.getElementById('nameError');
+            const nameInput = document.getElementById('customerName');
+            if (!name) { nameError.classList.add('show'); nameInput.classList.add('error'); isValid = false; }
+            else { nameError.classList.remove('show'); nameInput.classList.remove('error'); }
+            
+            const phone = document.getElementById('customerPhone').value.trim();
+            const phoneError = document.getElementById('phoneError');
+            const phoneInput = document.getElementById('customerPhone');
+            if (!phone || phone.length !== 10 || !/^\d{10}$/.test(phone)) {
+                phoneError.classList.add('show'); phoneInput.classList.add('error'); isValid = false;
+            } else { phoneError.classList.remove('show'); phoneInput.classList.remove('error'); }
+            
+            if (deliveryType === 'home') {
+                const address = document.getElementById('customerAddress').value.trim();
+                const addressError = document.getElementById('addressError');
+                const addressInput = document.getElementById('customerAddress');
+                if (!address) { addressError.classList.add('show'); addressInput.classList.add('error'); isValid = false; }
+                else { addressError.classList.remove('show'); addressInput.classList.remove('error'); }
+            }
+            
+            setTimeout(() => { document.querySelectorAll('.form-input.error').forEach(el => el.classList.remove('error')); }, 500);
+            return isValid;
+        }
+        
+        // ========== PLACE ORDER ==========
+        function placeOrder() {
+            if (!validateForm()) {
+                const firstError = document.querySelector('.form-input.error');
+                if (firstError) firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                return;
+            }
+            
+            const cart = Cart.getCart();
+            
+            const orderData = {
+                items: cart.items,
+                total: cart.totalAmount,
+                totalItems: cart.totalItems,
+                deliveryType: deliveryType,
+                paymentMethod: paymentMethod,
+                customer: {
+                    name: document.getElementById('customerName').value.trim(),
+                    phone: document.getElementById('customerPhone').value.trim(),
+                    address: deliveryType === 'home' ? document.getElementById('customerAddress').value.trim() : 'Store Pickup',
+                    instructions: document.getElementById('orderInstructions').value.trim()
+                },
+                location: detectedLocation,
+                orderRef: generateOrderRef(),
+                dateTime: getCurrentDateTime()
+            };
+            
+            // Save customer details for future
+            const customerInfo = {
+                name: orderData.customer.name,
+                phone: orderData.customer.phone,
+                address: orderData.customer.address,
+                instructions: orderData.customer.instructions
+            };
+            localStorage.setItem('quickdukan_customer', JSON.stringify(customerInfo));
+            
+            // Save last order
+            localStorage.setItem('quickdukan_last_order', JSON.stringify({
+                orderRef: orderData.orderRef,
+                total: orderData.total,
+                dateTime: orderData.dateTime
+            }));
+            
+            // Send via WhatsApp
+            WhatsApp.sendOrder(orderData);
+            
+            // Clear cart
+            Cart.clearCart();
+            
+            setTimeout(() => { window.location.href = 'success.html'; }, 500);
+        }
+        
+        function generateOrderRef() {
+            const now = new Date();
+            return 'QD' + now.getFullYear() + String(now.getMonth()+1).padStart(2,'0') + String(now.getDate()).padStart(2,'0') + String(now.getHours()).padStart(2,'0') + String(now.getMinutes()).padStart(2,'0') + String(now.getSeconds()).padStart(2,'0');
+        }
+        
+        function getCurrentDateTime() {
+            return new Date().toLocaleDateString('en-IN', { day:'numeric', month:'long', year:'numeric', hour:'2-digit', minute:'2-digit' });
+        }
+        
+        // Header & Theme
+        window.addEventListener('scroll', () => { document.getElementById('topHeader').classList.toggle('scrolled', window.scrollY > 10); });
+        const savedTheme = localStorage.getItem('quickdukan_theme');
+        if (savedTheme === 'dark') { document.body.classList.add('dark-mode'); document.getElementById('toggleIcon').textContent = '☀️'; }
+        document.getElementById('themeToggle').addEventListener('click', function() {
+            document.body.classList.toggle('dark-mode');
+            localStorage.setItem('quickdukan_theme', document.body.classList.contains('dark-mode') ? 'dark' : 'light');
+            document.getElementById('toggleIcon').textContent = document.body.classList.contains('dark-mode') ? '☀️' : '🌙';
+        });
+        
+        init();
+    </script>
+</body>
+</html>

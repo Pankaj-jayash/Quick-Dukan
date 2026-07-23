@@ -1,0 +1,11 @@
+{
+    "category": { "id": "dairy-bread", "name": "Dairy & Bread", "icon": "🥛", "priority": false, "totalProducts": 20 },
+    "products": [
+        { "id": "db-001", "name": "Amul Taaza Milk", "weight": "500ml", "price": 25, "mrp": 28, "image": "", "icon": "🥛", "rating": 4.6, "reviews": 400, "inStock": true, "mostOrdered": true, "badge": "popular" },
+        { "id": "db-002", "name": "Amul Butter", "weight": "100g", "price": 50, "mrp": 55, "image": "", "icon": "🧈", "rating": 4.5, "reviews": 300, "inStock": true, "mostOrdered": true, "badge": null },
+        { "id": "db-003", "name": "Modern Bread", "weight": "400g", "price": 35, "mrp": 40, "image": "", "icon": "🍞", "rating": 4.2, "reviews": 180, "inStock": true, "mostOrdered": false, "badge": null },
+        { "id": "db-004", "name": "Amul Cheese", "weight": "200g", "price": 95, "mrp": 105, "image": "", "icon": "🧀", "rating": 4.4, "reviews": 220, "inStock": true, "mostOrdered": false, "badge": null },
+        { "id": "db-005", "name": "Mother Dairy Curd", "weight": "500g", "price": 40, "mrp": 45, "image": "", "icon": "🥛", "rating": 4.3, "reviews": 160, "inStock": true, "mostOrdered": false, "badge": null },
+        { "id": "db-006", "name": "Amul Paneer", "weight": "200g", "price": 85, "mrp": 95, "image": "", "icon": "🧀", "rating": 4.5, "reviews": 280, "inStock": true, "mostOrdered": false, "badge": null }
+    ]
+}

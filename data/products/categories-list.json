@@ -1,0 +1,14 @@
+{
+    "categories": [
+        { "id": "biscuit-namkeen", "name": "Biscuit & Namkeen", "icon": "🍪", "count": 35, "priority": true, "order": 1, "file": "data/products/biscuit-namkeen.json" },
+        { "id": "cold-drinks", "name": "Cold Drinks", "icon": "🥤", "count": 15, "priority": false, "order": 2, "file": "data/products/cold-drinks.json" },
+        { "id": "atta-rice", "name": "Atta & Rice", "icon": "🍚", "count": 30, "priority": true, "order": 3, "file": "data/products/atta-rice.json" },
+        { "id": "soap-shampoo", "name": "Soap & Shampoo", "icon": "🧴", "count": 25, "priority": true, "order": 4, "file": "data/products/soap-shampoo.json" },
+        { "id": "masale-oil", "name": "Masale & Oil", "icon": "🧂", "count": 40, "priority": true, "order": 5, "file": "data/products/masale-oil.json" },
+        { "id": "dairy-bread", "name": "Dairy & Bread", "icon": "🥛", "count": 20, "priority": false, "order": 6, "file": "data/products/dairy-bread.json" },
+        { "id": "cleaning", "name": "Cleaning Items", "icon": "🧹", "count": 20, "priority": false, "order": 7, "file": "data/products/cleaning.json" },
+        { "id": "ghee-paneer", "name": "Ghee & Paneer", "icon": "🐄", "count": 10, "priority": false, "order": 8, "file": "data/products/ghee-paneer.json" },
+        { "id": "tea-coffee", "name": "Tea & Coffee", "icon": "☕", "count": 15, "priority": false, "order": 9, "file": "data/products/tea-coffee.json" },
+        { "id": "sweets-snacks", "name": "Sweets & Snacks", "icon": "🍬", "count": 25, "priority": false, "order": 10, "file": "data/products/sweets-snacks.json" }
+    ]
+}

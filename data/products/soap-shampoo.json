@@ -1,0 +1,11 @@
+{
+    "category": { "id": "soap-shampoo", "name": "Soap & Shampoo", "icon": "🧴", "priority": true, "totalProducts": 25 },
+    "products": [
+        { "id": "ss-001", "name": "Surf Excel Matic", "weight": "1kg", "price": 180, "mrp": 220, "image": "", "icon": "🧴", "rating": 4.3, "reviews": 89, "inStock": true, "mostOrdered": true, "badge": "discount" },
+        { "id": "ss-002", "name": "Rin Detergent Bar", "weight": "250g", "price": 25, "mrp": 28, "image": "", "icon": "🧼", "rating": 4.0, "reviews": 150, "inStock": true, "mostOrdered": false, "badge": null },
+        { "id": "ss-003", "name": "Clinic Plus Shampoo", "weight": "200ml", "price": 95, "mrp": 110, "image": "", "icon": "🧴", "rating": 4.2, "reviews": 200, "inStock": true, "mostOrdered": false, "badge": null },
+        { "id": "ss-004", "name": "Lux Soap", "weight": "150g", "price": 38, "mrp": 42, "image": "", "icon": "🧼", "rating": 4.5, "reviews": 300, "inStock": true, "mostOrdered": true, "badge": "popular" },
+        { "id": "ss-005", "name": "Colgate Toothpaste", "weight": "200g", "price": 75, "mrp": 85, "image": "", "icon": "🪥", "rating": 4.4, "reviews": 250, "inStock": true, "mostOrdered": true, "badge": null },
+        { "id": "ss-006", "name": "Dettol Handwash", "weight": "200ml", "price": 65, "mrp": 75, "image": "", "icon": "🧴", "rating": 4.6, "reviews": 180, "inStock": true, "mostOrdered": false, "badge": null }
+    ]
+}

@@ -1,0 +1,11 @@
+{
+    "category": { "id": "cold-drinks", "name": "Cold Drinks", "icon": "🥤", "priority": false, "totalProducts": 15 },
+    "products": [
+        { "id": "cd-001", "name": "Coca Cola", "weight": "750ml", "price": 40, "mrp": 45, "image": "", "icon": "🥤", "rating": 4.4, "reviews": 400, "inStock": true, "mostOrdered": true, "badge": "popular" },
+        { "id": "cd-002", "name": "Pepsi", "weight": "750ml", "price": 38, "mrp": 42, "image": "", "icon": "🥤", "rating": 4.3, "reviews": 350, "inStock": true, "mostOrdered": true, "badge": null },
+        { "id": "cd-003", "name": "Sprite", "weight": "750ml", "price": 40, "mrp": 45, "image": "", "icon": "🫧", "rating": 4.2, "reviews": 280, "inStock": true, "mostOrdered": false, "badge": null },
+        { "id": "cd-004", "name": "Fanta", "weight": "750ml", "price": 38, "mrp": 42, "image": "", "icon": "🍊", "rating": 4.1, "reviews": 220, "inStock": true, "mostOrdered": false, "badge": null },
+        { "id": "cd-005", "name": "Thums Up", "weight": "750ml", "price": 40, "mrp": 45, "image": "", "icon": "🥤", "rating": 4.5, "reviews": 380, "inStock": true, "mostOrdered": true, "badge": "popular" },
+        { "id": "cd-006", "name": "Mountain Dew", "weight": "750ml", "price": 38, "mrp": 42, "image": "", "icon": "💚", "rating": 4.0, "reviews": 180, "inStock": true, "mostOrdered": false, "badge": null }
+    ]
+}

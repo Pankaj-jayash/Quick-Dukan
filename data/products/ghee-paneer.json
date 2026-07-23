@@ -1,0 +1,9 @@
+{
+    "category": { "id": "ghee-paneer", "name": "Ghee & Paneer", "icon": "🐄", "priority": false, "totalProducts": 10 },
+    "products": [
+        { "id": "gp-001", "name": "Amul Pure Ghee", "weight": "500ml", "price": 280, "mrp": 310, "image": "", "icon": "🧈", "rating": 4.7, "reviews": 350, "inStock": true, "mostOrdered": true, "badge": "best-seller" },
+        { "id": "gp-002", "name": "Mother Dairy Ghee", "weight": "500ml", "price": 260, "mrp": 290, "image": "", "icon": "🧈", "rating": 4.4, "reviews": 200, "inStock": true, "mostOrdered": false, "badge": null },
+        { "id": "gp-003", "name": "Amul Fresh Paneer", "weight": "200g", "price": 85, "mrp": 95, "image": "", "icon": "🧀", "rating": 4.5, "reviews": 280, "inStock": true, "mostOrdered": false, "badge": null },
+        { "id": "gp-004", "name": "Patanjali Ghee", "weight": "500ml", "price": 250, "mrp": 280, "image": "", "icon": "🧈", "rating": 4.3, "reviews": 180, "inStock": true, "mostOrdered": false, "badge": null }
+    ]
+}
