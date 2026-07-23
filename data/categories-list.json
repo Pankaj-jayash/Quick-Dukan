@@ -1,0 +1,100 @@
+{
+  "categories": [
+    {
+      "id": "atta-rice",
+      "name": "Atta & Rice",
+      "icon": "🍚",
+      "priority": true,
+      "file": "data/products/atta-rice.json",
+      "totalProducts": 16
+    },
+    {
+      "id": "soap-shampoo",
+      "name": "Soap & Shampoo",
+      "icon": "🧴",
+      "priority": true,
+      "file": "data/products/soap-shampoo.json",
+      "totalProducts": 13
+    },
+    {
+      "id": "masale-oil",
+      "name": "Masale & Oil",
+      "icon": "🧂",
+      "priority": true,
+      "file": "data/products/masale-oil.json",
+      "totalProducts": 16
+    },
+    {
+      "id": "dairy-bread",
+      "name": "Dairy & Bread",
+      "icon": "🥛",
+      "priority": true,
+      "file": "data/products/dairy-bread.json",
+      "totalProducts": 13
+    },
+    {
+      "id": "biscuit-namkeen",
+      "name": "Biscuit & Namkeen",
+      "icon": "🍪",
+      "priority": false,
+      "file": "data/products/biscuit-namkeen.json",
+      "totalProducts": 15
+    },
+    {
+      "id": "cold-drinks",
+      "name": "Cold Drinks",
+      "icon": "🥤",
+      "priority": false,
+      "file": "data/products/cold-drinks.json",
+      "totalProducts": 12
+    },
+    {
+      "id": "cleaning",
+      "name": "Cleaning Items",
+      "icon": "🧹",
+      "priority": false,
+      "file": "data/products/cleaning.json",
+      "totalProducts": 13
+    },
+    {
+      "id": "ghee-paneer",
+      "name": "Ghee & Paneer",
+      "icon": "🐄",
+      "priority": false,
+      "file": "data/products/ghee-paneer.json",
+      "totalProducts": 10
+    },
+    {
+      "id": "tea-coffee",
+      "name": "Tea & Coffee",
+      "icon": "☕",
+      "priority": false,
+      "file": "data/products/tea-coffee.json",
+      "totalProducts": 11
+    },
+    {
+      "id": "sweets-snacks",
+      "name": "Sweets & Snacks",
+      "icon": "🍬",
+      "priority": false,
+      "file": "data/products/sweets-snacks.json",
+      "totalProducts": 12
+    },
+    {
+      "id": "dry-fruits",
+      "name": "Dry Fruits",
+      "icon": "🥜",
+      "priority": false,
+      "file": "data/products/dry-fruits.json",
+      "totalProducts": 10
+    },
+    {
+      "id": "frozen-food",
+      "name": "Frozen Food",
+      "icon": "❄️",
+      "priority": false,
+      "file": "data/products/frozen-food.json",
+      "totalProducts": 8
+    }
+  ]
+}
