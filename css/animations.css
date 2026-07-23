@@ -1,185 +1,160 @@
-/* ========== ALL KEYFRAME ANIMATIONS ========== */
+/* ========== ALL ANIMATIONS ========== */
 
+/* Cart Wiggle */
 @keyframes cartWiggle {
     0%, 100% { transform: rotate(0deg); }
-    5%       { transform: rotate(12deg); }
-    10%      { transform: rotate(-12deg); }
-    15%      { transform: rotate(8deg); }
-    20%      { transform: rotate(0deg); }
+    5% { transform: rotate(8deg); }
+    10% { transform: rotate(-8deg); }
+    15% { transform: rotate(4deg); }
+    20% { transform: rotate(0deg); }
 }
 
-@keyframes brandFloat {
+/* Truck Move */
+@keyframes truckMove {
+    0%, 100% { transform: translateX(0); }
+    50% { transform: translateX(3px); }
+}
+
+/* Car Bounce */
+@keyframes carBounce {
     0%, 100% { transform: translateY(0); }
-    50%      { transform: translateY(-2px); }
+    30% { transform: translateY(-2px); }
+    60% { transform: translateY(1px); }
 }
 
-@keyframes quickTypewriter {
-    0%   { clip-path: inset(0 100% 0 0); }
-    100% { clip-path: inset(0 0% 0 0); }
+/* Car Sway */
+@keyframes carSway {
+    0%, 100% { transform: rotate(0deg); }
+    25% { transform: rotate(2deg); }
+    75% { transform: rotate(-2deg); }
 }
 
-@keyframes quickFlash {
-    0%   { text-shadow: 0 0 0px #FFF, 0 0 0px #FFD700; }
-    50%  { text-shadow: 0 0 20px #FFF, 0 0 40px #FFD700, 0 0 60px #FFA000; }
-    100% { text-shadow: 0 2px 8px rgba(0,0,0,0.2); }
-}
-
-@keyframes dukanSlideIn {
-    0%   { transform: translateX(30px); opacity: 0; }
-    60%  { transform: translateX(-4px); opacity: 1; }
-    100% { transform: translateX(0); opacity: 1; }
-}
-
-@keyframes truckDrive {
-    0%, 100% { transform: translateX(0) translateY(0) rotate(0deg); }
-    15%      { transform: translateX(2px) translateY(-2px) rotate(2deg); }
-    35%      { transform: translateX(-2px) translateY(-1px) rotate(-2deg); }
-    55%      { transform: translateX(3px) translateY(-3px) rotate(1deg); }
-    75%      { transform: translateX(-3px) translateY(0px) rotate(-1deg); }
-    90%      { transform: translateX(0px) translateY(-1px) rotate(0deg); }
-}
-
-@keyframes exhaustPuff {
-    0%   { opacity: 0; transform: translateY(-50%) translateX(0) scale(0.5); }
-    20%  { opacity: 1; transform: translateY(-50%) translateX(4px) scale(1); }
-    60%  { opacity: 0.6; transform: translateY(-50%) translateX(10px) scale(1.4); }
-    100% { opacity: 0; transform: translateY(-50%) translateX(18px) scale(2); }
-}
-
+/* Road Move */
 @keyframes roadMove {
-    0%   { background-position-x: 0px; }
-    100% { background-position-x: 10px; }
+    0% { background-position: 0% 50%; }
+    100% { background-position: 100% 50%; }
 }
 
+/* Exhaust Puff */
+@keyframes exhaustPuff {
+    0% { opacity: 1; transform: translateX(0) scale(1); }
+    100% { opacity: 0; transform: translateX(-8px) scale(1.5); }
+}
+
+/* Icon Flip */
+@keyframes iconFlip {
+    0% { transform: rotateY(0deg) scale(1); }
+    50% { transform: rotateY(90deg) scale(0.8); }
+    100% { transform: rotateY(0deg) scale(1); }
+}
+
+/* Ripple */
 @keyframes rippleExpand {
     to { transform: scale(4); opacity: 0; }
 }
 
-@keyframes sparkleFly {
-    0%   { transform: translate(0,0) scale(1); opacity: 1; }
-    100% { transform: translate(var(--tx), var(--ty)) scale(0); opacity: 0; }
+/* Pulse Ring */
+@keyframes pulseRing {
+    0% { box-shadow: 0 0 0 0 rgba(123,31,162,0.4); }
+    100% { box-shadow: 0 0 0 16px rgba(123,31,162,0); }
 }
 
-@keyframes textGlowGold {
-    0%   { text-shadow: 0 0 0px #FFD700; }
-    50%  { text-shadow: 0 0 24px #FFD700, 0 0 48px #FFA000; }
-    100% { text-shadow: 0 2px 8px rgba(255,215,0,0.3); }
-}
-
-@keyframes cosmicFlip {
-    0%   { transform: rotateY(0deg) scale(1); }
-    50%  { transform: rotateY(90deg) scale(0.6); }
-    100% { transform: rotateY(0deg) scale(1); }
-}
-
-@keyframes ringExpand {
-    0%   { width: 10px; height: 10px; opacity: 1; }
-    100% { width: 90px; height: 90px; opacity: 0; }
-}
-
-@keyframes starBurst {
-    0%   { transform: translate(0,0) scale(1); opacity: 1; }
-    100% { transform: translate(var(--sx), var(--sy)) scale(0); opacity: 0; }
-}
-
-@keyframes searchIconPulse {
-    0%, 100% { transform: scale(1); opacity: 0.6; }
-    50%      { transform: scale(1.1); opacity: 1; }
-}
-
-@keyframes searchIconSpin {
-    0%   { transform: rotate(0deg) scale(1); }
-    50%  { transform: rotate(15deg) scale(1.2); }
-    100% { transform: rotate(0deg) scale(1); }
-}
-
+/* Search Pulse */
 @keyframes searchPulse {
-    0%, 100% { box-shadow: 0 4px 20px rgba(74,111,165,0.15), 0 0 0 4px rgba(74,111,165,0.04); }
-    50%      { box-shadow: 0 4px 28px rgba(74,111,165,0.22), 0 0 0 8px rgba(74,111,165,0.06); }
+    0%, 100% { 
+        box-shadow: 0 4px 8px rgba(123,31,162,0.08), 0 12px 28px rgba(123,31,162,0.15), 0 0 0 4px rgba(123,31,162,0.05);
+    }
+    50% { 
+        box-shadow: 0 4px 12px rgba(123,31,162,0.12), 0 16px 32px rgba(123,31,162,0.20), 0 0 0 8px rgba(123,31,162,0.08);
+    }
 }
 
-@keyframes voiceBreathe {
-    0%, 100% { transform: scale(1); opacity: 0.65; }
-    50%      { transform: scale(1.12); opacity: 1; }
-}
-
-@keyframes voiceVibrate {
-    0%, 100% { transform: rotate(-4deg); }
-    50%      { transform: rotate(4deg); }
-}
-
-@keyframes voiceRingPulse {
-    0%   { width: 16px; height: 16px; opacity: 0.9; }
-    100% { width: 50px; height: 50px; opacity: 0; }
-}
-
-@keyframes dropdownSlide {
-    0%   { opacity: 0; transform: translateY(-8px); }
-    100% { opacity: 1; transform: translateY(0); }
-}
-
-@keyframes priorityPulse {
-    0%, 100% { transform: scale(1); opacity: 1; box-shadow: 0 0 6px rgba(255,107,138,0.5); }
-    50%      { transform: scale(1.8); opacity: 0.6; box-shadow: 0 0 14px rgba(255,107,138,0.3); }
-}
-
-@keyframes badgeBounce {
-    0%   { transform: scale(0); }
-    40%  { transform: scale(1.5); }
-    60%  { transform: scale(0.85); }
-    80%  { transform: scale(1.1); }
+/* Badge Pop */
+@keyframes badgePop {
+    0% { transform: scale(0); }
+    50% { transform: scale(1.4); }
+    70% { transform: scale(0.9); }
     100% { transform: scale(1); }
 }
 
-@keyframes cartShake {
-    0%, 100% { transform: translateX(0); }
-    15%      { transform: translateX(-4px) rotate(-5deg); }
-    30%      { transform: translateX(4px) rotate(5deg); }
-    45%      { transform: translateX(-3px) rotate(-3deg); }
-    60%      { transform: translateX(3px) rotate(3deg); }
-    75%      { transform: translateX(-1px); }
+/* Nav Bounce */
+@keyframes navBounce {
+    0% { transform: translateY(0); }
+    30% { transform: translateY(-6px); }
+    50% { transform: translateY(2px); }
+    70% { transform: translateY(-3px); }
+    100% { transform: translateY(0); }
 }
 
-@keyframes cartSparkleFly {
-    0%   { transform: translate(0,0) scale(1); opacity: 1; }
-    100% { transform: translate(var(--cx), var(--cy)) scale(0); opacity: 0; }
+/* Arrow Launch */
+@keyframes arrowLaunch {
+    0% { transform: translateY(0); opacity: 1; }
+    40% { transform: translateY(-20px); opacity: 0; }
+    60% { transform: translateY(8px); opacity: 0.6; }
+    80% { transform: translateY(-3px); opacity: 0.9; }
+    100% { transform: translateY(0); opacity: 1; }
 }
 
-@keyframes whatsappBreathe {
-    0%, 100% { width: 28px; height: 28px; opacity: 0; }
-    30%      { opacity: 0.6; }
-    50%      { width: 44px; height: 44px; opacity: 0; }
+/* Slide From Top */
+@keyframes slideFromTop {
+    0% { transform: translateY(-100%); opacity: 0; }
+    60% { transform: translateY(5%); opacity: 1; }
+    80% { transform: translateY(-2%); }
+    100% { transform: translateY(0); opacity: 1; }
 }
 
-@keyframes topColorCycle {
-    0%   { color: #FF6B8A; filter: drop-shadow(0 0 6px rgba(255,107,138,0.5)); }
-    20%  { color: #FF8A65; }
-    40%  { color: #FFD740; }
-    60%  { color: #69F0AE; }
-    80%  { color: #40C4FF; }
-    100% { color: #FF6B8A; filter: drop-shadow(0 0 6px rgba(255,107,138,0.5)); }
+/* Popup Scale In */
+@keyframes popupScaleIn {
+    0% { transform: scale(0.8); opacity: 0; }
+    100% { transform: scale(1); opacity: 1; }
 }
 
-@keyframes topSparkleTrail {
-    0%   { transform: translate(0,0) scale(1); opacity: 1; }
-    100% { transform: translate(var(--tx), var(--ty)) scale(0); opacity: 0; }
+/* Fade In */
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
 }
 
-@keyframes cardRipple {
-    to { transform: scale(3); opacity: 0; }
+/* Slide Up */
+@keyframes slideUp {
+    from { transform: translateY(100%); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
 }
 
-@keyframes cardSparkleBurst {
-    0%   { transform: translate(0,0) scale(1); opacity: 1; }
-    100% { transform: translate(var(--sx), var(--sy)) scale(0); opacity: 0; }
+/* Slide Down */
+@keyframes slideDown {
+    from { transform: translateY(-10px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
 }
 
-@keyframes fadeInUp {
-    from { opacity: 0; transform: translateY(20px); }
-    to { opacity: 1; transform: translateY(0); }
+/* Shimmer */
+@keyframes shimmer {
+    0% { background-position: -200% 0; }
+    100% { background-position: 200% 0; }
 }
 
-@keyframes pulse {
-    0%, 100% { opacity: 0.5; }
-    50% { opacity: 1; }
+/* Confetti */
+@keyframes confetti {
+    0% { transform: translateY(0) rotate(0deg); opacity: 1; }
+    100% { transform: translateY(100px) rotate(720deg); opacity: 0; }
 }
+
+/* Spin */
+@keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+/* Sparkle */
+@keyframes sparkle {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.5; transform: scale(0.8); }
+}
+
+/* Utility Classes */
+.animate-bounce { animation: navBounce 0.5s ease-out; }
+.animate-fade-in { animation: fadeIn 0.3s ease-out; }
+.animate-slide-up { animation: slideUp 0.4s ease-out; }
+.animate-slide-down { animation: slideDown 0.3s ease-out; }
+.animate-popup { animation: popupScaleIn 0.3s cubic-bezier(0.34, 1.56, 0.64, 1); }
+.animate-spin { animation: spin 1s linear infinite; }
