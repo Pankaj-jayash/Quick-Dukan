@@ -118,14 +118,62 @@
     
     <!-- ==================== BOTTOM NAVBAR ==================== -->
     <nav class="bottom-nav" id="bottomNav">
-        <div class="bottom-nav-inner">
-            <button class="nav-item active" data-page="home" onclick="navigateTo('index.html')" aria-label="Home">
-                <span class="nav-icon">🏠</span>
-                <span class="nav-label">Home</span>
-                <span class="nav-dot"></span>
-                <span class="nav-ripple-container"></span>
-            </button>
-            <button class="nav-item" data-page="shop" onclick="navigateTo('shop.html')" aria-label="Shop">
+    <div class="bottom-nav-inner">
+        
+        <!-- Home -->
+        <a href="index.html" class="nav-item active" data-page="home" aria-label="Home">
+            <span class="nav-icon">🏠</span>
+            <span class="nav-label">Home</span>
+            <span class="nav-dot"></span>
+            <span class="nav-ripple-container"></span>
+        </a>
+        
+        <!-- Shop -->
+        <a href="shop.html" class="nav-item" data-page="shop" aria-label="Shop">
+            <span class="nav-icon">🛍️</span>
+            <span class="nav-label">Shop</span>
+            <span class="nav-dot"></span>
+            <span class="nav-ripple-container"></span>
+        </a>
+        
+        <!-- Cart -->
+        <a href="cart.html" class="nav-item nav-cart" data-page="cart" aria-label="Cart">
+            <span class="nav-icon-wrapper">
+                <span class="nav-icon">🛒</span>
+                <span class="cart-badge" id="cartBadge">0</span>
+                <span class="cart-sparkle-container" id="cartSparkles"></span>
+            </span>
+            <span class="nav-label">Cart</span>
+            <span class="nav-dot"></span>
+            <span class="nav-ripple-container"></span>
+        </a>
+        
+        <!-- WhatsApp -->
+        <button class="nav-item nav-whatsapp" data-page="whatsapp" onclick="openWhatsApp()" aria-label="WhatsApp">
+            <span class="nav-icon-wrapper">
+                <span class="nav-icon">💬</span>
+                <span class="whatsapp-ring" id="whatsappRing"></span>
+            </span>
+            <span class="nav-label">Whats</span>
+            <span class="nav-dot"></span>
+            <span class="nav-ripple-container"></span>
+        </button>
+        
+        <!-- Top -->
+        <button class="nav-item nav-top" id="navTop" data-page="top" onclick="window.scrollTo({top:0,behavior:'smooth'})" aria-label="Back to Top">
+            <span class="nav-icon-wrapper">
+                <span class="nav-icon" id="topIcon">⬆️</span>
+                <span class="top-sparkle-container" id="topSparkles"></span>
+            </span>
+            <span class="nav-label">Top</span>
+            <span class="nav-dot"></span>
+            <span class="nav-ripple-container"></span>
+        </button>
+        
+    </div>
+</nav>
+       <!-- NEW (100% working) -->
+         <button class="nav-item" onclick="window.location.href='shop.html'"><button class="nav-item" data-page="shop" onclick="navigateTo('shop.html')" aria-label="Shop">
                 <span class="nav-icon">🛍️</span>
                 <span class="nav-label">Shop</span>
                 <span class="nav-dot"></span>
