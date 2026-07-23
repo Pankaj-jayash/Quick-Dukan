@@ -1,13 +1,39 @@
 <!DOCTYPE html>
-
-<html>
+<html lang="hi">
 <head>
-  <meta http-equiv="CONTENT-TYPE" content="text/html; charset=UTF-8">
-  <title>Hello, World!</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Order Placed — Quick Dukan</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800;900&family=Nunito:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/reset.css">
+    <link rel="stylesheet" href="css/variables.css">
+    <link rel="stylesheet" href="css/global.css">
+    <style>
+        .success-container { max-width: 500px; margin: 60px auto; text-align: center; padding: 40px 24px; background: var(--bg-white); border-radius: 20px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); }
+        .success-icon { font-size: 80px; animation: pop 0.5s ease; }
+        @keyframes pop { 0%{transform:scale(0)} 60%{transform:scale(1.2)} 100%{transform:scale(1)} }
+        .success-title { font-size: 24px; font-weight: 800; margin: 16px 0 8px; }
+        .success-subtitle { color: #757575; margin-bottom: 24px; }
+    </style>
 </head>
 <body>
-  <h1>
-    Hello, World!
-  </h1>
+
+<header class="top-header"><div class="header-brand" onclick="window.location.href='index.html'"><span class="brand-icon">🛒</span><span class="brand-text"><span class="quick-text">QUICK</span><span class="dukan-text">DUKAN</span></span></div></header>
+
+<div class="main-content-full">
+    <div class="success-container">
+        <div class="success-icon">✅</div>
+        <h1 class="success-title">Order Placed Successfully!</h1>
+        <p class="success-subtitle">Your order has been sent via WhatsApp.<br>We will confirm your order shortly.</p>
+        <p>📞 Any questions? Call: <strong>98765-43210</strong></p>
+        <div style="margin-top:20px;display:flex;gap:10px;flex-direction:column;">
+            <a href="index.html" style="padding:14px;background:#4A6FA5;color:#FFF;border-radius:50px;font-weight:700;text-decoration:none;">🏠 Back to Home</a>
+            <a href="shop.html" style="padding:14px;border:2px solid #4A6FA5;color:#4A6FA5;border-radius:50px;font-weight:700;text-decoration:none;">🛍️ Continue Shopping</a>
+        </div>
+    </div>
+</div>
+
 </body>
 </html>
