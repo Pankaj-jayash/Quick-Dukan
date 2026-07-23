@@ -1,74 +1,106 @@
-var WhatsApp = {
-    sendOrder: function(orderData) {
-        var msg = '';
+// ========== WHATSAPP MESSAGE GENERATOR ==========
+
+const WhatsApp = {
+    buildMessage(orderData) {
+        let message = '';
         
-        msg += '🛒 *' + CONFIG.store.name + ' — New Order*\n';
-        msg += '━━━━━━━━━━━━━━━━\n\n';
+        // Header
+        message += `🛒 *${CONFIG.store.name} — New Order*\n`;
+        message += `━━━━━━━━━━━━━━━━━━━━━━━━\n\n`;
         
-        msg += '📋 *Order Details:*\n';
-        orderData.items.forEach(function(item, i) {
-            msg += (i+1) + '. *' + item.name + '*\n';
-            msg += '   📦 Qty: ' + item.quantity;
-            if (item.weight) msg += ' (' + item.weight + ')';
-            msg += '\n   💰 ₹' + item.price + ' × ' + item.quantity + ' = ₹' + (item.price * item.quantity) + '\n';
-            if (item.image && item.image.indexOf('http') === 0) msg += '   🖼️ ' + item.image + '\n';
-            msg += '\n';
+        // Order Items
+        message += `📋 *Order Details:*\n`;
+        message += `━━━━━━━━━━━━━━━━━━━━━━━━\n\n`;
+        
+        orderData.items.forEach((item, index) => {
+            message += `${index + 1}️⃣ *${item.name}* (${item.weight})\n`;
+            message += `   Qty: ${item.quantity} | ${Utils.formatPrice(item.price)} × ${item.quantity} = ${Utils.formatPrice(item.price * item.quantity)}\n`;
+            if (item.image) {
+                message += `   🖼️ ${item.image}\n`;
+            }
+            message += `\n`;
         });
         
-        msg += '━━━━━━━━━━━━━━━━\n';
-        msg += '💰 *Total: ₹' + orderData.total + '*\n';
-        msg += '📦 Items: ' + orderData.totalItems + '\n';
-        msg += '━━━━━━━━━━━━━━━━\n\n';
+        // Total
+        message += `━━━━━━━━━━━━━━━━━━━━━━━━\n`;
+        message += `💰 *Total: ${Utils.formatPrice(orderData.total)}*\n`;
+        message += `💵 Payment: ${orderData.payment || 'Cash on Delivery'}\n`;
+        message += `━━━━━━━━━━━━━━━━━━━━━━━━\n\n`;
         
-        msg += '💳 *Payment:* ';
-        if (orderData.paymentMethod === 'cash') {
-            msg += 'Cash on Delivery 💵\n';
-            msg += 'ℹ️ _QR se bhi pay kar sakte hain:_ ' + (CONFIG.payments.qrCodeImage || 'Contact for QR') + '\n';
-        } else if (orderData.paymentMethod === 'qr') {
-            msg += 'QR/UPI Payment 📱\n';
-            msg += '🆔 UPI: ' + CONFIG.payments.phonePeUPI + '\n';
-            msg += '📱 QR: ' + (CONFIG.payments.qrCodeImage || 'Contact for QR') + '\n';
-        } else {
-            msg += 'PhonePe Payment 💸\n';
-            msg += '🆔 UPI: ' + CONFIG.payments.phonePeUPI + '\n';
-        }
-        msg += '\n';
+        // Customer Details
+        message += `👤 *Customer Details:*\n`;
+        message += `━━━━━━━━━━━━━━━━━━━━━━━━\n`;
+        message += `Name: ${orderData.customer.name}\n`;
+        message += `📞 Phone: ${orderData.customer.phone}\n`;
+        message += `📍 Address: ${orderData.customer.address}\n`;
+        message += `🏘️ City: ${orderData.customer.city}\n\n`;
         
-        msg += '👤 *Customer:*\n';
-        msg += '👤 ' + orderData.customer.name + '\n';
-        msg += '📞 ' + orderData.customer.phone + '\n';
-        if (orderData.deliveryType === 'home') {
-            msg += '📍 ' + orderData.customer.address + '\n';
-        }
-        if (orderData.customer.instructions) {
-            msg += '📝 ' + orderData.customer.instructions + '\n';
-        }
-        msg += '\n';
+        // Delivery Type
+        message += `🚚 Delivery: ${orderData.deliveryType === 'pickup' ? 'Store Pickup 🏬' : 'Home Delivery 🚚'}\n\n`;
         
-        msg += '🚚 *Delivery:* ' + (orderData.deliveryType === 'home' ? 'Home Delivery' : 'Store Pickup') + '\n\n';
-        
-        // LIVE LOCATION
-        if (orderData.location) {
-            msg += '📍 *Live Location:*\n';
-            msg += '🗺️ Google Maps: https://maps.google.com/?q=' + orderData.location.lat + ',' + orderData.location.lng + '\n';
-            if (orderData.locationAddress) {
-                msg += '📌 Address: ' + orderData.locationAddress + '\n';
-            }
-            msg += '\n';
-        }
-        
+        // Pickup info
         if (orderData.deliveryType === 'pickup') {
-            msg += '🏬 *Store:* https://maps.google.com/?q=' + CONFIG.store.googleMapsQuery + '\n\n';
+            message += `🏬 *Pickup Location:*\n`;
+            message += `${CONFIG.store.name}\n`;
+            message += `${CONFIG.store.address}\n`;
+            message += `⏰ ${CONFIG.store.timing}\n`;
+            message += `📞 ${CONFIG.store.phoneDisplay}\n\n`;
         }
         
-        msg += '━━━━━━━━━━━━━━━━\n';
-        msg += '🆔 ' + orderData.orderRef + '\n';
-        msg += '📅 ' + orderData.dateTime + '\n';
-        msg += '━━━━━━━━━━━━━━━━\n\n';
-        msg += '🙏 *Thank you!* We will confirm shortly.\n';
-        msg += '📞 ' + CONFIG.store.phoneDisplay + '\n';
-        msg += '📍 ' + CONFIG.store.address;
+        // Instructions
+        if (orderData.customer.instructions) {
+            message += `📝 *Instructions:* ${orderData.customer.instructions}\n\n`;
+        }
         
-        window.open('https://wa.me/' + CONFIG.store.phone + '?text=' + encodeURIComponent(msg), '_blank');
+        // Location
+        if (orderData.location) {
+            const locQuery = encodeURIComponent(
+                (orderData.customer.address || '') + ' ' + 
+                (orderData.customer.city || '') + ' ' + 
+                (orderData.location.pincode || '')
+            );
+            message += `📍 *Location on Map:*\n`;
+            message += `https://maps.google.com/?q=${locQuery}\n\n`;
+        }
+        
+        // Footer
+        message += `━━━━━━━━━━━━━━━━━━━━━━━━\n`;
+        message += `📅 ${Utils.getCurrentDateTime()}\n`;
+        message += `🆔 Order Ref: ${orderData.orderRef}\n`;
+        message += `━━━━━━━━━━━━━━━━━━━━━━━━\n\n`;
+        message += `🙏 Thank you for your order!\n`;
+        message += `We'll confirm shortly.\n`;
+        message += `📞 ${CONFIG.store.name}: ${CONFIG.store.phoneDisplay}\n`;
+        
+        return message;
+    },
+    
+    sendOrder(orderData) {
+        const message = this.buildMessage(orderData);
+        const encodedMessage = encodeURIComponent(message);
+        const whatsappURL = `${CONFIG.urls.whatsappAPI}${CONFIG.store.phone}?text=${encodedMessage}`;
+        
+        // Open WhatsApp
+        window.open(whatsappURL, '_blank');
+        
+        // Save order
+        Storage.addOrder({
+            orderRef: orderData.orderRef,
+            date: Utils.getCurrentDateTime(),
+            items: orderData.items,
+            total: orderData.total,
+            payment: orderData.payment,
+            deliveryType: orderData.deliveryType,
+            customer: orderData.customer,
+            instructions: orderData.customer.instructions || '',
+            location: orderData.location,
+            status: 'confirmed'
+        });
+        
+        // Clear purchased items from cart
+        const purchasedIds = orderData.items.map(item => item.id);
+        Cart.clearPurchased(purchasedIds);
+        
+        return true;
     }
 };
