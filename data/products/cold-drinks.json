@@ -1,11 +1,167 @@
 {
-    "category": { "id": "cold-drinks", "name": "Cold Drinks", "icon": "🥤", "priority": false, "totalProducts": 15 },
-    "products": [
-        { "id": "cd-001", "name": "Coca Cola", "weight": "750ml", "price": 40, "mrp": 45, "image": "", "icon": "🥤", "rating": 4.4, "reviews": 400, "inStock": true, "mostOrdered": true, "badge": "popular" },
-        { "id": "cd-002", "name": "Pepsi", "weight": "750ml", "price": 38, "mrp": 42, "image": "", "icon": "🥤", "rating": 4.3, "reviews": 350, "inStock": true, "mostOrdered": true, "badge": null },
-        { "id": "cd-003", "name": "Sprite", "weight": "750ml", "price": 40, "mrp": 45, "image": "", "icon": "🫧", "rating": 4.2, "reviews": 280, "inStock": true, "mostOrdered": false, "badge": null },
-        { "id": "cd-004", "name": "Fanta", "weight": "750ml", "price": 38, "mrp": 42, "image": "", "icon": "🍊", "rating": 4.1, "reviews": 220, "inStock": true, "mostOrdered": false, "badge": null },
-        { "id": "cd-005", "name": "Thums Up", "weight": "750ml", "price": 40, "mrp": 45, "image": "", "icon": "🥤", "rating": 4.5, "reviews": 380, "inStock": true, "mostOrdered": true, "badge": "popular" },
-        { "id": "cd-006", "name": "Mountain Dew", "weight": "750ml", "price": 38, "mrp": 42, "image": "", "icon": "💚", "rating": 4.0, "reviews": 180, "inStock": true, "mostOrdered": false, "badge": null }
-    ]
+  "category": {
+    "id": "cold-drinks",
+    "name": "Cold Drinks",
+    "icon": "🥤",
+    "priority": false,
+    "totalProducts": 12
+  },
+  "products": [
+    {
+      "id": "cd-001",
+      "name": "Coca-Cola",
+      "weight": "750ml",
+      "price": 40,
+      "mrp": 45,
+      "image": "https://picsum.photos/400/400?random=601",
+      "rating": 4.4,
+      "reviews": 500,
+      "inStock": true,
+      "mostOrdered": true,
+      "badge": "best-seller"
+    },
+    {
+      "id": "cd-002",
+      "name": "Pepsi",
+      "weight": "750ml",
+      "price": 38,
+      "mrp": 42,
+      "image": "https://picsum.photos/400/400?random=602",
+      "rating": 4.3,
+      "reviews": 450,
+      "inStock": true,
+      "mostOrdered": true,
+      "badge": null
+    },
+    {
+      "id": "cd-003",
+      "name": "Sprite",
+      "weight": "750ml",
+      "price": 38,
+      "mrp": 42,
+      "image": "https://picsum.photos/400/400?random=603",
+      "rating": 4.2,
+      "reviews": 380,
+      "inStock": true,
+      "mostOrdered": true,
+      "badge": null
+    },
+    {
+      "id": "cd-004",
+      "name": "Thums Up",
+      "weight": "750ml",
+      "price": 40,
+      "mrp": 45,
+      "image": "https://picsum.photos/400/400?random=604",
+      "rating": 4.5,
+      "reviews": 420,
+      "inStock": true,
+      "mostOrdered": true,
+      "badge": null
+    },
+    {
+      "id": "cd-005",
+      "name": "Mountain Dew",
+      "weight": "750ml",
+      "price": 38,
+      "mrp": 42,
+      "image": "https://picsum.photos/400/400?random=605",
+      "rating": 4.1,
+      "reviews": 300,
+      "inStock": true,
+      "mostOrdered": false,
+      "badge": null
+    },
+    {
+      "id": "cd-006",
+      "name": "Fanta Orange",
+      "weight": "750ml",
+      "price": 38,
+      "mrp": 42,
+      "image": "https://picsum.photos/400/400?random=606",
+      "rating": 4.0,
+      "reviews": 280,
+      "inStock": true,
+      "mostOrdered": false,
+      "badge": null
+    },
+    {
+      "id": "cd-007",
+      "name": "Maaza Mango",
+      "weight": "600ml",
+      "price": 35,
+      "mrp": 40,
+      "image": "https://picsum.photos/400/400?random=607",
+      "rating": 4.3,
+      "reviews": 350,
+      "inStock": true,
+      "mostOrdered": false,
+      "badge": null
+    },
+    {
+      "id": "cd-008",
+      "name": "Slice Mango",
+      "weight": "600ml",
+      "price": 35,
+      "mrp": 40,
+      "image": "https://picsum.photos/400/400?random=608",
+      "rating": 4.2,
+      "reviews": 310,
+      "inStock": true,
+      "mostOrdered": false,
+      "badge": null
+    },
+    {
+      "id": "cd-009",
+      "name": "Coca-Cola Can",
+      "weight": "300ml",
+      "price": 35,
+      "mrp": 40,
+      "image": "https://picsum.photos/400/400?random=609",
+      "rating": 4.1,
+      "reviews": 200,
+      "inStock": true,
+      "mostOrdered": false,
+      "badge": null
+    },
+    {
+      "id": "cd-010",
+      "name": "Red Bull",
+      "weight": "250ml",
+      "price": 110,
+      "mrp": 125,
+      "image": "https://picsum.photos/400/400?random=610",
+      "rating": 4.3,
+      "reviews": 180,
+      "inStock": true,
+      "mostOrdered": false,
+      "badge": "premium"
+    },
+    {
+      "id": "cd-011",
+      "name": "Minute Maid Pulpy Orange",
+      "weight": "1L",
+      "price": 85,
+      "mrp": 99,
+      "image": "https://picsum.photos/400/400?random=611",
+      "rating": 4.4,
+      "reviews": 220,
+      "inStock": true,
+      "mostOrdered": false,
+      "badge": null
+    },
+    {
+      "id": "cd-012",
+      "name": "Bisleri Water",
+      "weight": "1L",
+      "price": 20,
+      "mrp": 22,
+      "image": "https://picsum.photos/400/400?random=612",
+      "rating": 4.5,
+      "reviews": 600,
+      "inStock": true,
+      "mostOrdered": true,
+      "badge": null
+    }
+  ]
 }
