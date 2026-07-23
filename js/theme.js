@@ -1,17 +1,39 @@
-var Theme = {
-    init: function() {
-        var saved = localStorage.getItem('quickdukan_theme');
-        if (saved === 'dark') document.body.classList.add('dark-mode');
-        else document.body.classList.remove('dark-mode');
-        this.updateIcon();
+// ========== DARK/LIGHT MODE ==========
+
+const Theme = {
+    init() {
+        const toggle = document.getElementById('themeToggle');
+        if (!toggle) return;
+        
+        // Apply saved theme
+        const savedTheme = Storage.getTheme();
+        if (savedTheme === 'dark') {
+            document.body.classList.add('dark-mode');
+            toggle.querySelector('.toggle-icon').textContent = '☀️';
+        }
+        
+        toggle.addEventListener('click', () => {
+            this.toggle();
+        });
+        
+        // Ripple effect
+        toggle.addEventListener('click', function(e) {
+            UI.createRipple(e, this, 'rgba(255,255,255,0.2)');
+        });
     },
-    toggle: function() {
-        document.body.classList.toggle('dark-mode');
-        localStorage.setItem('quickdukan_theme', document.body.classList.contains('dark-mode') ? 'dark' : 'light');
-        this.updateIcon();
-    },
-    updateIcon: function() {
-        var icon = document.getElementById('toggleIcon');
-        if (icon) icon.textContent = document.body.classList.contains('dark-mode') ? '☀️' : '🌙';
+    
+    toggle() {
+        const isDark = document.body.classList.toggle('dark-mode');
+        const icon = document.querySelector('.toggle-icon');
+        
+        if (icon) {
+            icon.classList.add('flipping');
+            setTimeout(() => {
+                icon.textContent = isDark ? '☀️' : '🌙';
+                icon.classList.remove('flipping');
+            }, 200);
+        }
+        
+        Storage.setTheme(isDark ? 'dark' : 'light');
     }
 };
