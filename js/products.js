@@ -1,4 +1,4 @@
-const Products = {
+var Products = {
     allProducts: [],
     mostOrderedProducts: [],
     
@@ -11,144 +11,119 @@ const Products = {
     },
     
     async loadAllProducts() {
-    try {
-        const response = await fetch(CONFIG.urls.categoriesList);
-        if (!response.ok) throw new Error('Failed to fetch categories');
-        const data = await response.json();
-        const categories = data.categories;
-        this.allProducts = [];
-        
-        for (const cat of categories) {
-            try {
-                const catResponse = await fetch(cat.file);
-                if (!catResponse.ok) throw new Error('Failed to fetch ' + cat.file);
-                const catData = await catResponse.json();
-                const products = catData.products.filter(p => p.inStock);
-                this.allProducts = [...this.allProducts, ...products];
-            } catch (e) {
-                console.warn('Could not load category:', cat.name, e.message);
+        try {
+            var response = await fetch(CONFIG.urls.categoriesList);
+            if (!response.ok) throw new Error('Failed');
+            var data = await response.json();
+            var categories = data.categories;
+            this.allProducts = [];
+            
+            for (var i = 0; i < categories.length; i++) {
+                var cat = categories[i];
+                try {
+                    var catResponse = await fetch(cat.file);
+                    if (!catResponse.ok) continue;
+                    var catData = await catResponse.json();
+                    var products = catData.products.filter(function(p) { return p.inStock; });
+                    this.allProducts = this.allProducts.concat(products);
+                } catch (e) {
+                    console.warn('Skip:', cat.name);
+                }
             }
-        }
-        
-        // Agar kuch bhi load nahi hua, fallback use karo
-        if (this.allProducts.length === 0) {
-            console.warn('No products loaded from JSON, using fallback');
+            
+            if (this.allProducts.length === 0) {
+                this.allProducts = this.getFallbackProducts();
+            }
+        } catch (error) {
+            console.error('Load error:', error);
             this.allProducts = this.getFallbackProducts();
         }
-    } catch (error) {
-        console.error('Failed to load products:', error);
-        this.allProducts = this.getFallbackProducts();
-    }
+    },
     
-    console.log('✅ Total products loaded:', this.allProducts.length);
-}
+    async loadMostOrdered() {
+        if (this.allProducts.length === 0) await this.loadAllProducts();
+        this.mostOrderedProducts = this.allProducts.filter(function(p) { return p.mostOrdered; }).slice(0, 12);
+        if (this.mostOrderedProducts.length === 0) this.mostOrderedProducts = this.allProducts.slice(0, 8);
+        this.renderProductCards(this.mostOrderedProducts, 'productsGrid');
+        var section = document.getElementById('mostOrderedSection');
+        if (section) section.style.display = 'block';
+    },
     
-    // Search function for real products
+    async loadCategoryProducts(categoryId) {
+        UI.showLoading();
+        try {
+            var cat = Categories.categoriesList.find(function(c) { return c.id === categoryId; });
+            if (!cat) throw new Error('Not found');
+            var response = await fetch(cat.file);
+            var data = await response.json();
+            var products = data.products.filter(function(p) { return p.inStock; });
+            UI.hideLoading();
+            return products;
+        } catch (error) {
+            UI.hideLoading();
+            return this.allProducts.filter(function(p) { return p.category === categoryId; }).slice(0, 8);
+        }
+    },
+    
     searchProducts(query) {
         if (this.allProducts.length === 0) return [];
-        const q = query.toLowerCase();
-        return this.allProducts.filter(p => 
-            p.name.toLowerCase().includes(q) || 
-            (p.weight && p.weight.toLowerCase().includes(q))
-        );
+        var q = query.toLowerCase();
+        return this.allProducts.filter(function(p) {
+            return p.name.toLowerCase().indexOf(q) > -1 || (p.weight && p.weight.toLowerCase().indexOf(q) > -1);
+        }).slice(0, CONFIG.search.maxSuggestions);
     },
     
     renderProductCards(products, containerId) {
-        const container = document.getElementById(containerId);
+        var container = document.getElementById(containerId);
         if (!container) return;
-        
         if (!products || products.length === 0) {
-            container.innerHTML = `<div class="empty-products-message" style="grid-column:1/-1;"><span style="font-size:48px;">📦</span><p>Products coming soon!</p><p style="font-size:12px;color:#999;">We're adding products to this category</p></div>`;
+            container.innerHTML = '<div class="empty-products-message"><span style="font-size:48px;">📦</span><p>Products coming soon!</p></div>';
             return;
         }
         
-        container.innerHTML = products.map(product => this.createProductCardHTML(product)).join('');
+        container.innerHTML = products.map(function(product) {
+            return createProductCardHTML(product);
+        }).join('');
         
-        container.querySelectorAll('.card-add-btn').forEach(btn => {
-            btn.addEventListener('click', (e) => {
+        // Add to Cart
+        var addBtns = container.querySelectorAll('.card-add-btn');
+        for (var i = 0; i < addBtns.length; i++) {
+            addBtns[i].addEventListener('click', function(e) {
                 e.stopPropagation();
-                const productId = btn.dataset.productId;
-                const product = products.find(p => p.id === productId);
+                var id = this.getAttribute('data-product-id');
+                var product = products.find(function(p) { return p.id === id; });
                 if (product) {
                     Cart.addItem(product, 1);
                     UI.showCartToast(product.name);
                     UI.addToRecentlyViewed(product);
                 }
             });
-        });
-        // After existing Add to Cart listener, add:
-container.querySelectorAll('.card-buy-btn').forEach(btn => {
-    btn.addEventListener('click', (e) => {
-        e.stopPropagation();
-        const productId = btn.dataset.productId;
-        const product = products.find(p => p.id === productId);
-        if (product) CheckoutModal.open(product);
-    });
-});
-        // After existing Add to Cart listener block, add this:
-container.querySelectorAll('.card-buy-btn').forEach(btn => {
-    btn.addEventListener('click', (e) => {
-        e.stopPropagation();
-        const productId = btn.dataset.productId;
-        const product = products.find(p => p.id === productId);
-        if (product) {
-            CheckoutModal.open(product);
         }
-    });
-});
         
-        // Inside renderProductCards, after adding Add to Cart listener:
-container.querySelectorAll('.card-buy-btn').forEach(btn => {
-    btn.addEventListener('click', (e) => {
-        e.stopPropagation();
-        const productId = btn.dataset.productId;
-        const product = products.find(p => p.id === productId);
-        if (product) {
-            CheckoutModal.open(product); // single product buy now
+        // Buy Now
+        var buyBtns = container.querySelectorAll('.card-buy-btn');
+        for (var j = 0; j < buyBtns.length; j++) {
+            buyBtns[j].addEventListener('click', function(e) {
+                e.stopPropagation();
+                var id = this.getAttribute('data-product-id');
+                var product = products.find(function(p) { return p.id === id; });
+                if (product && typeof CheckoutModal !== 'undefined') {
+                    CheckoutModal.open(product);
+                }
+            });
         }
-    });
-});
-    createProductCardHTML(product) {
-    const badgeHTML = product.badge ? 
-        `<span class="card-badge ${product.badge}">${
-            product.badge === 'best-seller' ? '🏆 Best' :
-            product.badge === 'popular' ? '🔥 Popular' :
-            product.badge === 'new' ? '✨ New' :
-            product.badge === 'discount' ? `${Math.round(((product.mrp - product.price) / product.mrp) * 100)}% OFF` : ''
-        }</span>` : '';
-    
-    const imageHTML = product.image && product.image.startsWith('http') ?
-        `<img src="${product.image}" alt="${product.name}" class="card-image" loading="lazy" onerror="this.parentElement.innerHTML='<div class=\\'card-image-placeholder\\'>${product.icon || '📦'}</div>'">` :
-        `<div class="card-image-placeholder">${product.icon || '📦'}</div>`;
-    
-    const discount = product.mrp ? Math.round(((product.mrp - product.price) / product.mrp) * 100) : 0;
-    
-    return `
-        <div class="product-card" data-product-id="${product.id}">
-            <div class="card-image-wrapper">
-                ${badgeHTML}
-                ${imageHTML}
-                <div class="card-price-overlay">₹${product.price}</div>
-            </div>
-            <div class="card-info">
-                <div class="card-name">${product.name}</div>
-                <div class="card-weight">${product.weight || ''}</div>
-                ${product.rating ? `<div class="card-rating"><span class="card-rating-stars">${'⭐'.repeat(Math.round(product.rating))}</span><span>${product.rating} (${product.reviews || 0})</span></div>` : ''}
-                <div class="card-bottom">
-                    <div>
-                        <span class="card-price">₹${product.price}</span>
-                        ${product.mrp ? `<span class="card-mrp">₹${product.mrp}</span>` : ''}
-                        ${discount > 0 ? `<span style="font-size:10px;color:#E85D75;font-weight:600;">${discount}% OFF</span>` : ''}
-                    </div>
-                    <div style="display:flex;gap:4px;">
-                        <button class="card-add-btn" data-product-id="${product.id}">🛒 Add</button>
-                        <button class="card-buy-btn" data-product-id="${product.id}">⚡ Buy</button>
-                    </div>
-                </div>
-            </div>
-        </div>
-    `;
-}
+        
+        // Card click
+        var cards = container.querySelectorAll('.product-card');
+        for (var k = 0; k < cards.length; k++) {
+            cards[k].addEventListener('click', function() {
+                var id = this.getAttribute('data-product-id');
+                var product = products.find(function(p) { return p.id === id; });
+                if (product && UI && UI.addToRecentlyViewed) UI.addToRecentlyViewed(product);
+                window.location.href = 'product.html?id=' + id;
+            });
+        }
+    },
     
     getFallbackProducts() {
         return [
@@ -163,4 +138,44 @@ container.querySelectorAll('.card-buy-btn').forEach(btn => {
         ];
     }
 };
-console.log('✅ Quick Dukan — Products Loader Ready');
+
+function createProductCardHTML(product) {
+    var badgeHTML = '';
+    if (product.badge) {
+        var badgeText = '';
+        if (product.badge === 'best-seller') badgeText = '🏆 Best';
+        else if (product.badge === 'popular') badgeText = '🔥 Popular';
+        else if (product.badge === 'new') badgeText = '✨ New';
+        else if (product.badge === 'discount') {
+            var d = product.mrp ? Math.round(((product.mrp - product.price) / product.mrp) * 100) : 0;
+            badgeText = d + '% OFF';
+        }
+        badgeHTML = '<span class="card-badge ' + product.badge + '">' + badgeText + '</span>';
+    }
+    
+    var imageHTML;
+    if (product.image && product.image.indexOf('http') === 0) {
+        imageHTML = '<img src="' + product.image + '" alt="' + product.name + '" class="card-image" loading="lazy" onerror="this.parentElement.innerHTML=\'<div class=card-image-placeholder>' + (product.icon || '📦') + '</div>\'">';
+    } else {
+        imageHTML = '<div class="card-image-placeholder">' + (product.icon || '📦') + '</div>';
+    }
+    
+    var discount = product.mrp ? Math.round(((product.mrp - product.price) / product.mrp) * 100) : 0;
+    var ratingHTML = '';
+    if (product.rating) {
+        ratingHTML = '<div class="card-rating"><span class="card-rating-stars">' + '⭐'.repeat(Math.round(product.rating)) + '</span><span>' + product.rating + ' (' + (product.reviews || 0) + ')</span></div>';
+    }
+    
+    return '<div class="product-card" data-product-id="' + product.id + '">' +
+        '<div class="card-image-wrapper">' + badgeHTML + imageHTML + '<div class="card-price-overlay">₹' + product.price + '</div></div>' +
+        '<div class="card-info">' +
+        '<div class="card-name">' + product.name + '</div>' +
+        '<div class="card-weight">' + (product.weight || '') + '</div>' +
+        ratingHTML +
+        '<div class="card-bottom"><div><span class="card-price">₹' + product.price + '</span>' +
+        (product.mrp ? '<span class="card-mrp">₹' + product.mrp + '</span>' : '') +
+        (discount > 0 ? '<span style="font-size:10px;color:#E85D75;font-weight:600;">' + discount + '% OFF</span>' : '') +
+        '</div><div style="display:flex;gap:4px;"><button class="card-add-btn" data-product-id="' + product.id + '">🛒 Add</button><button class="card-buy-btn" data-product-id="' + product.id + '">⚡ Buy</button></div></div></div></div>';
+}
+
+console.log('✅ Quick Dukan — Products Loader Ready (v2)');
