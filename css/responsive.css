@@ -1,72 +1,88 @@
-/* ========== RESPONSIVE STYLES ========== */
+/* ========== RESPONSIVE ========== */
+
 @media (max-width: 1024px) {
-    .products-grid { grid-template-columns: repeat(3, 1fr); }
+    .products-grid { grid-template-columns: repeat(3, 1fr); gap: var(--space-base); }
+    .search-container { width: 75%; }
 }
+
 @media (max-width: 768px) {
     .top-header { padding: 0 10px; }
-    .quick-text { font-size: 22px; }
-    .dukan-text { font-size: 16px; }
-    .brand-icon { font-size: 24px; }
-    .free-delivery { padding: 7px 12px; }
-    .truck-icon { font-size: 18px; }
-    .free-text { font-size: 13px; }
-    .search-container { width: 80%; }
-    .suggestions-dropdown { width: 80%; }
-    .products-grid { grid-template-columns: repeat(2, 1fr); }
-    .categories-bar-container { padding: 0 12px; }
-    .cat-scroll-arrow { display: none; }
-}
-@media (max-width: 480px) {
-    .top-header { height: var(--header-height-mobile); padding: 0 8px; }
-    .header-brand { padding: 6px 8px; gap: 6px; }
-    .brand-icon { font-size: 22px; }
     .quick-text { font-size: 20px; }
     .dukan-text { font-size: 15px; }
-    .truck-icon { font-size: 16px; }
-    .exhaust-puff { font-size: 10px; right: -6px; }
-    .free-text { font-size: 11px; }
-    .free-delivery { padding: 6px 10px; gap: 5px; }
-    .toggle-icon { font-size: 22px; }
-    .theme-toggle { width: 36px; height: 36px; }
-    .search-wrapper { padding: 10px 0; }
-    .search-container { width: 88%; height: 44px; padding: 0 12px; gap: 8px; border-radius: 30px; }
-    .suggestions-dropdown { width: 88%; }
-    .voice-icon { font-size: 16px; }
-    .search-icon { font-size: 16px; }
-    .search-input { font-size: 13px; }
-    .categories-bar-wrapper { padding: 6px 0; }
-    .category-pill { padding: 8px 12px; border-radius: 10px; }
-    .pill-icon { font-size: 16px; }
-    .pill-name { font-size: 11px; }
-    .pill-count { font-size: 9px; }
-    .main-content-full { padding-top: calc(var(--header-height-mobile) + 64px + 56px); padding-left: var(--space-sm); padding-right: var(--space-sm); }
+    .brand-icon { font-size: 24px; }
+    .free-delivery { padding: 6px 10px; }
+    .truck-icon { font-size: 18px; }
+    .free-text { font-size: 12px; }
+    
+    .search-container { width: 85%; height: 46px; }
     .products-grid { grid-template-columns: repeat(2, 1fr); gap: var(--space-sm); }
-    .card-image-wrapper { height: 130px; }
-    .card-name { font-size: 12px; min-height: 30px; }
-    .card-price { font-size: 14px; }
-    .card-add-btn { padding: 6px 10px; font-size: 10px; }
+    
+    .categories-bar-container { padding: 0 12px; }
+    .cat-scroll-arrow { display: none; }
+    .category-pill { padding: 8px 14px; }
+    .pill-icon { font-size: 18px; }
+    .pill-name { font-size: 12px; }
+    
+    .product-detail-container { grid-template-columns: 1fr; gap: 24px; }
+    .detail-image-wrapper { max-width: 100%; }
+    .detail-name { font-size: var(--text-xl); }
+    .detail-price { font-size: 24px; }
+    
+    .main-content-full { padding-top: calc(var(--header-height-mobile) + 64px + 64px + 16px); }
     .bottom-nav-inner { height: var(--nav-height-mobile); }
     .nav-icon { font-size: 20px; }
     .nav-label { font-size: 10px; }
-    .nav-item { min-width: 48px; padding: 4px 6px; gap: 1px; }
-    .cart-badge { top: -6px; right: -10px; min-width: 18px; height: 18px; font-size: 10px; }
-    .cat-scroll-arrow { display: none; }
+    .nav-item { min-width: 48px; padding: 6px 8px; }
+    .cart-badge { top: -4px; right: -8px; min-width: 16px; height: 16px; font-size: 10px; }
 }
-@media (max-width: 380px) {
+
+@media (max-width: 480px) {
+    .top-header { height: var(--header-height-mobile); padding: 0 8px; }
     .quick-text { font-size: 18px; }
     .dukan-text { font-size: 13px; }
     .brand-icon { font-size: 20px; }
-    .free-text { font-size: 10px; }
     .free-delivery { padding: 5px 8px; gap: 4px; }
-    .truck-icon { font-size: 14px; }
+    .truck-icon { font-size: 16px; }
+    .free-text { font-size: 10px; }
+    .toggle-icon { font-size: 20px; }
+    .theme-toggle { width: 32px; height: 32px; }
+    
+    .search-container { width: 90%; height: 42px; padding: 0 12px; border-radius: 30px; }
+    .search-icon, .voice-icon { font-size: 16px; }
+    .search-input { font-size: 13px; }
+    
+    .categories-bar-wrapper { padding: 6px 0; }
+    .category-pill { padding: 7px 10px; gap: 5px; border-radius: var(--radius-base); }
+    .pill-icon { font-size: 16px; }
+    .pill-name { font-size: 11px; }
+    .pill-count { font-size: 9px; padding: 1px 6px; }
+    
+    .products-grid { grid-template-columns: repeat(2, 1fr); gap: var(--space-sm); }
+    .card-image-wrapper { height: 140px; }
+    .card-name { font-size: 12px; min-height: 30px; }
+    .card-price { font-size: 15px; }
+    .card-add-btn, .card-buy-btn { padding: 6px 10px; font-size: 10px; }
+    .card-price-overlay { font-size: 14px; padding: 4px 10px; }
+    
+    .delivery-options { grid-template-columns: 1fr; }
+    .payment-options { grid-template-columns: 1fr; }
+    
+    .cart-toast { bottom: calc(var(--nav-height-mobile) + 8px); max-width: 300px; padding: 10px 14px; }
+    .recently-card { width: 110px; padding: 8px; }
+    
+    .main-content-full { padding-left: var(--space-sm); padding-right: var(--space-sm); }
+}
+
+@media (max-width: 380px) {
+    .quick-text { font-size: 16px; }
+    .dukan-text { font-size: 12px; }
+    .free-text { font-size: 9px; }
     .exhaust-puff { display: none; }
-    .search-container { width: 92%; height: 40px; padding: 0 10px; gap: 6px; border-radius: 26px; }
-    .suggestions-dropdown { width: 92%; }
-    .voice-icon { font-size: 14px; }
-    .search-icon { font-size: 14px; }
-    .search-input { font-size: 12px; }
+    .search-container { width: 94%; height: 38px; }
+    .category-pill { padding: 6px 8px; }
+    .pill-name { font-size: 10px; }
+    .products-grid { gap: 6px; }
     .nav-icon { font-size: 18px; }
     .nav-label { font-size: 9px; }
-    .nav-item { min-width: 40px; padding: 3px 4px; }
-    .products-grid { grid-template-columns: repeat(2, 1fr); gap: 6px; }
+    .nav-item { min-width: 40px; padding: 4px 6px; }
 }
