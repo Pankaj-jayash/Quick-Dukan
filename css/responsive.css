@@ -1,113 +1,221 @@
+/* ========== RESPONSIVE STYLES ========== */
+
+/* Tablet (768px - 1024px) */
+@media (max-width: 1024px) {
+    .product-grid {
+        grid-template-columns: repeat(3, 1fr);
+        gap: 8px;
+    }
+    
+    .shop-main {
+        grid-template-columns: 200px 1fr;
+    }
+}
+
+/* Mobile (< 768px) */
 @media (max-width: 768px) {
-    .products-grid {
+    :root {
+        --header-height: 44px;
+        --search-height: 48px;
+        --bottom-nav-height: 64px;
+    }
+    
+    /* Header */
+    .brand-text .quick {
+        font-size: 18px;
+    }
+    .brand-text .dukan {
+        font-size: 13px;
+    }
+    .brand-icon {
+        font-size: 22px;
+    }
+    .free-text {
+        font-size: 12px;
+    }
+    .truck-icon {
+        font-size: 16px;
+    }
+    .toggle-icon {
+        font-size: 20px;
+    }
+    .theme-toggle {
+        width: 32px;
+        height: 32px;
+    }
+    
+    /* Search */
+    .search-section {
+        padding: 8px 12px;
+    }
+    .search-input {
+        font-size: var(--text-sm);
+    }
+    
+    /* Categories */
+    .categories-scroll {
+        gap: 6px;
+        padding: 6px 12px;
+    }
+    .category-item {
+        min-width: 60px;
+        padding: 8px 10px;
+    }
+    .category-icon {
+        font-size: 24px;
+    }
+    .category-name {
+        font-size: 10px;
+    }
+    
+    /* Product Grid */
+    .product-grid {
         grid-template-columns: repeat(3, 1fr);
         gap: 6px;
+        padding: 0 8px;
     }
-    .card-image-wrapper { flex: 0 0 65%; min-height: 110px; }
-    .card-info { flex: 0 0 35%; padding: 6px 8px 8px; }
-    .card-name { font-size: 10px; }
-    .card-weight { font-size: 9px; }
-    .card-price { font-size: 12px; }
-    .card-mrp { font-size: 9px; }
-    .card-discount-badge { font-size: 8px; padding: 2px 6px; }
-    .card-add-btn, .card-buy-btn { font-size: 9px; padding: 6px 0; }
-    .card-price-overlay { font-size: 12px; padding: 3px 8px; bottom: 6px; right: 6px; }
-    .card-price-row { margin-bottom: 4px; gap: 3px; }
-    .card-buttons { gap: 4px; }
-    .card-name-row { gap: 3px; }
-    .search-results-grid { grid-template-columns: repeat(2, 1fr); }
-}
-
-@media (max-width: 480px) {
-    .products-grid {
+    
+    .card-info {
+        padding: 6px 8px;
+    }
+    
+    .card-name {
+        font-size: 11px;
+    }
+    
+    .card-weight {
+        font-size: 9px;
+    }
+    
+    .price-overlay span {
+        font-size: var(--text-sm);
+    }
+    
+    .btn-cart, .btn-buy {
+        font-size: 10px;
+        padding: 5px 0;
+    }
+    
+    /* Shop */
+    .shop-main {
+        grid-template-columns: 1fr;
+    }
+    
+    .filter-sidebar {
+        position: fixed;
+        top: 0;
+        left: -100%;
+        width: 280px;
+        height: 100vh;
+        z-index: 1200;
+        transition: left var(--transition-base);
+    }
+    
+    .filter-sidebar.open {
+        left: 0;
+    }
+    
+    .filter-close-mobile {
+        display: block;
+    }
+    
+    .btn-filter-toggle {
+        display: flex;
+    }
+    
+    /* Cart */
+    .cart-item {
+        flex-wrap: wrap;
+        gap: 8px;
+    }
+    
+    .cart-item-image {
+        width: 60px;
+        height: 60px;
+    }
+    
+    /* Popups */
+    .popup-content {
+        grid-template-columns: 1fr;
+    }
+    
+    .popup-details {
+        padding-left: 0;
+        padding-top: 16px;
+    }
+    
+    .popup-content .popup-image img {
+        min-height: 200px;
+        max-height: 250px;
+    }
+    
+    .product-popup,
+    .checkout-popup,
+    .orders-popup {
+        max-width: 95vw;
+        max-height: 85vh;
+    }
+    
+    /* Payment Options */
+    .payment-options {
         grid-template-columns: repeat(3, 1fr);
-        gap: 4px;
     }
-    .card-image-wrapper { flex: 0 0 65%; min-height: 90px; }
-    .card-info { flex: 0 0 35%; padding: 4px 6px 6px; }
-    .card-name { font-size: 9px; }
-    .card-weight { font-size: 8px; }
-    .card-price { font-size: 11px; }
-    .card-price-overlay { font-size: 10px; padding: 2px 6px; }
-    .card-add-btn, .card-buy-btn { font-size: 8px; padding: 5px 0; }
-    .search-results-grid { grid-template-columns: repeat(2, 1fr); }
+    
+    /* Contact */
+    .contact-info-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .map-buttons {
+        flex-direction: column;
+    }
+    
+    .contact-actions {
+        flex-direction: column;
+    }
+    
+    /* Delivery Options */
+    .delivery-options {
+        grid-template-columns: 1fr 1fr;
+    }
+    
+    /* Navbar */
+    .bottom-nav {
+        height: 64px;
+        padding: 4px 6px;
+    }
+    
+    .nav-item i {
+        font-size: 22px;
+    }
+    
+    .nav-label {
+        font-size: 10px;
+    }
 }
 
-@media (max-width: 380px) {
-    .card-image-wrapper { min-height: 75px; }
-    .card-name { font-size: 8px; }
-    .card-price { font-size: 10px; }
-}
+/* Small Mobile (< 400px) */
+@media (max-width: 400px) {
+    .product-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
     
-    .search-container { width: 85%; height: 46px; }
-    .products-grid { grid-template-columns: repeat(2, 1fr); gap: var(--space-sm); }
+    .brand-text .quick {
+        font-size: 16px;
+    }
+    .brand-text .dukan {
+        font-size: 12px;
+    }
     
-    .categories-bar-container { padding: 0 12px; }
-    .cat-scroll-arrow { display: none; }
-    .category-pill { padding: 8px 14px; }
-    .pill-icon { font-size: 18px; }
-    .pill-name { font-size: 12px; }
+    .free-delivery {
+        padding: 3px 8px;
+    }
     
-    .product-detail-container { grid-template-columns: 1fr; gap: 24px; }
-    .detail-image-wrapper { max-width: 100%; }
-    .detail-name { font-size: var(--text-xl); }
-    .detail-price { font-size: 24px; }
+    .free-text {
+        font-size: 10px;
+    }
     
-    .main-content-full { padding-top: calc(var(--header-height-mobile) + 64px + 64px + 16px); }
-    .bottom-nav-inner { height: var(--nav-height-mobile); }
-    .nav-icon { font-size: 20px; }
-    .nav-label { font-size: 10px; }
-    .nav-item { min-width: 48px; padding: 6px 8px; }
-    .cart-badge { top: -4px; right: -8px; min-width: 16px; height: 16px; font-size: 10px; }
-}
-
-@media (max-width: 480px) {
-    .top-header { height: var(--header-height-mobile); padding: 0 8px; }
-    .quick-text { font-size: 18px; }
-    .dukan-text { font-size: 13px; }
-    .brand-icon { font-size: 20px; }
-    .free-delivery { padding: 5px 8px; gap: 4px; }
-    .truck-icon { font-size: 16px; }
-    .free-text { font-size: 10px; }
-    .toggle-icon { font-size: 20px; }
-    .theme-toggle { width: 32px; height: 32px; }
-    
-    .search-container { width: 90%; height: 42px; padding: 0 12px; border-radius: 30px; }
-    .search-icon, .voice-icon { font-size: 16px; }
-    .search-input { font-size: 13px; }
-    
-    .categories-bar-wrapper { padding: 6px 0; }
-    .category-pill { padding: 7px 10px; gap: 5px; border-radius: var(--radius-base); }
-    .pill-icon { font-size: 16px; }
-    .pill-name { font-size: 11px; }
-    .pill-count { font-size: 9px; padding: 1px 6px; }
-    
-    .products-grid { grid-template-columns: repeat(2, 1fr); gap: var(--space-sm); }
-    .card-image-wrapper { height: 140px; }
-    .card-name { font-size: 12px; min-height: 30px; }
-    .card-price { font-size: 15px; }
-    .card-add-btn, .card-buy-btn { padding: 6px 10px; font-size: 10px; }
-    .card-price-overlay { font-size: 14px; padding: 4px 10px; }
-    
-    .delivery-options { grid-template-columns: 1fr; }
-    .payment-options { grid-template-columns: 1fr; }
-    
-    .cart-toast { bottom: calc(var(--nav-height-mobile) + 8px); max-width: 300px; padding: 10px 14px; }
-    .recently-card { width: 110px; padding: 8px; }
-    
-    .main-content-full { padding-left: var(--space-sm); padding-right: var(--space-sm); }
-}
-
-@media (max-width: 380px) {
-    .quick-text { font-size: 16px; }
-    .dukan-text { font-size: 12px; }
-    .free-text { font-size: 9px; }
-    .exhaust-puff { display: none; }
-    .search-container { width: 94%; height: 38px; }
-    .category-pill { padding: 6px 8px; }
-    .pill-name { font-size: 10px; }
-    .products-grid { gap: 6px; }
-    .nav-icon { font-size: 18px; }
-    .nav-label { font-size: 9px; }
-    .nav-item { min-width: 40px; padding: 4px 6px; }
+    .payment-options {
+        grid-template-columns: repeat(2, 1fr);
+    }
 }
