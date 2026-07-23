@@ -1,105 +1,124 @@
-var Categories = {
-    categoriesList: [],
-    selectedCategory: null,
+// ========== CATEGORIES MANAGEMENT ==========
+
+const Categories = {
+    currentCategory: null,
     
-    init: function() {
-        this.loadCategories();
-    },
-    
-    loadCategories: function() {
-        var self = this;
-        fetch(CONFIG.urls.categoriesList)
-            .then(function(res) { return res.json(); })
-            .then(function(data) {
-                self.categoriesList = data.categories.sort(function(a, b) { return a.order - b.order; });
-                self.renderBar();
-            })
-            .catch(function() {
-                self.categoriesList = self.getFallback();
-                self.renderBar();
-            });
-    },
-    
-    getFallback: function() {
-        return [
-            { id: 'biscuit-namkeen', name: 'Biscuit & Namkeen', icon: '🍪', count: 35, priority: true, order: 1, file: 'data/products/biscuit-namkeen.json' },
-            { id: 'cold-drinks', name: 'Cold Drinks', icon: '🥤', count: 15, priority: false, order: 2, file: 'data/products/cold-drinks.json' },
-            { id: 'atta-rice', name: 'Atta & Rice', icon: '🍚', count: 30, priority: true, order: 3, file: 'data/products/atta-rice.json' },
-            { id: 'soap-shampoo', name: 'Soap & Shampoo', icon: '🧴', count: 25, priority: true, order: 4, file: 'data/products/soap-shampoo.json' },
-            { id: 'masale-oil', name: 'Masale & Oil', icon: '🧂', count: 40, priority: true, order: 5, file: 'data/products/masale-oil.json' },
-            { id: 'dairy-bread', name: 'Dairy & Bread', icon: '🥛', count: 20, priority: false, order: 6, file: 'data/products/dairy-bread.json' },
-            { id: 'cleaning', name: 'Cleaning Items', icon: '🧹', count: 20, priority: false, order: 7, file: 'data/products/cleaning.json' },
-            { id: 'ghee-paneer', name: 'Ghee & Paneer', icon: '🐄', count: 10, priority: false, order: 8, file: 'data/products/ghee-paneer.json' },
-            { id: 'tea-coffee', name: 'Tea & Coffee', icon: '☕', count: 15, priority: false, order: 9, file: 'data/products/tea-coffee.json' },
-            { id: 'sweets-snacks', name: 'Sweets & Snacks', icon: '🍬', count: 25, priority: false, order: 10, file: 'data/products/sweets-snacks.json' }
-        ];
-    },
-    
-    renderBar: function() {
-        var container = document.getElementById('categoriesBar');
+    async render() {
+        const container = document.getElementById('categoriesScroll');
+        const indicator = document.getElementById('scrollIndicator');
         if (!container) return;
-        var self = this;
-        container.innerHTML = this.categoriesList.map(function(cat) {
-            var dot = cat.priority ? '<span class="pill-priority-dot"></span>' : '';
-            var sel = self.selectedCategory === cat.id ? ' selected' : '';
-            return '<div class="category-pill' + sel + '" data-category="' + cat.id + '" onclick="Categories.selectCategory(\'' + cat.id + '\')">' + dot + '<span class="pill-icon">' + cat.icon + '</span><span class="pill-name">' + cat.name + '</span><span class="pill-count">' + cat.count + '</span></div>';
-        }).join('');
+        
+        const categories = await ProductLoader.loadCategoriesList();
+        
+        // Render categories
+        container.innerHTML = categories.map(cat => `
+            <div class="category-item ${cat.priority ? 'priority' : ''} ${this.currentCategory === cat.id ? 'active' : ''}" 
+                 data-category="${cat.id}"
+                 onclick="Categories.select('${cat.id}')">
+                <span class="category-icon">${cat.icon}</span>
+                <span class="category-name">${cat.name}</span>
+                ${cat.priority ? '<span class="priority-badge">🔥</span>' : ''}
+            </div>
+        `).join('');
+        
+        // Render scroll indicator
+        if (indicator) {
+            const totalDots = Math.min(categories.length, 5);
+            indicator.innerHTML = Array.from({ length: totalDots }, (_, i) => 
+                `<span class="scroll-dot ${i === 0 ? 'active' : ''}" data-index="${i}"></span>`
+            ).join('');
+        }
+        
+        this.setupScroll();
     },
     
-    selectCategory: function(categoryId) {
-    if (this.selectedCategory === categoryId) {
-        this.deselectAll();
-        return;
-    }
+    setupScroll() {
+        const scrollContainer = document.getElementById('categoriesScroll');
+        const leftArrow = document.getElementById('catScrollLeft');
+        const rightArrow = document.getElementById('catScrollRight');
+        
+        if (!scrollContainer) return;
+        
+        // Arrow clicks
+        if (leftArrow) {
+            leftArrow.addEventListener('click', () => {
+                scrollContainer.scrollBy({ left: -150, behavior: 'smooth' });
+            });
+        }
+        
+        if (rightArrow) {
+            rightArrow.addEventListener('click', () => {
+                scrollContainer.scrollBy({ left: 150, behavior: 'smooth' });
+            });
+        }
+        
+        // Update scroll indicator
+        scrollContainer.addEventListener('scroll', Utils.debounce(() => {
+            const scrollLeft = scrollContainer.scrollLeft;
+            const scrollWidth = scrollContainer.scrollWidth - scrollContainer.clientWidth;
+            const progress = scrollWidth > 0 ? scrollLeft / scrollWidth : 0;
+            
+            document.querySelectorAll('.scroll-dot').forEach((dot, i) => {
+                const dotProgress = i / (document.querySelectorAll('.scroll-dot').length - 1);
+                dot.classList.toggle('active', Math.abs(progress - dotProgress) < 0.15);
+            });
+        }, 50));
+    },
     
-    this.deselectAll();
-    this.selectedCategory = categoryId;
-    
-    var pill = document.querySelector('.category-pill[data-category="' + categoryId + '"]');
-    if (pill) pill.classList.add('selected');
-    
-    this.showCategoryProducts(categoryId);
-    
-    // 👁️ Recently Viewed ko HIDE karo
-    var recentSection = document.getElementById('recentlyViewedSection');
-    if (recentSection) {
-        recentSection.style.display = 'none';
-    }
-},
-    
-    deselectAll: function() {
-    var pills = document.querySelectorAll('.category-pill.selected');
-    for (var i = 0; i < pills.length; i++) {
-        pills[i].classList.remove('selected');
-    }
-    
-    this.selectedCategory = null;
-    this.showMostOrdered();
-    
-    // 👁️ Recently Viewed ko WAPAS SHOW karo
-    var recentSection = document.getElementById('recentlyViewedSection');
-    if (recentSection && typeof UI !== 'undefined') {
-        UI.renderRecentlyViewed();
-    }
-},
-    
-    showCategoryProducts: function(categoryId) {
-        var cat = this.categoriesList.find(function(c) { return c.id === categoryId; });
-        if (!cat) return;
-        document.getElementById('mostOrderedSection').style.display = 'none';
-        document.getElementById('categoryBack').style.display = 'block';
-        document.getElementById('categoryTitle').style.display = 'block';
-        document.getElementById('categoryTitle').textContent = cat.icon + ' ' + cat.name + ' (' + cat.count + ' products)';
-        document.getElementById('categoryProductsSection').style.display = 'block';
-        Products.loadCategoryProducts(categoryId).then(function(products) {
-            Products.renderProductCards(products, 'categoryProductsGrid');
+    async select(categoryId) {
+        this.currentCategory = categoryId;
+        
+        // Update category items active state
+        document.querySelectorAll('.category-item').forEach(item => {
+            item.classList.toggle('active', item.dataset.category === categoryId);
         });
+        
+        // Show category products
+        const recentSection = document.getElementById('recentlySection');
+        const categorySection = document.getElementById('categoryProductsSection');
+        const categoryTitle = document.getElementById('categoryProductsTitle');
+        const categoryGrid = document.getElementById('categoryProductsGrid');
+        
+        if (recentSection) recentSection.style.display = 'none';
+        if (categorySection) categorySection.style.display = 'block';
+        
+        // Load and render products
+        const data = await ProductLoader.loadCategoryProducts(categoryId);
+        const categories = await ProductLoader.loadCategoriesList();
+        const cat = categories.find(c => c.id === categoryId);
+        
+        if (categoryTitle && cat) {
+            categoryTitle.textContent = `${cat.icon} ${cat.name} (${data.products.filter(p => p.inStock).length} products)`;
+        }
+        
+        if (categoryGrid) {
+            categoryGrid.innerHTML = data.products
+                .filter(p => p.inStock)
+                .map(p => ProductLoader.renderProductCard({ ...p, category: categoryId }))
+                .join('');
+        }
+        
+        // Scroll to category products
+        if (categorySection) {
+            categorySection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
     },
     
-    showMostOrdered: function() {
-        document.getElementById('mostOrderedSection').style.display = 'block';
-        document.getElementById('categoryBack').style.display = 'none';
-        document.getElementById('categoryTitle').style.display = 'none';
-        document.getElementById('categoryProductsSection').style.display = 'none';
+    deselect() {
+        this.currentCategory = null;
+        
+        document.querySelectorAll('.category-item').forEach(item => {
+            item.classList.remove('active');
+        });
+        
+        const categorySection = document.getElementById('categoryProductsSection');
+        if (categorySection) categorySection.style.display = 'none';
+        
+        // Show recent if exists
+        const recent = Storage.getRecent();
+        const recentSection = document.getElementById('recentlySection');
+        if (recentSection && recent.length > 0) {
+            recentSection.style.display = 'block';
+        }
     }
 };
