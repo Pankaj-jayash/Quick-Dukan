@@ -4,128 +4,216 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Quick Dukan — Ghar Baithe Kirana</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800;900&family=Nunito:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- CSS -->
     <link rel="stylesheet" href="css/reset.css">
     <link rel="stylesheet" href="css/variables.css">
-    <link rel="stylesheet" href="css/global.css">
     <link rel="stylesheet" href="css/animations.css">
+    <link rel="stylesheet" href="css/global.css">
+    <link rel="stylesheet" href="css/components.css">
+    <link rel="stylesheet" href="css/home.css">
+    <link rel="stylesheet" href="css/dark-mode.css">
     <link rel="stylesheet" href="css/responsive.css">
+    
+    <!-- Font Awesome 6 -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&family=Nunito:wght@400;500;600;700&display=swap" rel="stylesheet">
 </head>
 <body>
+    <!-- ========== TOP HEADER ========== -->
+    <header class="top-header" id="topHeader">
+        <div class="header-brand" id="headerBrand">
+            <span class="brand-icon">🛒</span>
+            <span class="brand-text">
+                <span class="quick">QUICK</span>
+                <span class="dukan">Dukan</span>
+            </span>
+        </div>
+        
+        <div class="free-delivery" id="freeDeliveryBadge">
+            <span class="truck-icon">🚚</span>
+            <span class="exhaust">💨</span>
+            <span class="free-text">Free Delivery*</span>
+            <div class="road-lines"></div>
+        </div>
+        
+        <button class="theme-toggle" id="themeToggle" aria-label="Toggle theme">
+            <span class="toggle-icon">🌙</span>
+        </button>
+    </header>
 
-<!-- ========== TOP HEADER ========== -->
-<header class="top-header" id="topHeader">
-    <div class="header-brand" onclick="window.location.href='index.html'">
-        <span class="brand-icon">🛒</span>
-        <div class="brand-text-wrapper">
-            <span class="brand-text"><span class="quick-text">QUICK</span><span class="dukan-text">DUKAN</span></span>
+    <!-- ========== SEARCH BAR ========== -->
+    <section class="search-section" id="searchSection">
+        <div class="search-container" id="searchContainer">
+            <span class="search-icon-left" id="voiceSearchBtn">
+                <i class="fa-solid fa-microphone"></i>
+            </span>
+            <input 
+                type="text" 
+                class="search-input" 
+                id="searchInput" 
+                placeholder="Biwi ne list di? Copy-paste karo yahan! 😅"
+                autocomplete="off"
+            >
+            <span class="search-icon-right" id="searchBtn">
+                <i class="fa-solid fa-magnifying-glass"></i>
+            </span>
+        </div>
+    </section>
+
+    <!-- ========== SEARCH RESULTS MODAL ========== -->
+    <div class="search-overlay" id="searchOverlay">
+        <div class="search-modal" id="searchModal">
+            <div class="search-modal-header">
+                <h3 id="searchModalTitle">🔍 Search Results</h3>
+                <button class="search-modal-close" id="searchModalClose">✕</button>
+            </div>
+            <div class="search-modal-body" id="searchModalBody">
+                <!-- Dynamic content -->
+            </div>
         </div>
     </div>
-    <div class="free-delivery">
-        <div class="truck-icon-wrapper"><span class="truck-icon">🚚</span><span class="exhaust-puff">💨</span></div>
-        <span class="free-text">Free Delivery*</span>
-        <div class="road-lines"></div>
+
+    <!-- ========== CATEGORIES ========== -->
+    <section class="categories-section" id="categoriesSection">
+        <div class="categories-header">
+            <h3 class="section-title">📂 All Categories</h3>
+        </div>
+        <div class="categories-scroll-wrapper">
+            <button class="category-arrow left" id="catScrollLeft">◄</button>
+            <div class="categories-scroll" id="categoriesScroll">
+                <!-- Dynamic categories -->
+            </div>
+            <button class="category-arrow right" id="catScrollRight">►</button>
+        </div>
+        <div class="scroll-indicator" id="scrollIndicator">
+            <!-- Dynamic dots -->
+        </div>
+    </section>
+
+    <!-- ========== MAIN CONTENT AREA ========== -->
+    <main class="main-content" id="mainContent">
+        
+        <!-- Recently Viewed Section -->
+        <section class="recently-section" id="recentlySection" style="display: none;">
+            <h3 class="section-title">👁️ Recently Viewed</h3>
+            <div class="recent-scroll" id="recentScroll">
+                <!-- Dynamic recent products -->
+            </div>
+        </section>
+
+        <!-- Category Products Section -->
+        <section class="category-products-section" id="categoryProductsSection" style="display: none;">
+            <div class="category-products-header">
+                <button class="back-btn" id="backToAllBtn">← Back to All</button>
+                <h3 class="section-title" id="categoryProductsTitle"></h3>
+            </div>
+            <div class="product-grid" id="categoryProductsGrid">
+                <!-- Dynamic category products -->
+            </div>
+        </section>
+
+        <!-- Most Ordered Section -->
+        <section class="most-ordered-section" id="mostOrderedSection">
+            <h3 class="section-title">🔥 Most Ordered — "City Ki Pasand"</h3>
+            <div class="product-grid" id="mostOrderedGrid">
+                <!-- Dynamic most ordered products -->
+            </div>
+        </section>
+
+    </main>
+
+    <!-- ========== PRODUCT DETAIL POPUP ========== -->
+    <div class="popup-overlay" id="productPopupOverlay">
+        <div class="product-popup" id="productPopup">
+            <button class="popup-close" id="productPopupClose">✕</button>
+            <div class="popup-content" id="productPopupContent">
+                <!-- Dynamic product detail -->
+            </div>
+        </div>
     </div>
-    <button class="theme-toggle" id="themeToggle" aria-label="Toggle theme">
-        <span class="toggle-icon" id="toggleIcon">🌙</span>
-    </button>
-</header>
 
-<!-- ========== SEARCH BAR ========== -->
-<div class="search-wrapper" id="searchWrapper">
-    <div class="search-container">
-        <span class="search-icon" onclick="document.getElementById('searchInput').focus()">🔍</span>
-        <input type="text" class="search-input" id="searchInput" placeholder="Search atta, chawal, sabun..." autocomplete="off">
-        <span class="voice-icon" title="Voice Search">🎤</span>
-    </div>
-    <div class="suggestions-dropdown" id="suggestionsDropdown"></div>
-</div>
-
-<!-- ========== CATEGORIES BAR ========== -->
-<div class="categories-bar-wrapper" id="categoriesBarWrapper">
-    <div class="categories-bar-container">
-        <button class="cat-scroll-arrow cat-scroll-left" onclick="document.getElementById('categoriesBar').scrollBy({left:-200,behavior:'smooth'})">◄</button>
-        <div class="categories-bar" id="categoriesBar"></div>
-        <button class="cat-scroll-arrow cat-scroll-right" onclick="document.getElementById('categoriesBar').scrollBy({left:200,behavior:'smooth'})">►</button>
-    </div>
-    <div class="cat-fade-left"></div>
-    <div class="cat-fade-right"></div>
-    <div class="cat-scroll-dots" id="catScrollDots"></div>
-</div>
-
-<!-- ========== MAIN CONTENT ========== -->
-<div class="main-content-full">
-
-    <div class="recently-viewed-section" id="recentlyViewedSection">
-        <h2 class="section-heading">👁️ Recently Viewed</h2>
-        <div class="recently-grid" id="recentlyGrid"></div>
+    <!-- ========== CHECKOUT POPUP ========== -->
+    <div class="popup-overlay" id="checkoutPopupOverlay">
+        <div class="checkout-popup" id="checkoutPopup">
+            <button class="popup-close" id="checkoutPopupClose">✕</button>
+            <div class="checkout-content" id="checkoutContent">
+                <!-- Dynamic checkout form -->
+            </div>
+        </div>
     </div>
 
-    <div class="category-back" id="categoryBack" style="display:none;">
-        <button class="back-btn" onclick="backToAll()">← Back to All Categories</button>
+    <!-- ========== ORDER SUCCESS POPUP ========== -->
+    <div class="popup-overlay" id="successPopupOverlay">
+        <div class="success-popup" id="successPopup">
+            <button class="popup-close" id="successPopupClose">✕</button>
+            <div class="success-content">
+                <div class="success-icons">🎉 ✅ 🎉</div>
+                <h2>ORDER PLACED!</h2>
+                <div class="success-details" id="successDetails">
+                    <!-- Dynamic order details -->
+                </div>
+                <button class="btn btn-primary" id="viewMyOrdersBtn">📋 View My Orders</button>
+                <button class="btn btn-outline" id="backToHomeBtn">🏠 Back to Home</button>
+            </div>
+        </div>
     </div>
 
-    <h2 class="category-title" id="categoryTitle" style="display:none;"></h2>
-
-    <div class="products-loading" id="productsLoading">
-        <div class="loading-spinner"><div class="spinner-circle"></div><div class="spinner-circle spinner-inner"></div><div class="spinner-icon">🛒</div></div>
-        <p class="loading-text">Loading products...</p>
+    <!-- ========== MY ORDERS POPUP ========== -->
+    <div class="popup-overlay" id="ordersPopupOverlay">
+        <div class="orders-popup" id="ordersPopup">
+            <button class="popup-close" id="ordersPopupClose">✕</button>
+            <div class="orders-content" id="ordersContent">
+                <!-- Dynamic orders list -->
+            </div>
+        </div>
     </div>
 
-    <div class="most-ordered-section" id="mostOrderedSection" style="display:none;">
-        <h2 class="section-heading">🔥 MOST ORDERED — "Bhopal Ki Pasand"</h2>
-        <div class="products-grid" id="productsGrid"></div>
+    <!-- ========== CART TOAST ========== -->
+    <div class="cart-toast" id="cartToast">
+        <span class="toast-icon">✅</span>
+        <span class="toast-message" id="toastMessage"></span>
     </div>
 
-    <div class="category-products-section" id="categoryProductsSection" style="display:none;">
-        <div class="products-grid" id="categoryProductsGrid"></div>
-    </div>
-
-</div>
-
-<!-- ========== CART TOAST ========== -->
-<div class="cart-toast" id="cartToast">
-    <span class="toast-icon">✅</span>
-    <div class="toast-content"><span class="toast-title">Added to Cart!</span><span class="toast-product" id="toastProduct"></span></div>
-    <span class="toast-close" onclick="this.parentElement.classList.remove('show')">✕</span>
-</div>
-
-<!-- ========== BOTTOM NAVBAR ========== -->
-<nav class="bottom-nav">
-    <div class="bottom-nav-inner">
-        <a href="index.html" class="nav-item active"><span class="nav-icon">🏠</span><span class="nav-label">Home</span></a>
-        <a href="shop.html" class="nav-item"><span class="nav-icon">🛍️</span><span class="nav-label">Shop</span></a>
-        <a href="cart.html" class="nav-item nav-cart">
-            <span class="nav-icon-wrapper"><span class="nav-icon">🛒</span><span class="cart-badge" id="cartBadge">0</span></span>
+    <!-- ========== BOTTOM NAVBAR ========== -->
+    <nav class="bottom-nav" id="bottomNav">
+        <button class="nav-item active" data-page="home">
+            <i class="fa-solid fa-house"></i>
+            <span class="nav-label">Home</span>
+        </button>
+        <button class="nav-item" data-page="shop">
+            <i class="fa-solid fa-grid-2"></i>
+            <span class="nav-label">Shop</span>
+        </button>
+        <button class="nav-item" data-page="cart" id="cartNavBtn">
+            <i class="fa-solid fa-bag-shopping"></i>
+            <span class="cart-badge" id="cartBadge" style="display: none;">0</span>
             <span class="nav-label">Cart</span>
-        </a>
-        <button class="nav-item nav-whatsapp" onclick="openWhatsApp()"><span class="nav-icon">💬</span><span class="nav-label">Whats</span></button>
-        <button class="nav-item nav-top" id="navTop" onclick="window.scrollTo({top:0,behavior:'smooth'})"><span class="nav-icon">⬆️</span><span class="nav-label">Top</span></button>
-    </div>
-</nav>
+        </button>
+        <button class="nav-item" data-page="orders" id="myOrdersNavBtn">
+            <i class="fa-solid fa-clipboard-list"></i>
+            <span class="nav-label">My Orders</span>
+        </button>
+        <button class="nav-item top-btn" id="backToTopBtn">
+            <i class="fa-solid fa-arrow-up"></i>
+            <span class="nav-label">Top</span>
+        </button>
+    </nav>
 
-<!-- ========== SCRIPTS ========== -->
-<script src="js/config.js"></script>
-<script src="js/ui.js"></script>
-<script src="js/theme.js"></script>
-<script src="js/cart.js"></script>
-<script src="js/categories.js"></script>
-<script src="js/products.js"></script>
-<script src="js/search.js"></script>
-<script src="js/whatsapp.js"></script>
-<script src="js/checkout-modal.js"></script>
-<script src="js/header.js"></script>
-
-<script>
-function backToAll() { if(typeof Categories!=='undefined') Categories.deselectAll(); }
-function openWhatsApp() {
-    var msg = 'Hi Quick Dukan, I want to order groceries...';
-    if(typeof Cart!=='undefined'){var c=Cart.getCart();if(c.totalItems>0){msg='🛒 *Quick Dukan*\n\n';c.items.forEach(function(i,k){msg+=(k+1)+'. '+i.name+' x'+i.quantity+' = ₹'+(i.price*i.quantity)+'\n';});msg+='\n💰 Total: ₹'+c.totalAmount;}}
-    window.open('https://wa.me/919876543210?text='+encodeURIComponent(msg),'_blank');
-}
-</script>
-
+    <!-- ========== SCRIPTS ========== -->
+    <script src="js/config.js"></script>
+    <script src="js/storage.js"></script>
+    <script src="js/utils.js"></script>
+    <script src="js/ui.js"></script>
+    <script src="js/cart.js"></script>
+    <script src="js/products.js"></script>
+    <script src="js/categories.js"></script>
+    <script src="js/search.js"></script>
+    <script src="js/recent.js"></script>
+    <script src="js/whatsapp.js"></script>
+    <script src="js/theme.js"></script>
+    <script src="js/home.js"></script>
 </body>
-</html> 
+</html>
