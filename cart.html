@@ -3,86 +3,153 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Your Cart — Quick Dukan</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800;900&family=Nunito:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <title>Cart — Quick Dukan</title>
+    
     <link rel="stylesheet" href="css/reset.css">
     <link rel="stylesheet" href="css/variables.css">
-    <link rel="stylesheet" href="css/global.css">
     <link rel="stylesheet" href="css/animations.css">
+    <link rel="stylesheet" href="css/global.css">
+    <link rel="stylesheet" href="css/components.css">
+    <link rel="stylesheet" href="css/cart.css">
+    <link rel="stylesheet" href="css/dark-mode.css">
     <link rel="stylesheet" href="css/responsive.css">
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&family=Nunito:wght@400;500;600;700&display=swap" rel="stylesheet">
 </head>
 <body>
+    <!-- Top Header -->
+    <header class="top-header" id="topHeader">
+        <div class="header-brand" id="headerBrand">
+            <span class="brand-icon">🛒</span>
+            <span class="brand-text">
+                <span class="quick">QUICK</span>
+                <span class="dukan">Dukan</span>
+            </span>
+        </div>
+        <div class="free-delivery" id="freeDeliveryBadge">
+            <span class="truck-icon">🚚</span>
+            <span class="exhaust">💨</span>
+            <span class="free-text">Free Delivery*</span>
+            <div class="road-lines"></div>
+        </div>
+        <button class="theme-toggle" id="themeToggle" aria-label="Toggle theme">
+            <span class="toggle-icon">🌙</span>
+        </button>
+    </header>
 
-<header class="top-header" id="topHeader">
-    <div class="header-brand" onclick="window.location.href='index.html'">
-        <span class="brand-icon">🛒</span>
-        <div class="brand-text-wrapper"><span class="brand-text"><span class="quick-text">QUICK</span><span class="dukan-text">DUKAN</span></span></div>
-    </div>
-    <div class="free-delivery"><div class="truck-icon-wrapper"><span class="truck-icon">🚚</span><span class="exhaust-puff">💨</span></div><span class="free-text">Free Delivery*</span><div class="road-lines"></div></div>
-    <button class="theme-toggle" id="themeToggle"><span class="toggle-icon" id="toggleIcon">🌙</span></button>
-</header>
+    <!-- Cart Content -->
+    <main class="cart-main">
+        <div class="cart-header">
+            <h2>🛒 My Cart</h2>
+            <span class="cart-count" id="cartCount">(0 items)</span>
+            <button class="btn-clear-all" id="clearAllBtn" style="display: none;">
+                <i class="fa-solid fa-trash"></i> Clear All
+            </button>
+        </div>
 
-<div class="main-content-full">
-    <h1 class="section-heading">🛒 Your Cart</h1>
-    <div id="cartEmpty"><div style="text-align:center;padding:60px 20px;"><span style="font-size:64px;">🛒</span><h2>Your cart is empty</h2><a href="index.html" style="display:inline-block;padding:12px 28px;background:#4A6FA5;color:#FFF;border-radius:50px;font-weight:700;text-decoration:none;">🛍️ Start Shopping</a></div></div>
-    <div id="cartItemsContainer" style="display:none;">
-        <div id="cartItemsList"></div>
-        <div class="cart-summary">
-            <div class="cart-summary-row"><span>Subtotal</span><span id="cartSubtotal">₹0</span></div>
-            <div class="cart-summary-row"><span>Delivery</span><span style="color:#4CAF50;">FREE 🎉</span></div>
-            <div class="cart-summary-row cart-total-row"><span>Total</span><span id="cartTotal">₹0</span></div>
-            <button class="cart-clear-btn" onclick="clearCart()">🗑️ Clear Cart</button>
-            <button class="cart-checkout-btn" onclick="CheckoutModal.open()">📦 Proceed to Checkout</button>
-            <a href="index.html" style="display:block;text-align:center;padding:10px;color:#4A6FA5;font-weight:600;text-decoration:none;">🛍️ Continue Shopping</a>
+        <div class="cart-items" id="cartItems"></div>
+
+        <div class="cart-empty" id="cartEmpty">
+            <div class="empty-icon">🛒</div>
+            <h3>Your cart is empty</h3>
+            <p>"Kuch to add karo, khali pet kya?" 😄</p>
+            <a href="index.html" class="btn btn-primary">🛍️ Start Shopping</a>
+        </div>
+
+        <div class="cart-summary" id="cartSummary" style="display: none;">
+            <div class="summary-row">
+                <span>Selected Items:</span>
+                <span id="selectedCount">0</span>
+            </div>
+            <div class="summary-row">
+                <span>Subtotal:</span>
+                <span id="subtotalAmount">₹0</span>
+            </div>
+            <div class="summary-row">
+                <span>Delivery:</span>
+                <span class="free-delivery-text">FREE 🎉</span>
+            </div>
+            <div class="summary-row total">
+                <span>Total:</span>
+                <span id="totalAmount">₹0</span>
+            </div>
+            <div class="cart-actions">
+                <a href="index.html" class="btn btn-outline">🛒 Continue Shopping</a>
+                <button class="btn btn-primary" id="buySelectedBtn">🛍️ Buy Selected (0)</button>
+            </div>
+        </div>
+    </main>
+
+    <!-- Checkout Popup -->
+    <div class="popup-overlay" id="checkoutPopupOverlay">
+        <div class="checkout-popup" id="checkoutPopup">
+            <button class="popup-close" id="checkoutPopupClose">✕</button>
+            <div class="checkout-content" id="checkoutContent"></div>
         </div>
     </div>
-</div>
 
-<nav class="bottom-nav">
-    <div class="bottom-nav-inner">
-        <a href="index.html" class="nav-item"><span class="nav-icon">🏠</span><span class="nav-label">Home</span></a>
-        <a href="shop.html" class="nav-item"><span class="nav-icon">🛍️</span><span class="nav-label">Shop</span></a>
-        <a href="cart.html" class="nav-item nav-cart active"><span class="nav-icon-wrapper"><span class="nav-icon">🛒</span><span class="cart-badge" id="cartBadge">0</span></span><span class="nav-label">Cart</span></a>
-        <button class="nav-item nav-whatsapp" onclick="openWhatsApp()"><span class="nav-icon">💬</span><span class="nav-label">Whats</span></button>
-        <button class="nav-item nav-top" id="navTop" onclick="window.scrollTo({top:0,behavior:'smooth'})"><span class="nav-icon">⬆️</span><span class="nav-label">Top</span></button>
+    <!-- Order Success Popup -->
+    <div class="popup-overlay" id="successPopupOverlay">
+        <div class="success-popup" id="successPopup">
+            <button class="popup-close" id="successPopupClose">✕</button>
+            <div class="success-content">
+                <div class="success-icons">🎉 ✅ 🎉</div>
+                <h2>ORDER PLACED!</h2>
+                <div class="success-details" id="successDetails"></div>
+                <button class="btn btn-primary" id="viewMyOrdersBtn">📋 View My Orders</button>
+                <button class="btn btn-outline" id="backToHomeBtn">🏠 Back to Home</button>
+            </div>
+        </div>
     </div>
-</nav>
 
-<script src="js/config.js"></script>
-<script src="js/cart.js"></script>
-<script src="js/whatsapp.js"></script>
-<script src="js/checkout-modal.js"></script>
+    <!-- My Orders Popup -->
+    <div class="popup-overlay" id="ordersPopupOverlay">
+        <div class="orders-popup" id="ordersPopup">
+            <button class="popup-close" id="ordersPopupClose">✕</button>
+            <div class="orders-content" id="ordersContent"></div>
+        </div>
+    </div>
 
-<script>
-function openWhatsApp() {
-    var msg = 'Hi Quick Dukan, I want to order...';
-    var c = Cart.getCart();
-    if(c.totalItems>0){msg='🛒 *Order*\n\n';c.items.forEach(function(i,k){msg+=(k+1)+'. '+i.name+' x'+i.quantity+' = ₹'+(i.price*i.quantity)+'\n';});msg+='\n💰 Total: ₹'+c.totalAmount;}
-    window.open('https://wa.me/919876543210?text='+encodeURIComponent(msg),'_blank');
-}
-function renderCart() {
-    var cart = Cart.getCart();
-    document.getElementById('cartBadge').textContent = cart.totalItems;
-    document.getElementById('cartBadge').classList.toggle('visible', cart.totalItems>0);
-    if(cart.totalItems===0) { document.getElementById('cartEmpty').style.display='block'; document.getElementById('cartItemsContainer').style.display='none'; return; }
-    document.getElementById('cartEmpty').style.display='none';
-    document.getElementById('cartItemsContainer').style.display='block';
-    document.getElementById('cartItemsList').innerHTML = cart.items.map(function(item) {
-        return '<div class="cart-item-card"><div class="cart-item-icon">'+(item.icon||'📦')+'</div><div class="cart-item-details"><div class="cart-item-name">'+item.name+'</div><div class="cart-item-weight">'+(item.weight||'')+'</div><div class="cart-item-price">₹'+item.price+' × '+item.quantity+' = ₹'+(item.price*item.quantity)+'</div></div><div class="cart-item-actions"><div class="cart-qty-controls"><button class="cart-qty-btn" onclick="updateQty(\''+item.id+'\','+(item.quantity-1)+')">−</button><span>'+item.quantity+'</span><button class="cart-qty-btn" onclick="updateQty(\''+item.id+'\','+(item.quantity+1)+')">+</button></div><button class="cart-remove-btn" onclick="removeItem(\''+item.id+'\')">❌</button></div></div>';
-    }).join('');
-    document.getElementById('cartSubtotal').textContent = '₹'+cart.totalAmount;
-    document.getElementById('cartTotal').textContent = '₹'+cart.totalAmount;
-}
-function updateQty(id, qty) { if(qty<=0) Cart.removeItem(id); else Cart.updateQuantity(id, qty); renderCart(); }
-function removeItem(id) { Cart.removeItem(id); renderCart(); }
-function clearCart() { if(confirm('Clear cart?')) { Cart.clearCart(); renderCart(); } }
-renderCart();
-window.addEventListener('cartUpdated', function() { renderCart(); });
-if(localStorage.getItem('quickdukan_theme')==='dark'){document.body.classList.add('dark-mode');document.getElementById('toggleIcon').textContent='☀️';}
-document.getElementById('themeToggle').onclick=function(){document.body.classList.toggle('dark-mode');localStorage.setItem('quickdukan_theme',document.body.classList.contains('dark-mode')?'dark':'light');document.getElementById('toggleIcon').textContent=document.body.classList.contains('dark-mode')?'☀️':'🌙';};
-window.addEventListener('scroll',function(){document.getElementById('topHeader').classList.toggle('scrolled',window.scrollY>10);var t=document.getElementById('navTop');if(t)t.classList.toggle('visible',window.scrollY>300);});
-</script>
+    <!-- Cart Toast -->
+    <div class="cart-toast" id="cartToast">
+        <span class="toast-icon">✅</span>
+        <span class="toast-message" id="toastMessage"></span>
+    </div>
+
+    <!-- Bottom Navbar -->
+    <nav class="bottom-nav" id="bottomNav">
+        <button class="nav-item" data-page="home">
+            <i class="fa-solid fa-house"></i>
+            <span class="nav-label">Home</span>
+        </button>
+        <button class="nav-item" data-page="shop">
+            <i class="fa-solid fa-grid-2"></i>
+            <span class="nav-label">Shop</span>
+        </button>
+        <button class="nav-item active" data-page="cart" id="cartNavBtn">
+            <i class="fa-solid fa-bag-shopping"></i>
+            <span class="cart-badge" id="cartBadge" style="display: none;">0</span>
+            <span class="nav-label">Cart</span>
+        </button>
+        <button class="nav-item" data-page="orders" id="myOrdersNavBtn">
+            <i class="fa-solid fa-clipboard-list"></i>
+            <span class="nav-label">My Orders</span>
+        </button>
+        <button class="nav-item top-btn" id="backToTopBtn">
+            <i class="fa-solid fa-arrow-up"></i>
+            <span class="nav-label">Top</span>
+        </button>
+    </nav>
+
+    <script src="js/config.js"></script>
+    <script src="js/storage.js"></script>
+    <script src="js/utils.js"></script>
+    <script src="js/ui.js"></script>
+    <script src="js/cart.js"></script>
+    <script src="js/products.js"></script>
+    <script src="js/whatsapp.js"></script>
+    <script src="js/theme.js"></script>
+    <script src="js/cart-page.js"></script>
 </body>
 </html>
