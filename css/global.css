@@ -107,87 +107,137 @@
 
 /* ========== CATEGORIES BAR ========== */
 .categories-bar-wrapper {
-    position: fixed; top: calc(var(--header-height) + var(--search-wrapper-height));
-    left: 0; width: 100%; z-index: 998;
-    background: rgba(255,255,255,0.85); backdrop-filter: blur(8px);
-    padding: 10px 0; border-bottom: 1px solid rgba(0,0,0,0.04);
+    position: fixed;
+    top: calc(var(--header-height) + var(--search-wrapper-height));
+    left: 0;
+    width: 100%;
+    z-index: 998;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    padding: 10px 0;
+    border-bottom: 1px solid rgba(255,255,255,0.1);
 }
+
 .categories-bar-container {
-    display: flex; align-items: center;
-    max-width: 1200px; margin: 0 auto; padding: 0 32px; position: relative;
+    display: flex;
+    align-items: center;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 20px;
+    position: relative;
 }
+
 .categories-bar {
-    display: flex; gap: 10px; overflow-x: auto;
-    scroll-behavior: smooth; scrollbar-width: none;
-    padding: 4px 0; flex: 1;
+    display: flex;
+    gap: 10px;
+    overflow-x: auto;
+    scroll-behavior: smooth;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+    padding: 4px 0;
+    flex: 1;
+    scroll-snap-type: x mandatory;
 }
 .categories-bar::-webkit-scrollbar { display: none; }
 
-/* Category Pill */
+/* Category Pill — 4 visible at a time */
 .category-pill {
-    display: flex; align-items: center; gap: 8px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
     padding: 10px 18px;
-    background: var(--bg-white);
-    border: 2px solid rgba(0,0,0,0.05);
+    background: rgba(255,255,255,0.15);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 2px solid rgba(255,255,255,0.25);
     border-radius: var(--radius-xl);
-    cursor: pointer; white-space: nowrap;
+    cursor: pointer;
+    white-space: nowrap;
     transition: all var(--transition-spring);
-    box-shadow: var(--shadow-xs);
-    flex-shrink: 0; position: relative;
-    font-family: var(--font-body);
+    flex-shrink: 0;
+    position: relative;
+    scroll-snap-align: start;
+    min-width: 130px;
+    justify-content: center;
 }
 .category-pill:hover {
-    background: var(--blue-pale);
-    border-color: var(--blue-light);
+    background: rgba(255,255,255,0.25);
+    border-color: rgba(255,255,255,0.5);
     transform: translateY(-3px);
-    box-shadow: var(--shadow-md);
+    box-shadow: 0 8px 24px rgba(0,0,0,0.2);
 }
 .category-pill:active { transform: scale(0.94); transition: transform 0.1s ease; }
+
 .category-pill.selected {
-    background: var(--blue-mid);
-    border-color: var(--blue-mid);
-    color: #FFFFFF;
-    box-shadow: 0 6px 24px rgba(74,111,165,0.35);
+    background: #FFFFFF;
+    border-color: #FFFFFF;
+    box-shadow: 0 8px 30px rgba(0,0,0,0.3);
     transform: translateY(-2px);
 }
-.category-pill.selected .pill-name { color: #FFFFFF; font-weight: 700; }
-.category-pill.selected .pill-count { color: rgba(255,255,255,0.8); }
-.category-pill.selected .pill-icon { transform: scale(1.15); filter: none; }
+.category-pill.selected .pill-name { color: #4A1D8A; font-weight: 800; }
+.category-pill.selected .pill-count { color: #6B3FA0; background: rgba(102,126,234,0.15); }
+.category-pill.selected .pill-icon { transform: scale(1.2); }
 
 .pill-icon { font-size: 20px; transition: transform var(--transition-base); flex-shrink: 0; }
-.pill-name { font-size: 13px; font-weight: 600; color: var(--text-dark); transition: color var(--transition-base); letter-spacing: 0.2px; }
-.pill-count { font-size: 10px; color: var(--text-light); font-weight: 500; background: rgba(0,0,0,0.04); padding: 2px 8px; border-radius: var(--radius-full); }
+.pill-name { 
+    font-size: 13px; font-weight: 600; color: #FFFFFF;
+    transition: color var(--transition-base); letter-spacing: 0.3px;
+    text-shadow: 0 1px 2px rgba(0,0,0,0.2);
+}
+.pill-count { 
+    font-size: 10px; color: rgba(255,255,255,0.8); font-weight: 500;
+    background: rgba(255,255,255,0.15); padding: 2px 8px;
+    border-radius: var(--radius-full);
+}
 
 /* Priority Dot */
 .pill-priority-dot {
     position: absolute; top: 6px; right: 6px;
-    width: 8px; height: 8px; background: var(--pink);
+    width: 8px; height: 8px; background: #FFD700;
     border-radius: 50%;
     animation: priorityPulse 2s ease-in-out infinite;
-    box-shadow: 0 0 8px var(--pink-glow);
+    box-shadow: 0 0 10px rgba(255,215,0,0.6);
 }
 
 /* Scroll Arrows */
 .cat-scroll-arrow {
     width: 36px; height: 36px; border-radius: 50%;
-    background: var(--bg-white); border: 2px solid rgba(0,0,0,0.06);
-    cursor: pointer; display: flex; align-items: center; justify-content: center;
-    font-size: 16px; color: var(--blue-mid);
-    transition: all var(--transition-base); flex-shrink: 0;
-    box-shadow: var(--shadow-sm);
+    background: rgba(255,255,255,0.2);
+    border: 2px solid rgba(255,255,255,0.3);
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 16px; color: #FFFFFF;
+    transition: all var(--transition-base);
+    flex-shrink: 0;
+    backdrop-filter: blur(10px);
 }
-.cat-scroll-arrow:hover { background: var(--blue-mid); color: #FFF; border-color: var(--blue-mid); transform: scale(1.1); }
+.cat-scroll-arrow:hover {
+    background: rgba(255,255,255,0.4);
+    transform: scale(1.15);
+}
 .cat-scroll-arrow:active { transform: scale(0.9); }
 
 .cat-fade-left, .cat-fade-right {
-    position: absolute; top: 0; bottom: 0; width: 40px; pointer-events: none; z-index: 2;
+    position: absolute; top: 0; bottom: 0; width: 40px;
+    pointer-events: none; z-index: 2;
 }
-.cat-fade-left { left: 0; background: linear-gradient(to right, rgba(255,255,255,0.95) 0%, transparent 100%); }
-.cat-fade-right { right: 0; background: linear-gradient(to left, rgba(255,255,255,0.95) 0%, transparent 100%); }
+.cat-fade-left { left: 0; background: linear-gradient(to right, #667eea, transparent); }
+.cat-fade-right { right: 0; background: linear-gradient(to left, #764ba2, transparent); }
 
-.cat-scroll-dots { display: flex; justify-content: center; gap: 6px; padding: 6px 0 0; }
-.cat-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--blue-light); transition: all 0.4s ease; }
-.cat-dot.active { background: var(--blue-mid); width: 20px; border-radius: 3px; }
+/* Scroll Dots */
+.cat-scroll-dots {
+    display: flex; justify-content: center; gap: 6px; padding: 6px 0 0;
+}
+.cat-dot {
+    width: 6px; height: 6px; border-radius: 50%;
+    background: rgba(255,255,255,0.4);
+    transition: all 0.4s ease;
+}
+.cat-dot.active {
+    background: #FFD700;
+    width: 20px;
+    border-radius: 3px;
+    box-shadow: 0 0 8px rgba(255,215,0,0.5);
+}
 
 /* ========== MAIN CONTENT ========== */
 .main-content-full {
