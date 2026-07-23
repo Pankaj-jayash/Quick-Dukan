@@ -12,10 +12,7 @@ html {
 
 body {
     font-family: 'Nunito', sans-serif;
-    background-color: var(--bg);
-    color: var(--text-dark);
     line-height: 1.5;
-    min-height: 100vh;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
 }
@@ -32,19 +29,25 @@ ul, ol {
 img {
     max-width: 100%;
     display: block;
+    height: auto;
 }
 
 button {
     cursor: pointer;
     border: none;
     outline: none;
-    font-family: inherit;
     background: none;
+    font-family: inherit;
 }
 
-input, textarea {
+input, textarea, select {
     border: none;
     outline: none;
     font-family: inherit;
-    background: none;
+    font-size: inherit;
+}
+
+h1, h2, h3, h4, h5, h6 {
+    font-family: 'Poppins', sans-serif;
+    line-height: 1.3;
 }
