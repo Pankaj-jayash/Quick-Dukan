@@ -1,18 +1,44 @@
-/* ========== RESPONSIVE ========== */
-
+/* Tablet */
 @media (max-width: 1024px) {
-    .products-grid { grid-template-columns: repeat(3, 1fr); gap: var(--space-base); }
-    .search-container { width: 75%; }
+    .products-grid {
+        grid-template-columns: repeat(3, 1fr);
+        gap: var(--space-sm);
+    }
 }
 
 @media (max-width: 768px) {
-    .top-header { padding: 0 10px; }
-    .quick-text { font-size: 20px; }
-    .dukan-text { font-size: 15px; }
-    .brand-icon { font-size: 24px; }
-    .free-delivery { padding: 6px 10px; }
-    .truck-icon { font-size: 18px; }
-    .free-text { font-size: 12px; }
+    .products-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: var(--space-sm);
+    }
+    .card-image-wrapper { height: 160px; }
+    .card-name { font-size: 13px; }
+    .card-price { font-size: 16px; }
+    .card-price-overlay { font-size: 16px; padding: 4px 10px; }
+    .card-add-btn, .card-buy-btn { font-size: 12px; padding: 8px 0; }
+}
+
+@media (max-width: 480px) {
+    .products-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 8px;
+    }
+    .card-image-wrapper { height: 140px; }
+    .card-name { font-size: 12px; }
+    .card-weight { font-size: 10px; }
+    .card-price { font-size: 15px; }
+    .card-price-overlay { font-size: 14px; bottom: 8px; right: 8px; }
+    .card-add-btn, .card-buy-btn { font-size: 11px; padding: 7px 0; }
+    .card-info { padding: 10px; }
+}
+
+@media (max-width: 380px) {
+    .products-grid { gap: 6px; }
+    .card-image-wrapper { height: 120px; }
+    .card-name { font-size: 11px; }
+    .card-price { font-size: 13px; }
+    .card-add-btn, .card-buy-btn { font-size: 10px; padding: 6px 0; }
+}
     
     .search-container { width: 85%; height: 46px; }
     .products-grid { grid-template-columns: repeat(2, 1fr); gap: var(--space-sm); }
