@@ -1,26 +1,26 @@
-const Categories = {
+var Categories = {
     categoriesList: [],
     selectedCategory: null,
     
-    async init() {
-        await this.loadCategories();
-        this.renderCategoriesBar();
-        this.setupScroll();
-        this.setupFadeEdges();
+    init: function() {
+        this.loadCategories();
     },
     
-    async loadCategories() {
-        try {
-            const response = await fetch(CONFIG.urls.categoriesList);
-            const data = await response.json();
-            this.categoriesList = data.categories.sort((a, b) => a.order - b.order);
-        } catch (error) {
-            console.error('Failed to load categories:', error);
-            this.categoriesList = this.getFallbackCategories();
-        }
+    loadCategories: function() {
+        var self = this;
+        fetch(CONFIG.urls.categoriesList)
+            .then(function(res) { return res.json(); })
+            .then(function(data) {
+                self.categoriesList = data.categories.sort(function(a, b) { return a.order - b.order; });
+                self.renderBar();
+            })
+            .catch(function() {
+                self.categoriesList = self.getFallback();
+                self.renderBar();
+            });
     },
     
-    getFallbackCategories() {
+    getFallback: function() {
         return [
             { id: 'biscuit-namkeen', name: 'Biscuit & Namkeen', icon: '🍪', count: 35, priority: true, order: 1, file: 'data/products/biscuit-namkeen.json' },
             { id: 'cold-drinks', name: 'Cold Drinks', icon: '🥤', count: 15, priority: false, order: 2, file: 'data/products/cold-drinks.json' },
@@ -35,126 +35,50 @@ const Categories = {
         ];
     },
     
-    renderCategoriesBar() {
-        const container = document.getElementById('categoriesBar');
+    renderBar: function() {
+        var container = document.getElementById('categoriesBar');
         if (!container) return;
-        
-        container.innerHTML = this.categoriesList.map(cat => `
-            <div class="category-pill ${this.selectedCategory === cat.id ? 'selected' : ''}" 
-                 data-category="${cat.id}"
-                 onclick="Categories.selectCategory('${cat.id}')">
-                ${cat.priority ? '<span class="pill-priority-dot"></span>' : ''}
-                <span class="pill-icon">${cat.icon}</span>
-                <span class="pill-name">${cat.name}</span>
-                <span class="pill-count">${cat.count}</span>
-            </div>
-        `).join('');
-        
-        this.renderDots();
+        var self = this;
+        container.innerHTML = this.categoriesList.map(function(cat) {
+            var dot = cat.priority ? '<span class="pill-priority-dot"></span>' : '';
+            var sel = self.selectedCategory === cat.id ? ' selected' : '';
+            return '<div class="category-pill' + sel + '" data-category="' + cat.id + '" onclick="Categories.selectCategory(\'' + cat.id + '\')">' + dot + '<span class="pill-icon">' + cat.icon + '</span><span class="pill-name">' + cat.name + '</span><span class="pill-count">' + cat.count + '</span></div>';
+        }).join('');
     },
     
-    selectCategory(categoryId) {
-        if (this.selectedCategory === categoryId) {
-            this.deselectAll();
-            return;
-        }
-        
+    selectCategory: function(categoryId) {
+        if (this.selectedCategory === categoryId) { this.deselectAll(); return; }
         this.deselectAll();
         this.selectedCategory = categoryId;
-        
-        const pill = document.querySelector(`.category-pill[data-category="${categoryId}"]`);
+        var pill = document.querySelector('.category-pill[data-category="' + categoryId + '"]');
         if (pill) pill.classList.add('selected');
-        
         this.showCategoryProducts(categoryId);
     },
     
-    deselectAll() {
-        document.querySelectorAll('.category-pill.selected').forEach(p => p.classList.remove('selected'));
+    deselectAll: function() {
+        var pills = document.querySelectorAll('.category-pill.selected');
+        for (var i = 0; i < pills.length; i++) { pills[i].classList.remove('selected'); }
         this.selectedCategory = null;
         this.showMostOrdered();
     },
     
-    async showCategoryProducts(categoryId) {
-        const cat = this.categoriesList.find(c => c.id === categoryId);
+    showCategoryProducts: function(categoryId) {
+        var cat = this.categoriesList.find(function(c) { return c.id === categoryId; });
         if (!cat) return;
-        
         document.getElementById('mostOrderedSection').style.display = 'none';
         document.getElementById('categoryBack').style.display = 'block';
         document.getElementById('categoryTitle').style.display = 'block';
-        document.getElementById('categoryTitle').textContent = `${cat.icon} ${cat.name} (${cat.count} products)`;
+        document.getElementById('categoryTitle').textContent = cat.icon + ' ' + cat.name + ' (' + cat.count + ' products)';
         document.getElementById('categoryProductsSection').style.display = 'block';
-        
-        // Load products
-        const products = await Products.loadCategoryProducts(categoryId);
-        Products.renderProductCards(products, 'categoryProductsGrid');
+        Products.loadCategoryProducts(categoryId).then(function(products) {
+            Products.renderProductCards(products, 'categoryProductsGrid');
+        });
     },
     
-    async showMostOrdered() {
+    showMostOrdered: function() {
         document.getElementById('mostOrderedSection').style.display = 'block';
         document.getElementById('categoryBack').style.display = 'none';
         document.getElementById('categoryTitle').style.display = 'none';
         document.getElementById('categoryProductsSection').style.display = 'none';
-        
-        // Load most ordered
-        await Products.loadMostOrdered();
-    },
-    
-    setupScroll() {
-        const bar = document.getElementById('categoriesBar');
-        const leftBtn = document.getElementById('catScrollLeft');
-        const rightBtn = document.getElementById('catScrollRight');
-        if (!bar) return;
-        
-        if (leftBtn) leftBtn.addEventListener('click', () => { bar.scrollBy({ left: -200, behavior: 'smooth' }); });
-        if (rightBtn) rightBtn.addEventListener('click', () => { bar.scrollBy({ left: 200, behavior: 'smooth' }); });
-        
-        bar.addEventListener('scroll', () => { this.updateDots(); this.updateArrowVisibility(); });
-        this.updateArrowVisibility();
-    },
-    
-    updateArrowVisibility() {
-        const bar = document.getElementById('categoriesBar');
-        const leftBtn = document.getElementById('catScrollLeft');
-        const rightBtn = document.getElementById('catScrollRight');
-        if (!bar || !leftBtn || !rightBtn) return;
-        
-        leftBtn.style.opacity = bar.scrollLeft <= 5 ? '0.3' : '1';
-        rightBtn.style.opacity = bar.scrollLeft + bar.clientWidth >= bar.scrollWidth - 5 ? '0.3' : '1';
-    },
-    
-    renderDots() {
-        const container = document.getElementById('catScrollDots');
-        if (!container) return;
-        const totalDots = Math.ceil(this.categoriesList.length / 5);
-        container.innerHTML = Array.from({ length: totalDots }, (_, i) => 
-            `<span class="cat-dot ${i === 0 ? 'active' : ''}" data-dot="${i}"></span>`
-        ).join('');
-    },
-    
-    updateDots() {
-        const bar = document.getElementById('categoriesBar');
-        const dots = document.querySelectorAll('.cat-dot');
-        if (!bar || dots.length === 0) return;
-        
-        const scrollPercent = bar.scrollLeft / (bar.scrollWidth - bar.clientWidth);
-        const activeIndex = Math.round(scrollPercent * (dots.length - 1));
-        
-        dots.forEach((dot, i) => dot.classList.toggle('active', i === activeIndex));
-    },
-    
-    setupFadeEdges() {
-        const bar = document.getElementById('categoriesBar');
-        const fadeLeft = document.querySelector('.cat-fade-left');
-        const fadeRight = document.querySelector('.cat-fade-right');
-        if (!bar) return;
-        
-        const updateFade = () => {
-            if (fadeLeft) fadeLeft.style.opacity = bar.scrollLeft > 5 ? '1' : '0';
-            if (fadeRight) fadeRight.style.opacity = bar.scrollLeft + bar.clientWidth < bar.scrollWidth - 5 ? '1' : '0';
-        };
-        
-        bar.addEventListener('scroll', updateFade);
-        updateFade();
     }
 };
-console.log('✅ Quick Dukan — Categories Manager Loaded');
