@@ -4,270 +4,45 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Contact — Quick Dukan</title>
-    
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800;900&family=Nunito:wght@400;500;600;700&display=swap" rel="stylesheet">
-    
     <link rel="stylesheet" href="css/reset.css">
     <link rel="stylesheet" href="css/variables.css">
     <link rel="stylesheet" href="css/global.css">
-    <link rel="stylesheet" href="css/animations.css">
-    <link rel="stylesheet" href="css/responsive.css">
-    
-    <style>
-        .contact-container {
-            max-width: 600px;
-            margin: 40px auto;
-            padding: 0 16px;
-        }
-        
-        .contact-card {
-            background: var(--bg-white);
-            border-radius: var(--radius-xl);
-            padding: 32px 24px;
-            box-shadow: var(--shadow-base);
-            text-align: center;
-        }
-        
-        .contact-logo {
-            font-size: 60px;
-            margin-bottom: 16px;
-        }
-        
-        .contact-name {
-            font-family: var(--font-heading);
-            font-size: var(--text-2xl);
-            font-weight: 800;
-            color: var(--text-dark);
-        }
-        
-        .contact-tagline {
-            font-size: 14px;
-            color: var(--text-grey);
-            margin: 4px 0 24px;
-        }
-        
-        .contact-info-list {
-            text-align: left;
-            margin-bottom: 24px;
-        }
-        
-        .contact-info-item {
-            display: flex;
-            align-items: flex-start;
-            gap: 12px;
-            padding: 14px 0;
-            border-bottom: 1px solid rgba(0,0,0,0.04);
-        }
-        
-        .contact-info-item:last-child {
-            border-bottom: none;
-        }
-        
-        .contact-info-icon {
-            font-size: 24px;
-            flex-shrink: 0;
-            width: 36px;
-            text-align: center;
-        }
-        
-        .contact-info-text {
-            font-size: 14px;
-            color: var(--text-dark);
-            line-height: 1.5;
-        }
-        
-        .contact-info-text strong {
-            display: block;
-            font-family: var(--font-heading);
-            font-size: 13px;
-            color: var(--text-grey);
-            margin-bottom: 2px;
-        }
-        
-        .contact-whatsapp-btn {
-            display: inline-block;
-            padding: 14px 32px;
-            background: #25D366;
-            color: #FFF;
-            border-radius: var(--radius-full);
-            font-family: var(--font-heading);
-            font-size: 16px;
-            font-weight: 700;
-            text-decoration: none;
-            transition: all 0.3s ease;
-            margin-top: 8px;
-        }
-        
-        .contact-whatsapp-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 20px rgba(37,211,102,0.3);
-        }
-    </style>
 </head>
 <body>
-    
-    <!-- ==================== TOP HEADER ==================== -->
-    <header class="top-header" id="topHeader">
-        <div class="header-brand" onclick="window.location.href='index.html'">
-            <span class="brand-icon">🛒</span>
-            <div class="brand-text-wrapper">
-                <span class="brand-text">
-                    <span class="quick-text">QUICK</span>
-                    <span class="dukan-text">DUKAN</span>
-                </span>
-            </div>
+
+<header class="top-header"><div class="header-brand" onclick="window.location.href='index.html'"><span class="brand-icon">🛒</span><span class="brand-text"><span class="quick-text">QUICK</span><span class="dukan-text">DUKAN</span></span></div></header>
+
+<div class="main-content-full" style="max-width:500px;margin:40px auto;">
+    <div style="background:var(--bg-white);border-radius:20px;padding:32px 24px;text-align:center;box-shadow:0 4px 20px rgba(0,0,0,0.08);">
+        <div style="font-size:60px;">🛒</div>
+        <h1 style="font-size:24px;font-weight:800;margin:16px 0 4px;">Quick Dukan</h1>
+        <p style="color:#757575;">Ghar Baithe Kirana</p>
+        <div style="text-align:left;margin:24px 0;">
+            <p style="padding:10px 0;border-bottom:1px solid rgba(0,0,0,0.04);"><strong>📍</strong> Near Ram Mandir, Bhopal, MP — 462001</p>
+            <p style="padding:10px 0;border-bottom:1px solid rgba(0,0,0,0.04);"><strong>📞</strong> 98765-43210</p>
+            <p style="padding:10px 0;border-bottom:1px solid rgba(0,0,0,0.04);"><strong>📧</strong> quickdukan@gmail.com</p>
+            <p style="padding:10px 0;border-bottom:1px solid rgba(0,0,0,0.04);"><strong>⏰</strong> Subah 8 Baje — Raat 9 Baje (Open All Days)</p>
+            <p style="padding:10px 0;"><strong>🚚</strong> Free Home Delivery | Store Pickup Available</p>
         </div>
-        <div class="free-delivery">
-            <div class="truck-icon-wrapper">
-                <span class="truck-icon">🚚</span>
-                <span class="exhaust-puff">💨</span>
-            </div>
-            <span class="free-text">Free Delivery*</span>
-            <div class="road-lines"></div>
-        </div>
-        <button class="theme-toggle" id="themeToggle" aria-label="Toggle theme">
-            <span class="toggle-icon" id="toggleIcon">🌙</span>
-        </button>
-    </header>
-    
-    <!-- ==================== CONTACT CONTENT ==================== -->
-    <div class="main-content-full">
-        <div class="contact-container">
-            
-            <div class="contact-card">
-                <div class="contact-logo">🛒</div>
-                <h1 class="contact-name">Quick Dukan</h1>
-                <p class="contact-tagline">Ghar Baithe Kirana</p>
-                
-                <div class="contact-info-list">
-                    <div class="contact-info-item">
-                        <span class="contact-info-icon">📍</span>
-                        <div class="contact-info-text">
-                            <strong>Address</strong>
-                            Near Ram Mandir, Bhopal, MP — 462001
-                        </div>
-                    </div>
-                    
-                    <div class="contact-info-item">
-                        <span class="contact-info-icon">📞</span>
-                        <div class="contact-info-text">
-                            <strong>Phone</strong>
-                            98765-43210
-                        </div>
-                    </div>
-                    
-                    <div class="contact-info-item">
-                        <span class="contact-info-icon">📧</span>
-                        <div class="contact-info-text">
-                            <strong>Email</strong>
-                            quickdukan@gmail.com
-                        </div>
-                    </div>
-                    
-                    <div class="contact-info-item">
-                        <span class="contact-info-icon">⏰</span>
-                        <div class="contact-info-text">
-                            <strong>Timing</strong>
-                            Subah 8 Baje — Raat 9 Baje<br>
-                            <span style="color:#4CAF50;font-weight:600;">Open All Days (Monday — Sunday)</span>
-                        </div>
-                    </div>
-                    
-                    <div class="contact-info-item">
-                        <span class="contact-info-icon">🚚</span>
-                        <div class="contact-info-text">
-                            <strong>Delivery</strong>
-                            Free Home Delivery | Store Pickup Available
-                        </div>
-                    </div>
-                </div>
-                
-                <a href="https://wa.me/919719312956?text=Hi%20Quick%20Dukan%2C%20I%20want%20to%20order..." class="contact-whatsapp-btn" target="_blank">
-                    💬 Chat on WhatsApp
-                </a>
-            </div>
-            
-        </div>
+        <a href="https://wa.me/919876543210?text=Hi%20Quick%20Dukan" target="_blank" style="display:inline-block;padding:14px 32px;background:#25D366;color:#FFF;border-radius:50px;font-weight:700;text-decoration:none;">💬 Chat on WhatsApp</a>
     </div>
-    
-    <!-- ==================== BOTTOM NAVBAR ==================== -->
-    <nav class="bottom-nav" id="bottomNav">
-        <div class="bottom-nav-inner">
-            <button class="nav-item" onclick="window.location.href='index.html'" aria-label="Home">
-                <span class="nav-icon">🏠</span><span class="nav-label">Home</span>
-                <span class="nav-dot"></span><span class="nav-ripple-container"></span>
-            </button>
-            <button class="nav-item" onclick="window.location.href='shop.html'" aria-label="Shop">
-                <span class="nav-icon">🛍️</span><span class="nav-label">Shop</span>
-                <span class="nav-dot"></span><span class="nav-ripple-container"></span>
-            </button>
-            <button class="nav-item nav-cart" onclick="window.location.href='cart.html'" aria-label="Cart">
-                <span class="nav-icon-wrapper">
-                    <span class="nav-icon">🛒</span>
-                    <span class="cart-badge" id="cartBadge">0</span>
-                </span>
-                <span class="nav-label">Cart</span>
-                <span class="nav-dot"></span><span class="nav-ripple-container"></span>
-            </button>
-            <button class="nav-item nav-whatsapp" onclick="window.open('https://wa.me/919719312956?text=Hi%20Quick%20Dukan','_blank')" aria-label="WhatsApp">
-                <span class="nav-icon">💬</span><span class="nav-label">Whats</span>
-                <span class="nav-dot"></span><span class="nav-ripple-container"></span>
-            </button>
-            <button class="nav-item nav-top" id="navTop" onclick="window.scrollTo({top:0,behavior:'smooth'})" aria-label="Back to Top">
-                <span class="nav-icon" id="topIcon">⬆️</span><span class="nav-label">Top</span>
-                <span class="nav-dot"></span><span class="nav-ripple-container"></span>
-            </button>
-        </div>
-    </nav>
-    
-    <script src="js/config.js"></script>
-    <script src="js/cart.js"></script>
-    <script>
-        // Cart badge
-        const cart = Cart.getCart();
-        const badge = document.getElementById('cartBadge');
-        if (badge && cart.totalItems > 0) {
-            badge.textContent = cart.totalItems > 99 ? '99+' : cart.totalItems;
-            badge.classList.add('visible');
-        }
-        
-        // Theme
-        const savedTheme = localStorage.getItem('quickdukan_theme');
-        if (savedTheme === 'dark') {
-            document.body.classList.add('dark-mode');
-            document.getElementById('toggleIcon').textContent = '☀️';
-        }
-        
-        document.getElementById('themeToggle').addEventListener('click', function() {
-            document.body.classList.toggle('dark-mode');
-            localStorage.setItem('quickdukan_theme', document.body.classList.contains('dark-mode') ? 'dark' : 'light');
-            document.getElementById('toggleIcon').textContent = document.body.classList.contains('dark-mode') ? '☀️' : '🌙';
-        });
-        
-        window.addEventListener('scroll', () => {
-            const header = document.getElementById('topHeader');
-            const navTop = document.getElementById('navTop');
-            if (window.scrollY > 10) header.classList.add('scrolled');
-            else header.classList.remove('scrolled');
-            if (navTop) navTop.classList.toggle('visible', window.scrollY > 300);
-        });
-        
-        // Nav ripple
-        document.querySelectorAll('.nav-item').forEach(item => {
-            item.addEventListener('click', function(e) {
-                const ripple = document.createElement('span');
-                ripple.classList.add('nav-ripple');
-                const rect = this.getBoundingClientRect();
-                const size = Math.max(rect.width, rect.height) * 2;
-                ripple.style.width = ripple.style.height = size + 'px';
-                ripple.style.left = (e.clientX - rect.left - size/2) + 'px';
-                ripple.style.top = (e.clientY - rect.top - size/2) + 'px';
-                this.querySelector('.nav-ripple-container').appendChild(ripple);
-                ripple.addEventListener('animationend', () => ripple.remove());
-            });
-        });
-    </script>
+</div>
+
+<nav class="bottom-nav">
+    <div class="bottom-nav-inner">
+        <a href="index.html" class="nav-item"><span class="nav-icon">🏠</span><span class="nav-label">Home</span></a>
+        <a href="shop.html" class="nav-item"><span class="nav-icon">🛍️</span><span class="nav-label">Shop</span></a>
+        <a href="cart.html" class="nav-item nav-cart"><span class="nav-icon">🛒</span><span class="nav-label">Cart</span></a>
+        <a href="contact.html" class="nav-item nav-whatsapp active"><span class="nav-icon">💬</span><span class="nav-label">Whats</span></a>
+        <button class="nav-item nav-top" id="navTop" onclick="window.scrollTo({top:0,behavior:'smooth'})"><span class="nav-icon">⬆️</span><span class="nav-label">Top</span></button>
+    </div>
+</nav>
+
+<script>
+window.addEventListener('scroll',function(){document.getElementById('topHeader').classList.toggle('scrolled',window.scrollY>10);var t=document.getElementById('navTop');if(t)t.classList.toggle('visible',window.scrollY>300);});
+</script>
 </body>
 </html>
