@@ -1,5 +1,21 @@
 /* ========== GLOBAL STYLES ========== */
 
+/* ========== FIX CONTENT OVERLAP ========== */
+.main-content-full {
+    padding-top: calc(var(--header-height) + var(--search-wrapper-height) + var(--cat-bar-height, 72px) + 10px) !important;
+    padding-bottom: var(--nav-height);
+    min-height: 100vh;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding-left: var(--space-base);
+    padding-right: var(--space-base);
+}
+
+@media (max-width: 480px) {
+    .main-content-full {
+        padding-top: calc(var(--header-height-mobile) + 64px + 56px + 10px) !important;
+    }
+}
 /* ========== TOP HEADER ========== */
 .top-header {
     position: fixed;
