@@ -1,34 +1,55 @@
-var CONFIG = {
+// ========== CONFIGURATION ==========
+
+const CONFIG = {
     store: {
         name: 'Quick Dukan',
-        phone: '919876543210',
-        phoneDisplay: '98765-43210',
+        tagline: 'Ghar Baithe Kirana',
+        phone: '919719312956',
+        phoneDisplay: '9719312956',
+        email: 'quickdukan@gmail.com',
         address: 'Near Ram Mandir, Bhopal, MP',
         pincode: '462001',
-        timing: 'Subah 8 Baje - Raat 9 Baje'
+        city: 'Bhopal',
+        state: 'Madhya Pradesh',
+        timing: 'Subah 8:00 AM - Raat 10:00 PM',
+        googleMapsQuery: 'Near+Ram+Mandir+Bhopal+MP+462001'
     },
+    
+    delivery: {
+        freeDeliveryNote: 'Free Delivery*',
+        estimatedTime: '45-60 mins',
+        pickupTime: '15-20 mins',
+        servicedStates: ['Madhya Pradesh'],
+        servicedCities: ['Bhopal', 'Indore', 'Jabalpur', 'Gwalior', 'Ujjain']
+    },
+    
     features: {
         recentlyViewedLimit: 4,
-        toastDuration: 2500
+        searchSuggestionsLimit: 5,
+        mostOrderedLimit: 12,
+        toastDuration: 2500,
+        enableDarkMode: true,
+        enableVoiceSearch: true
     },
-    search: {
-        placeholderCycleInterval: 4000,
-        minCharsToSearch: 2,
-        maxSuggestions: 5,
-        debounceDelay: 300
-    },
-    payments: {
-        qrCodeImage: 'https://via.placeholder.com/180x180.png?text=QR+Code',
-        phonePeUPI: 'quickdukan@upi'
-    },
-    placeholders: [
-        "Search atta, chawal, sabun...",
-        "Kya chahiye? Atta, Chawal, Masale...",
-        "Dhundho apna kirana...",
-        "Maggi, Surf Excel, Tata Atta...",
-        "Ghar baithe mangao, 2 ghante me..."
-    ],
+    
     urls: {
-        categoriesList: 'data/products/categories-list.json'
-    }
+        categoriesList: 'data/categories-list.json',
+        productsPath: 'data/products/',
+        imagesPath: 'images/products/',
+        whatsappAPI: 'https://wa.me/',
+        placeholderImage: 'https://picsum.photos/400/400'
+    },
+    
+    searchPlaceholders: [
+        'Biwi ne list di? Copy-paste karo yahan! 😅',
+        'Atta dhundh rahe ho? Yahan sab milega... 😊',
+        'Chawal, daal, masale — pet khush, jeb khush! 😋',
+        'Maggi khani hai? 2 minute me dhundho! 🍜',
+        'Kirana dhundhna ab mazaak jaisa easy... 🛒✨',
+        'Pados wali aunty se sasta, apni dukan se fast! 🚀',
+        'Jo chahiye type karo, hum dhundhte hain! 🔍❤️'
+    ]
 };
+
+// Freeze to prevent accidental changes
+Object.freeze(CONFIG);
