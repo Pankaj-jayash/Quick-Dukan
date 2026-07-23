@@ -11,50 +11,37 @@ const Products = {
     },
     
     async loadAllProducts() {
-        try {
-            const response = await fetch(CONFIG.urls.categoriesList);
-            const data = await response.json();
-            const categories = data.categories;
-            this.allProducts = [];
-            
-            for (const cat of categories) {
-                try {
-                    const catResponse = await fetch(cat.file);
-                    const catData = await catResponse.json();
-                    const products = catData.products.filter(p => p.inStock);
-                    this.allProducts = [...this.allProducts, ...products];
-                } catch (e) { /* skip */ }
+    try {
+        const response = await fetch(CONFIG.urls.categoriesList);
+        if (!response.ok) throw new Error('Failed to fetch categories');
+        const data = await response.json();
+        const categories = data.categories;
+        this.allProducts = [];
+        
+        for (const cat of categories) {
+            try {
+                const catResponse = await fetch(cat.file);
+                if (!catResponse.ok) throw new Error('Failed to fetch ' + cat.file);
+                const catData = await catResponse.json();
+                const products = catData.products.filter(p => p.inStock);
+                this.allProducts = [...this.allProducts, ...products];
+            } catch (e) {
+                console.warn('Could not load category:', cat.name, e.message);
             }
-        } catch (error) {
-            console.error('Failed to load all products:', error);
+        }
+        
+        // Agar kuch bhi load nahi hua, fallback use karo
+        if (this.allProducts.length === 0) {
+            console.warn('No products loaded from JSON, using fallback');
             this.allProducts = this.getFallbackProducts();
         }
-    },
+    } catch (error) {
+        console.error('Failed to load products:', error);
+        this.allProducts = this.getFallbackProducts();
+    }
     
-    async loadMostOrdered() {
-        if (this.allProducts.length === 0) await this.loadAllProducts();
-        this.mostOrderedProducts = this.allProducts.filter(p => p.mostOrdered).slice(0, 12);
-        if (this.mostOrderedProducts.length === 0) this.mostOrderedProducts = this.allProducts.slice(0, 8);
-        this.renderProductCards(this.mostOrderedProducts, 'productsGrid');
-        document.getElementById('mostOrderedSection').style.display = 'block';
-    },
-    
-    async loadCategoryProducts(categoryId) {
-        UI.showLoading();
-        try {
-            const cat = Categories.categoriesList.find(c => c.id === categoryId);
-            if (!cat) throw new Error('Category not found');
-            const response = await fetch(cat.file);
-            const data = await response.json();
-            const products = data.products.filter(p => p.inStock);
-            UI.hideLoading();
-            return products;
-        } catch (error) {
-            console.error('Failed to load category products:', error);
-            UI.hideLoading();
-            return this.allProducts.filter(p => p.category === categoryId) || this.getFallbackProducts();
-        }
-    },
+    console.log('✅ Total products loaded:', this.allProducts.length);
+}
     
     // Search function for real products
     searchProducts(query) {
