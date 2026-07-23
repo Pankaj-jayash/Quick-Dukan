@@ -84,30 +84,82 @@ document.addEventListener('DOMContentLoaded', function() {
         renderSuggestions(currentSearchResults, query);
     }
 
-    function executeSearch(query) {
-        if (query.length < CONFIG.search.minCharsToSearch) return;
-        closeSuggestions();
-        if (currentSearchResults.length > 0 && typeof Products !== 'undefined') {
-            document.getElementById('mostOrderedSection').style.display = 'block';
-            Products.renderProductCards(currentSearchResults, 'productsGrid');
-        }
+  function executeSearch(query) {
+    if (query.length < CONFIG.search.minCharsToSearch) return;
+    closeSuggestions();
+    
+    if (currentSearchResults.length > 0) {
+        showSearchResultsOverlay(currentSearchResults, query);
+    } else {
+        showSearchEmptyOverlay(query);
     }
+}
 
-    function renderSuggestions(results, query) {
-        if (!suggestionsDropdown) return;
-        if (!results || results.length === 0) {
-            suggestionsDropdown.innerHTML = '<div class="suggestions-header">No results</div>';
-            suggestionsDropdown.classList.add('active');
-            return;
-        }
-        var html = '<div class="suggestions-header">🔍 ' + results.length + ' results</div>';
-        results.forEach(function(item) {
-            html += '<div class="suggestion-item" onclick="window.location.href=\'product.html?id=' + item.id + '\'"><span style="font-size:28px;">' + (item.icon||'📦') + '</span><div class="suggestion-info"><div class="suggestion-name">' + item.name + '</div><div class="suggestion-meta">' + (item.weight||'') + '</div></div><div class="suggestion-price">₹' + item.price + '</div></div>';
-        });
-        suggestionsDropdown.innerHTML = html;
-        suggestionsDropdown.classList.add('active');
+function showSearchResultsOverlay(results, query) {
+    var overlay = document.getElementById('searchResultsOverlay');
+    if (!overlay) {
+        overlay = document.createElement('div');
+        overlay.id = 'searchResultsOverlay';
+        overlay.className = 'search-results-overlay';
+        overlay.onclick = function(e) { if (e.target === overlay) overlay.classList.remove('active'); };
+        document.body.appendChild(overlay);
     }
+    
+    var gridHTML = results.map(function(p) {
+        return createProductCardHTML(p);
+    }).join('');
+    
+    overlay.innerHTML = '<div class="search-results-container">' +
+        '<div class="search-results-header"><span>🔍 "' + query + '" ke results (' + results.length + ')</span><button class="search-results-close" onclick="document.getElementById(\'searchResultsOverlay\').classList.remove(\'active\')">✕</button></div>' +
+        '<div class="search-results-grid">' + gridHTML + '</div>' +
+        '</div>';
+    overlay.classList.add('active');
+    
+    var addBtns = overlay.querySelectorAll('.card-add-btn');
+    addBtns.forEach(function(btn) {
+        btn.onclick = function(e) {
+            e.stopPropagation();
+            var id = this.getAttribute('data-product-id');
+            var product = results.find(function(p) { return p.id === id; });
+            if (product) {
+                Cart.addItem(product, 1);
+                UI.showCartToast(product.name);
+                UI.addToRecentlyViewed(product);
+            }
+        };
+    });
+    
+    var buyBtns = overlay.querySelectorAll('.card-buy-btn');
+    buyBtns.forEach(function(btn) {
+        btn.onclick = function(e) {
+            e.stopPropagation();
+            var id = this.getAttribute('data-product-id');
+            var product = results.find(function(p) { return p.id === id; });
+            if (product && typeof CheckoutModal !== 'undefined') CheckoutModal.open(product);
+        };
+    });
+}
 
+function showSearchEmptyOverlay(query) {
+    var overlay = document.getElementById('searchResultsOverlay');
+    if (!overlay) {
+        overlay = document.createElement('div');
+        overlay.id = 'searchResultsOverlay';
+        overlay.className = 'search-results-overlay';
+        overlay.onclick = function(e) { if (e.target === overlay) overlay.classList.remove('active'); };
+        document.body.appendChild(overlay);
+    }
+    
+    overlay.innerHTML = '<div class="search-results-container">' +
+        '<div class="search-results-header"><span>🔍 "' + query + '" ke results</span><button class="search-results-close" onclick="document.getElementById(\'searchResultsOverlay\').classList.remove(\'active\')">✕</button></div>' +
+        '<div class="search-empty">' +
+        '<div class="search-empty-icon">📦</div>' +
+        '<div class="search-empty-title">"' + query + '" abhi available nahi hai!</div>' +
+        '<div class="search-empty-subtitle">Hum jald hi ye product add karenge. 😊</div>' +
+        '<button class="search-empty-btn" onclick="document.getElementById(\'searchResultsOverlay\').classList.remove(\'active\');document.getElementById(\'searchInput\').focus();">🔍 Kuch aur search karo</button>' +
+        '</div></div>';
+    overlay.classList.add('active');
+}
     function closeSuggestions() { if (suggestionsDropdown) suggestionsDropdown.classList.remove('active'); }
 
     document.addEventListener('click', function(e) {
