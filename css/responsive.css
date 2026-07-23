@@ -1,43 +1,42 @@
-/* Tablet */
-@media (max-width: 1024px) {
-    .products-grid {
-        grid-template-columns: repeat(3, 1fr);
-        gap: var(--space-sm);
-    }
-}
-
 @media (max-width: 768px) {
     .products-grid {
-        grid-template-columns: repeat(2, 1fr);
-        gap: var(--space-sm);
+        grid-template-columns: repeat(3, 1fr);
+        gap: 6px;
     }
-    .card-image-wrapper { height: 160px; }
-    .card-name { font-size: 13px; }
-    .card-price { font-size: 16px; }
-    .card-price-overlay { font-size: 16px; padding: 4px 10px; }
-    .card-add-btn, .card-buy-btn { font-size: 12px; padding: 8px 0; }
+    .card-image-wrapper { flex: 0 0 65%; min-height: 110px; }
+    .card-info { flex: 0 0 35%; padding: 6px 8px 8px; }
+    .card-name { font-size: 10px; }
+    .card-weight { font-size: 9px; }
+    .card-price { font-size: 12px; }
+    .card-mrp { font-size: 9px; }
+    .card-discount-badge { font-size: 8px; padding: 2px 6px; }
+    .card-add-btn, .card-buy-btn { font-size: 9px; padding: 6px 0; }
+    .card-price-overlay { font-size: 12px; padding: 3px 8px; bottom: 6px; right: 6px; }
+    .card-price-row { margin-bottom: 4px; gap: 3px; }
+    .card-buttons { gap: 4px; }
+    .card-name-row { gap: 3px; }
+    .search-results-grid { grid-template-columns: repeat(2, 1fr); }
 }
 
 @media (max-width: 480px) {
     .products-grid {
-        grid-template-columns: repeat(2, 1fr);
-        gap: 8px;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 4px;
     }
-    .card-image-wrapper { height: 140px; }
-    .card-name { font-size: 12px; }
-    .card-weight { font-size: 10px; }
-    .card-price { font-size: 15px; }
-    .card-price-overlay { font-size: 14px; bottom: 8px; right: 8px; }
-    .card-add-btn, .card-buy-btn { font-size: 11px; padding: 7px 0; }
-    .card-info { padding: 10px; }
+    .card-image-wrapper { flex: 0 0 65%; min-height: 90px; }
+    .card-info { flex: 0 0 35%; padding: 4px 6px 6px; }
+    .card-name { font-size: 9px; }
+    .card-weight { font-size: 8px; }
+    .card-price { font-size: 11px; }
+    .card-price-overlay { font-size: 10px; padding: 2px 6px; }
+    .card-add-btn, .card-buy-btn { font-size: 8px; padding: 5px 0; }
+    .search-results-grid { grid-template-columns: repeat(2, 1fr); }
 }
 
 @media (max-width: 380px) {
-    .products-grid { gap: 6px; }
-    .card-image-wrapper { height: 120px; }
-    .card-name { font-size: 11px; }
-    .card-price { font-size: 13px; }
-    .card-add-btn, .card-buy-btn { font-size: 10px; padding: 6px 0; }
+    .card-image-wrapper { min-height: 75px; }
+    .card-name { font-size: 8px; }
+    .card-price { font-size: 10px; }
 }
     
     .search-container { width: 85%; height: 46px; }
