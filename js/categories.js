@@ -47,20 +47,41 @@ var Categories = {
     },
     
     selectCategory: function(categoryId) {
-        if (this.selectedCategory === categoryId) { this.deselectAll(); return; }
+    if (this.selectedCategory === categoryId) {
         this.deselectAll();
-        this.selectedCategory = categoryId;
-        var pill = document.querySelector('.category-pill[data-category="' + categoryId + '"]');
-        if (pill) pill.classList.add('selected');
-        this.showCategoryProducts(categoryId);
-    },
+        return;
+    }
+    
+    this.deselectAll();
+    this.selectedCategory = categoryId;
+    
+    var pill = document.querySelector('.category-pill[data-category="' + categoryId + '"]');
+    if (pill) pill.classList.add('selected');
+    
+    this.showCategoryProducts(categoryId);
+    
+    // 👁️ Recently Viewed ko HIDE karo
+    var recentSection = document.getElementById('recentlyViewedSection');
+    if (recentSection) {
+        recentSection.style.display = 'none';
+    }
+},
     
     deselectAll: function() {
-        var pills = document.querySelectorAll('.category-pill.selected');
-        for (var i = 0; i < pills.length; i++) { pills[i].classList.remove('selected'); }
-        this.selectedCategory = null;
-        this.showMostOrdered();
-    },
+    var pills = document.querySelectorAll('.category-pill.selected');
+    for (var i = 0; i < pills.length; i++) {
+        pills[i].classList.remove('selected');
+    }
+    
+    this.selectedCategory = null;
+    this.showMostOrdered();
+    
+    // 👁️ Recently Viewed ko WAPAS SHOW karo
+    var recentSection = document.getElementById('recentlyViewedSection');
+    if (recentSection && typeof UI !== 'undefined') {
+        UI.renderRecentlyViewed();
+    }
+},
     
     showCategoryProducts: function(categoryId) {
         var cat = this.categoriesList.find(function(c) { return c.id === categoryId; });
