@@ -1,8 +1,8 @@
-const CONFIG = {
+var CONFIG = {
     store: {
         name: 'Quick Dukan',
         tagline: 'Ghar Baithe Kirana',
-        phone: '919876543210',           // ← APNA WHATSAPP NUMBER
+        phone: '919719312956',
         phoneDisplay: '98765-43210',
         email: 'quickdukan@gmail.com',
         address: 'Near Ram Mandir, Bhopal, MP',
@@ -28,8 +28,8 @@ const CONFIG = {
         debounceDelay: 300
     },
     payments: {
-        qrCodeImage: 'https://i.ibb.co/YOUR-QR-CODE.png',  // ← APNA QR CODE
-        phonePeUPI: 'quickdukan@upi',                        // ← APNA UPI ID
+        qrCodeImage: 'https://i.ibb.co/YOUR-QR-CODE.png',
+        phonePeUPI: 'quickdukan@upi',
         googlePayUPI: 'quickdukan@upi'
     },
     placeholders: [
