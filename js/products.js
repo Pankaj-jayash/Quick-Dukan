@@ -130,10 +130,57 @@ var Products = {
 function createProductCardHTML(product) {
     var badgeHTML = '';
     if (product.badge) {
-        var text = product.badge === 'best-seller' ? '🏆 Best' : product.badge === 'popular' ? '🔥 Popular' : product.badge === 'discount' ? Math.round(((product.mrp-product.price)/product.mrp)*100) + '% OFF' : '✨ New';
-        badgeHTML = '<span class="card-badge ' + product.badge + '">' + text + '</span>';
+        var badgeText = '';
+        if (product.badge === 'best-seller') badgeText = '🏆 Best Seller';
+        else if (product.badge === 'popular') badgeText = '🔥 Popular';
+        else if (product.badge === 'new') badgeText = '✨ New';
+        else if (product.badge === 'discount') {
+            var d = product.mrp ? Math.round(((product.mrp - product.price) / product.mrp) * 100) : 0;
+            badgeText = d + '% OFF';
+        }
+        badgeHTML = '<span class="card-badge ' + product.badge + '">' + badgeText + '</span>';
     }
-    var imageHTML = product.image && product.image.indexOf('http') === 0 ? '<img src="' + product.image + '" class="card-image" onerror="this.parentElement.innerHTML=\'<div class=card-image-placeholder>' + (product.icon||'📦') + '</div>\'">' : '<div class="card-image-placeholder">' + (product.icon||'📦') + '</div>';
-    var discount = product.mrp ? Math.round(((product.mrp-product.price)/product.mrp)*100) : 0;
-    return '<div class="product-card" data-product-id="' + product.id + '"><div class="card-image-wrapper">' + badgeHTML + imageHTML + '<div class="card-price-overlay">₹' + product.price + '</div></div><div class="card-info"><div class="card-name">' + product.name + '</div><div class="card-weight">' + (product.weight||'') + '</div>' + (product.rating ? '<div class="card-rating">⭐' + product.rating + ' (' + (product.reviews||0) + ')</div>' : '') + '<div class="card-bottom"><div><span class="card-price">₹' + product.price + '</span>' + (product.mrp ? '<span class="card-mrp">₹' + product.mrp + '</span>' : '') + (discount>0 ? '<span style="font-size:10px;color:#E85D75;">' + discount + '% OFF</span>' : '') + '</div><div style="display:flex;gap:4px;"><button class="card-add-btn" data-product-id="' + product.id + '">🛒</button><button class="card-buy-btn" data-product-id="' + product.id + '">⚡Buy</button></div></div></div></div>';
+    
+    var imageHTML;
+    if (product.image && product.image.indexOf('http') === 0) {
+        imageHTML = '<img src="' + product.image + '" alt="' + product.name + '" class="card-image" loading="lazy" onerror="this.parentElement.innerHTML=\'<div class=card-image-placeholder>' + (product.icon || '📦') + '</div>\'">';
+    } else {
+        imageHTML = '<div class="card-image-placeholder">' + (product.icon || '📦') + '</div>';
+    }
+    
+    var discount = product.mrp ? Math.round(((product.mrp - product.price) / product.mrp) * 100) : 0;
+    
+    var discountRow = '';
+    if (discount > 0) {
+        discountRow = '<div class="card-discount-row"><span class="card-discount-badge">' + discount + '% OFF</span></div>';
+    }
+    
+    var ratingRow = '';
+    if (product.rating) {
+        ratingRow = '<div class="card-rating"><span class="card-rating-stars">' + '⭐'.repeat(Math.round(product.rating)) + '</span><span>' + product.rating + ' (' + (product.reviews || 0) + ')</span></div>';
+    }
+    
+    return '<div class="product-card" data-product-id="' + product.id + '">' +
+        '<div class="card-image-wrapper">' +
+            badgeHTML +
+            imageHTML +
+            '<div class="card-price-overlay">₹' + product.price + '</div>' +
+        '</div>' +
+        '<div class="card-info">' +
+            '<div class="card-name-row">' +
+                '<span class="card-name">' + product.name + '</span>' +
+                '<span class="card-weight">' + (product.weight || '') + '</span>' +
+            '</div>' +
+            discountRow +
+            ratingRow +
+            '<div class="card-price-row">' +
+                '<span class="card-price">₹' + product.price + '</span>' +
+                (product.mrp ? '<span class="card-mrp">₹' + product.mrp + '</span>' : '') +
+            '</div>' +
+            '<div class="card-buttons">' +
+                '<button class="card-add-btn" data-product-id="' + product.id + '">🛒 Add</button>' +
+                '<button class="card-buy-btn" data-product-id="' + product.id + '">⚡ Buy</button>' +
+            '</div>' +
+        '</div>' +
+    '</div>';
 }
