@@ -4,11 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Quick Dukan — Ghar Baithe Kirana</title>
-    
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800;900&family=Nunito:wght@400;500;600;700&display=swap" rel="stylesheet">
-    
     <link rel="stylesheet" href="css/reset.css">
     <link rel="stylesheet" href="css/variables.css">
     <link rel="stylesheet" href="css/global.css">
@@ -16,228 +14,118 @@
     <link rel="stylesheet" href="css/responsive.css">
 </head>
 <body>
-    
-    <!-- ==================== TOP HEADER ==================== -->
-    <header class="top-header" id="topHeader">
-        <div class="header-brand" id="headerBrand">
-            <span class="brand-icon">🛒</span>
-            <div class="brand-text-wrapper">
-                <span class="brand-text">
-                    <span class="quick-text" id="quickText">QUICK</span>
-                    <span class="dukan-text" id="dukanText">DUKAN</span>
-                </span>
-            </div>
+
+<!-- ========== TOP HEADER ========== -->
+<header class="top-header" id="topHeader">
+    <div class="header-brand" onclick="window.location.href='index.html'">
+        <span class="brand-icon">🛒</span>
+        <div class="brand-text-wrapper">
+            <span class="brand-text"><span class="quick-text">QUICK</span><span class="dukan-text">DUKAN</span></span>
         </div>
-        <div class="free-delivery" id="freeDelivery">
-            <div class="truck-icon-wrapper">
-                <span class="truck-icon">🚚</span>
-                <span class="exhaust-puff">💨</span>
-            </div>
-            <span class="free-text">Free Delivery*</span>
-            <div class="road-lines"></div>
-            <div class="sparkle-container" id="sparkleContainer"></div>
-        </div>
-        <button class="theme-toggle" id="themeToggle" aria-label="Toggle theme">
-            <span class="toggle-icon" id="toggleIcon">🌙</span>
-        </button>
-    </header>
-    
-    <!-- ==================== SEARCH BAR ==================== -->
-    <div class="search-wrapper" id="searchWrapper">
-        <div class="search-container" id="searchContainer">
-            <span class="search-icon" id="searchIcon">🔍</span>
-            <input type="text" class="search-input" id="searchInput" placeholder="Search atta, chawal, sabun..." autocomplete="off">
-            <span class="voice-icon" id="voiceIcon" title="Voice Search">🎤</span>
-        </div>
-        <div class="suggestions-dropdown" id="suggestionsDropdown"></div>
     </div>
-    
-    <!-- ==================== CATEGORIES BAR ==================== -->
-    <div class="categories-bar-wrapper" id="categoriesBarWrapper">
-        <div class="categories-bar-container">
-            <button class="cat-scroll-arrow cat-scroll-left" id="catScrollLeft" aria-label="Scroll left">◄</button>
-            <div class="categories-bar" id="categoriesBar"></div>
-            <button class="cat-scroll-arrow cat-scroll-right" id="catScrollRight" aria-label="Scroll right">►</button>
-        </div>
-        <div class="cat-fade-left"></div>
-        <div class="cat-fade-right"></div>
-        <div class="cat-scroll-dots" id="catScrollDots"></div>
+    <div class="free-delivery">
+        <div class="truck-icon-wrapper"><span class="truck-icon">🚚</span><span class="exhaust-puff">💨</span></div>
+        <span class="free-text">Free Delivery*</span>
+        <div class="road-lines"></div>
     </div>
-    
-<!-- ==================== MAIN CONTENT AREA ==================== -->
+    <button class="theme-toggle" id="themeToggle" aria-label="Toggle theme">
+        <span class="toggle-icon" id="toggleIcon">🌙</span>
+    </button>
+</header>
+
+<!-- ========== SEARCH BAR ========== -->
+<div class="search-wrapper" id="searchWrapper">
+    <div class="search-container">
+        <span class="search-icon" onclick="document.getElementById('searchInput').focus()">🔍</span>
+        <input type="text" class="search-input" id="searchInput" placeholder="Search atta, chawal, sabun..." autocomplete="off">
+        <span class="voice-icon" title="Voice Search">🎤</span>
+    </div>
+    <div class="suggestions-dropdown" id="suggestionsDropdown"></div>
+</div>
+
+<!-- ========== CATEGORIES BAR ========== -->
+<div class="categories-bar-wrapper" id="categoriesBarWrapper">
+    <div class="categories-bar-container">
+        <button class="cat-scroll-arrow cat-scroll-left" onclick="document.getElementById('categoriesBar').scrollBy({left:-200,behavior:'smooth'})">◄</button>
+        <div class="categories-bar" id="categoriesBar"></div>
+        <button class="cat-scroll-arrow cat-scroll-right" onclick="document.getElementById('categoriesBar').scrollBy({left:200,behavior:'smooth'})">►</button>
+    </div>
+    <div class="cat-fade-left"></div>
+    <div class="cat-fade-right"></div>
+    <div class="cat-scroll-dots" id="catScrollDots"></div>
+</div>
+
+<!-- ========== MAIN CONTENT ========== -->
 <div class="main-content-full">
-    
-    <!-- Recently Viewed Section -->
+
     <div class="recently-viewed-section" id="recentlyViewedSection">
         <h2 class="section-heading">👁️ Recently Viewed</h2>
         <div class="recently-grid" id="recentlyGrid"></div>
     </div>
-    
-    <div class="category-back" id="categoryBack" style="display: none;">
+
+    <div class="category-back" id="categoryBack" style="display:none;">
         <button class="back-btn" onclick="backToAll()">← Back to All Categories</button>
     </div>
-    
-    <!-- ... rest same ... -->
+
+    <h2 class="category-title" id="categoryTitle" style="display:none;"></h2>
+
+    <div class="products-loading" id="productsLoading">
+        <div class="loading-spinner"><div class="spinner-circle"></div><div class="spinner-circle spinner-inner"></div><div class="spinner-icon">🛒</div></div>
+        <p class="loading-text">Loading products...</p>
+    </div>
+
+    <div class="most-ordered-section" id="mostOrderedSection" style="display:none;">
+        <h2 class="section-heading">🔥 MOST ORDERED — "Bhopal Ki Pasand"</h2>
+        <div class="products-grid" id="productsGrid"></div>
+    </div>
+
+    <div class="category-products-section" id="categoryProductsSection" style="display:none;">
+        <div class="products-grid" id="categoryProductsGrid"></div>
+    </div>
+
 </div>
-        
-        <h2 class="category-title" id="categoryTitle" style="display: none;"></h2>
-        
-        <!-- Loading Animation -->
-        <div class="products-loading" id="productsLoading">
-            <div class="loading-spinner">
-                <div class="spinner-circle"></div>
-                <div class="spinner-circle spinner-inner"></div>
-                <div class="spinner-icon">🛒</div>
-            </div>
-            <p class="loading-text">Loading products...</p>
-            <div class="loading-dots"><span>.</span><span>.</span><span>.</span></div>
-        </div>
-        
-        <!-- Most Ordered Section -->
-        <div class="most-ordered-section" id="mostOrderedSection" style="display: none;">
-            <h2 class="section-heading">🔥 MOST ORDERED — "Bhopal Ki Pasand"</h2>
-            <div class="products-grid" id="productsGrid"></div>
-        </div>
-        
-        <!-- Category Products Section -->
-        <div class="category-products-section" id="categoryProductsSection" style="display: none;">
-            <div class="products-grid" id="categoryProductsGrid"></div>
-        </div>
-        
-    </div>
-    
-    <!-- ==================== CART TOAST ==================== -->
-    <div class="cart-toast" id="cartToast">
-        <span class="toast-icon">✅</span>
-        <div class="toast-content">
-            <span class="toast-title">Added to Cart!</span>
-            <span class="toast-product" id="toastProduct"></span>
-        </div>
-        <span class="toast-close" onclick="document.getElementById('cartToast').classList.remove('show')">✕</span>
-    </div>
-    
-    <!-- ==================== BOTTOM NAVBAR ==================== -->
-    <nav class="bottom-nav" id="bottomNav">
+
+<!-- ========== CART TOAST ========== -->
+<div class="cart-toast" id="cartToast">
+    <span class="toast-icon">✅</span>
+    <div class="toast-content"><span class="toast-title">Added to Cart!</span><span class="toast-product" id="toastProduct"></span></div>
+    <span class="toast-close" onclick="this.parentElement.classList.remove('show')">✕</span>
+</div>
+
+<!-- ========== BOTTOM NAVBAR ========== -->
+<nav class="bottom-nav">
     <div class="bottom-nav-inner">
-        
-        <!-- Home -->
-        <a href="index.html" class="nav-item active" data-page="home" aria-label="Home">
-            <span class="nav-icon">🏠</span>
-            <span class="nav-label">Home</span>
-            <span class="nav-dot"></span>
-            <span class="nav-ripple-container"></span>
-        </a>
-        
-        <!-- Shop -->
-        <a href="shop.html" class="nav-item" data-page="shop" aria-label="Shop">
-            <span class="nav-icon">🛍️</span>
-            <span class="nav-label">Shop</span>
-            <span class="nav-dot"></span>
-            <span class="nav-ripple-container"></span>
-        </a>
-        
-        <!-- Cart -->
-        <a href="cart.html" class="nav-item nav-cart" data-page="cart" aria-label="Cart">
-            <span class="nav-icon-wrapper">
-                <span class="nav-icon">🛒</span>
-                <span class="cart-badge" id="cartBadge">0</span>
-                <span class="cart-sparkle-container" id="cartSparkles"></span>
-            </span>
+        <a href="index.html" class="nav-item active"><span class="nav-icon">🏠</span><span class="nav-label">Home</span></a>
+        <a href="shop.html" class="nav-item"><span class="nav-icon">🛍️</span><span class="nav-label">Shop</span></a>
+        <a href="cart.html" class="nav-item nav-cart">
+            <span class="nav-icon-wrapper"><span class="nav-icon">🛒</span><span class="cart-badge" id="cartBadge">0</span></span>
             <span class="nav-label">Cart</span>
-            <span class="nav-dot"></span>
-            <span class="nav-ripple-container"></span>
         </a>
-        
-        <!-- WhatsApp -->
-        <button class="nav-item nav-whatsapp" data-page="whatsapp" onclick="openWhatsApp()" aria-label="WhatsApp">
-            <span class="nav-icon-wrapper">
-                <span class="nav-icon">💬</span>
-                <span class="whatsapp-ring" id="whatsappRing"></span>
-            </span>
-            <span class="nav-label">Whats</span>
-            <span class="nav-dot"></span>
-            <span class="nav-ripple-container"></span>
-        </button>
-        
-        <!-- Top -->
-        <button class="nav-item nav-top" id="navTop" data-page="top" onclick="window.scrollTo({top:0,behavior:'smooth'})" aria-label="Back to Top">
-            <span class="nav-icon-wrapper">
-                <span class="nav-icon" id="topIcon">⬆️</span>
-                <span class="top-sparkle-container" id="topSparkles"></span>
-            </span>
-            <span class="nav-label">Top</span>
-            <span class="nav-dot"></span>
-            <span class="nav-ripple-container"></span>
-        </button>
-        
+        <button class="nav-item nav-whatsapp" onclick="openWhatsApp()"><span class="nav-icon">💬</span><span class="nav-label">Whats</span></button>
+        <button class="nav-item nav-top" id="navTop" onclick="window.scrollTo({top:0,behavior:'smooth'})"><span class="nav-icon">⬆️</span><span class="nav-label">Top</span></button>
     </div>
 </nav>
-       <!-- NEW (100% working) -->
-         <button class="nav-item" onclick="window.location.href='shop.html'"><button class="nav-item" data-page="shop" onclick="navigateTo('shop.html')" aria-label="Shop">
-                <span class="nav-icon">🛍️</span>
-                <span class="nav-label">Shop</span>
-                <span class="nav-dot"></span>
-                <span class="nav-ripple-container"></span>
-            </button>
-            <button class="nav-item nav-cart" data-page="cart" onclick="navigateTo('cart.html')" aria-label="Cart">
-                <span class="nav-icon-wrapper">
-                    <span class="nav-icon">🛒</span>
-                    <span class="cart-badge" id="cartBadge">0</span>
-                    <span class="cart-sparkle-container" id="cartSparkles"></span>
-                </span>
-                <span class="nav-label">Cart</span>
-                <span class="nav-dot"></span>
-                <span class="nav-ripple-container"></span>
-            </button>
-            <button class="nav-item nav-whatsapp" data-page="whatsapp" onclick="openWhatsApp()" aria-label="WhatsApp">
-                <span class="nav-icon-wrapper">
-                    <span class="nav-icon">💬</span>
-                    <span class="whatsapp-ring" id="whatsappRing"></span>
-                </span>
-                <span class="nav-label">Whats</span>
-                <span class="nav-dot"></span>
-                <span class="nav-ripple-container"></span>
-            </button>
-            <button class="nav-item nav-top" id="navTop" data-page="top" onclick="scrollToTop()" aria-label="Back to Top">
-                <span class="nav-icon-wrapper">
-                    <span class="nav-icon" id="topIcon">⬆️</span>
-                    <span class="top-sparkle-container" id="topSparkles"></span>
-                </span>
-                <span class="nav-label">Top</span>
-                <span class="nav-dot"></span>
-                <span class="nav-ripple-container"></span>
-            </button>
-        </div>
-    </nav>
-    
-    <!-- ==================== JAVASCRIPT ==================== -->
-    <script src="js/config.js"></script>
-    <script src="js/ui.js"></script>
-    <script src="js/theme.js"></script>
-    <script src="js/cart.js"></script>
-    <script src="js/categories.js"></script>
-    <script src="js/products.js"></script>
-    <script src="js/search.js"></script>
-    <script src="js/header.js"></script>
-    
-    <script>
-        function navigateTo(url) { setTimeout(() => { window.location.href = url; }, 200); }
-        
-        function openWhatsApp() {
-            const cart = Cart.getCart();
-            let message;
-            if (cart.totalItems > 0) {
-                message = '🛒 *Quick Dukan — Order*\n\n';
-                cart.items.forEach((item, i) => { message += `${i+1}. ${item.name} × ${item.quantity} = ₹${item.price * item.quantity}\n`; });
-                message += `\n💰 Total: ₹${cart.totalAmount}`;
-            } else { message = 'Hi Quick Dukan, I want to order groceries...'; }
-            const url = `https://wa.me/${CONFIG.store.phone}?text=${encodeURIComponent(message)}`;
-            window.open(url, '_blank');
-        }
-        
-        function scrollToTop() { UI.createTopSparkles(); window.scrollTo({ top: 0, behavior: 'smooth' }); }
-        function backToAll() { Categories.deselectAll(); }
-    <script src="js/checkout-modal.js"></script>
+
+<!-- ========== SCRIPTS ========== -->
+<script src="js/config.js"></script>
+<script src="js/ui.js"></script>
+<script src="js/theme.js"></script>
+<script src="js/cart.js"></script>
+<script src="js/categories.js"></script>
+<script src="js/products.js"></script>
+<script src="js/search.js"></script>
+<script src="js/whatsapp.js"></script>
+<script src="js/checkout-modal.js"></script>
+<script src="js/header.js"></script>
+
+<script>
+function backToAll() { if(typeof Categories!=='undefined') Categories.deselectAll(); }
+function openWhatsApp() {
+    var msg = 'Hi Quick Dukan, I want to order groceries...';
+    if(typeof Cart!=='undefined'){var c=Cart.getCart();if(c.totalItems>0){msg='🛒 *Quick Dukan*\n\n';c.items.forEach(function(i,k){msg+=(k+1)+'. '+i.name+' x'+i.quantity+' = ₹'+(i.price*i.quantity)+'\n';});msg+='\n💰 Total: ₹'+c.totalAmount;}}
+    window.open('https://wa.me/919876543210?text='+encodeURIComponent(msg),'_blank');
+}
 </script>
+
 </body>
 </html>
