@@ -1,92 +1,183 @@
-var UI = {
-    createRipple: function(event, element) {
-        var ripple = document.createElement('span');
-        ripple.className = 'header-ripple';
-        var rect = element.getBoundingClientRect();
-        var size = Math.max(rect.width, rect.height);
-        ripple.style.width = ripple.style.height = size + 'px';
-        ripple.style.left = (event.clientX - rect.left - size / 2) + 'px';
-        ripple.style.top = (event.clientY - rect.top - size / 2) + 'px';
-        element.appendChild(ripple);
-        ripple.addEventListener('animationend', function() { ripple.remove(); });
-    },
-    
-    showCartToast: function(productName) {
-        var toast = document.getElementById('cartToast');
-        var toastProduct = document.getElementById('toastProduct');
-        if (!toast || !toastProduct) return;
-        toastProduct.textContent = productName;
+// ========== UI HELPERS ==========
+
+const UI = {
+    // Toast
+    showCartToast(product, quantity) {
+        const toast = document.getElementById('cartToast');
+        const message = document.getElementById('toastMessage');
+        
+        if (!toast || !message) return;
+        
+        message.textContent = `✅ ${Utils.truncateText(product.name, 25)} × ${quantity} added!`;
         toast.classList.add('show');
+        
         clearTimeout(toast._timeout);
-        toast._timeout = setTimeout(function() { toast.classList.remove('show'); }, CONFIG.features.toastDuration);
+        toast._timeout = setTimeout(() => {
+            toast.classList.remove('show');
+        }, CONFIG.features.toastDuration);
     },
     
-    showLoading: function() {
-        var loader = document.getElementById('productsLoading');
-        if (loader) loader.classList.remove('hidden');
-    },
-    
-    hideLoading: function() {
-        var loader = document.getElementById('productsLoading');
-        if (loader) loader.classList.add('hidden');
-    },
-    
-    updateCartBadge: function(count) {
-        var badge = document.getElementById('cartBadge');
-        if (!badge) return;
-        if (count > 0) {
-            badge.textContent = count > 99 ? '99+' : count;
-            badge.classList.add('visible');
-        } else {
-            badge.classList.remove('visible');
-            badge.textContent = '0';
-        }
-    },
-    
-    setupScrollShadow: function(header, search) {
-        window.addEventListener('scroll', function() {
-            if (window.scrollY > 10) {
-                if (header) header.classList.add('scrolled');
-                if (search) search.classList.add('scrolled');
+    // Cart Badge
+    updateCartBadge() {
+        const cart = Storage.getCart();
+        const badge = document.getElementById('cartBadge');
+        const navBadges = document.querySelectorAll('.cart-badge');
+        
+        navBadges.forEach(badgeEl => {
+            if (cart.totalItems > 0) {
+                badgeEl.textContent = cart.totalItems > 99 ? '99+' : cart.totalItems;
+                badgeEl.style.display = 'flex';
+                badgeEl.classList.add('pop');
+                setTimeout(() => badgeEl.classList.remove('pop'), 400);
             } else {
-                if (header) header.classList.remove('scrolled');
-                if (search) search.classList.remove('scrolled');
-            }
-            var navTop = document.getElementById('navTop');
-            if (navTop) {
-                if (window.scrollY > 300) navTop.classList.add('visible');
-                else navTop.classList.remove('visible');
+                badgeEl.style.display = 'none';
             }
         });
     },
     
-    addToRecentlyViewed: function(product) {
-        var recent = JSON.parse(localStorage.getItem('quickdukan_recent') || '[]');
-        recent = recent.filter(function(p) { return p.id !== product.id; });
-        recent.unshift({ id: product.id, name: product.name, price: product.price, icon: product.icon || '📦' });
-        recent = recent.slice(0, CONFIG.features.recentlyViewedLimit);
-        localStorage.setItem('quickdukan_recent', JSON.stringify(recent));
-        this.renderRecentlyViewed();
-    },
-    
-    renderRecentlyViewed: function() {
-        var section = document.getElementById('recentlyViewedSection');
-        var container = document.getElementById('recentlyGrid');
-        if (!section || !container) return;
-        var recent = JSON.parse(localStorage.getItem('quickdukan_recent') || '[]');
-        if (recent.length === 0) { section.style.display = 'none'; return; }
-        section.style.display = 'block';
-        container.innerHTML = recent.map(function(p) {
-            return '<div class="recently-card" onclick="window.location.href=\'product.html?id=' + p.id + '\'"><div class="recently-card-image">' + (p.icon || '📦') + '</div><div class="recently-card-name">' + p.name + '</div><div class="recently-card-price">₹' + p.price + '</div></div>';
-        }).join('');
-    },
-    
-    debounce: function(func, delay) {
-        var timeout;
-        return function() {
-            var context = this, args = arguments;
-            clearTimeout(timeout);
-            timeout = setTimeout(function() { func.apply(context, args); }, delay);
+    // Back to Top
+    setupBackToTop() {
+        const topBtn = document.getElementById('backToTopBtn');
+        if (!topBtn) return;
+        
+        const toggleVisibility = () => {
+            if (window.scrollY > 300) {
+                topBtn.classList.add('visible');
+            } else {
+                topBtn.classList.remove('visible');
+            }
         };
+        
+        window.addEventListener('scroll', Utils.debounce(toggleVisibility, 100));
+        toggleVisibility();
+        
+        topBtn.addEventListener('click', () => {
+            const icon = topBtn.querySelector('i');
+            if (icon) {
+                icon.classList.add('launching');
+                setTimeout(() => icon.classList.remove('launching'), 600);
+            }
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        });
+    },
+    
+    // Bottom Nav Active State
+    setActiveNav(page) {
+        document.querySelectorAll('.nav-item').forEach(item => {
+            item.classList.remove('active');
+            if (item.dataset.page === page) item.classList.add('active');
+        });
+    },
+    
+    // Header Scroll Shadow
+    setupHeaderScroll() {
+        const header = document.getElementById('topHeader');
+        if (!header) return;
+        
+        window.addEventListener('scroll', Utils.debounce(() => {
+            if (window.scrollY > 10) {
+                header.classList.add('scrolled');
+            } else {
+                header.classList.remove('scrolled');
+            }
+        }, 50));
+    },
+    
+    // Search Sticky Shadow
+    setupSearchSticky() {
+        const searchSection = document.getElementById('searchSection');
+        if (!searchSection) return;
+        
+        window.addEventListener('scroll', Utils.debounce(() => {
+            if (window.scrollY > 50) {
+                searchSection.classList.add('sticky-shadow');
+            } else {
+                searchSection.classList.remove('sticky-shadow');
+            }
+        }, 50));
+    },
+    
+    // Ripple Effect
+    createRipple(event, element, color = 'rgba(255,255,255,0.3)') {
+        const ripple = document.createElement('span');
+        ripple.className = 'header-ripple';
+        
+        const rect = element.getBoundingClientRect();
+        const size = Math.max(rect.width, rect.height);
+        ripple.style.width = ripple.style.height = size + 'px';
+        ripple.style.left = (event.clientX - rect.left - size / 2) + 'px';
+        ripple.style.top = (event.clientY - rect.top - size / 2) + 'px';
+        ripple.style.background = color;
+        
+        element.style.position = element.style.position || 'relative';
+        element.style.overflow = 'hidden';
+        element.appendChild(ripple);
+        
+        ripple.addEventListener('animationend', () => ripple.remove());
+    },
+    
+    // Show Popup
+    showPopup(overlayId) {
+        const overlay = document.getElementById(overlayId);
+        if (overlay) {
+            overlay.classList.add('active');
+            document.body.style.overflow = 'hidden';
+        }
+    },
+    
+    // Hide Popup
+    hidePopup(overlayId) {
+        const overlay = document.getElementById(overlayId);
+        if (overlay) {
+            overlay.classList.remove('active');
+            document.body.style.overflow = '';
+        }
+    },
+    
+    // Close popup on outside click
+    setupPopupClose(overlayId, popupSelector) {
+        const overlay = document.getElementById(overlayId);
+        if (!overlay) return;
+        
+        overlay.addEventListener('click', function(e) {
+            if (e.target === overlay) {
+                UI.hidePopup(overlayId);
+            }
+        });
+        
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape' && overlay.classList.contains('active')) {
+                UI.hidePopup(overlayId);
+            }
+        });
+    },
+    
+    // Navbar button navigation
+    setupNavNavigation() {
+        document.querySelectorAll('.nav-item[data-page]').forEach(item => {
+            item.addEventListener('click', function(e) {
+                const page = this.dataset.page;
+                const ripple = document.createElement('span');
+                ripple.className = 'nav-ripple';
+                this.appendChild(ripple);
+                ripple.addEventListener('animationend', () => ripple.remove());
+                
+                switch(page) {
+                    case 'home':
+                        window.location.href = 'index.html';
+                        break;
+                    case 'shop':
+                        window.location.href = 'shop.html';
+                        break;
+                    case 'cart':
+                        window.location.href = 'cart.html';
+                        break;
+                    case 'orders':
+                        UI.showPopup('ordersPopupOverlay');
+                        if (typeof loadMyOrders === 'function') loadMyOrders();
+                        break;
+                }
+            });
+        });
     }
 };
