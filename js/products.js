@@ -1,186 +1,225 @@
-var Products = {
-    allProducts: [],
+// ========== PRODUCT LOADING & RENDERING ==========
+
+const ProductLoader = {
+    categoriesCache: null,
+    productsCache: {},
     
-    init: function() {
-        UI.showLoading();
-        var self = this;
-        this.loadAllProducts().then(function() {
-            self.loadMostOrdered();
-            UI.hideLoading();
-            UI.renderRecentlyViewed();
-        });
-    },
-    
-    loadAllProducts: function() {
-        var self = this;
-        return fetch(CONFIG.urls.categoriesList)
-            .then(function(res) { return res.json(); })
-            .then(function(data) {
-                var promises = data.categories.map(function(cat) {
-                    return fetch(cat.file).then(function(r) { return r.json(); }).catch(function() { return { products: [] }; });
-                });
-                return Promise.all(promises);
-            })
-            .then(function(results) {
-                self.allProducts = [];
-                results.forEach(function(data) {
-                    if (data.products) {
-                        var active = data.products.filter(function(p) { return p.inStock; });
-                        self.allProducts = self.allProducts.concat(active);
-                    }
-                });
-                if (self.allProducts.length === 0) self.allProducts = self.getFallback();
-            })
-            .catch(function() {
-                self.allProducts = self.getFallback();
-            });
-    },
-    
-    loadMostOrdered: function() {
-        var popular = this.allProducts.filter(function(p) { return p.mostOrdered; }).slice(0, 12);
-        if (popular.length === 0) popular = this.allProducts.slice(0, 8);
-        this.renderProductCards(popular, 'productsGrid');
-        document.getElementById('mostOrderedSection').style.display = 'block';
-    },
-    
-    loadCategoryProducts: function(categoryId) {
-        UI.showLoading();
-        var cat = Categories.categoriesList.find(function(c) { return c.id === categoryId; });
-        if (!cat) return Promise.resolve([]);
-        return fetch(cat.file)
-            .then(function(res) { return res.json(); })
-            .then(function(data) {
-                UI.hideLoading();
-                return data.products.filter(function(p) { return p.inStock; });
-            })
-            .catch(function() {
-                UI.hideLoading();
-                return [];
-            });
-    },
-    
-    searchProducts: function(query) {
-        var q = query.toLowerCase();
-        return this.allProducts.filter(function(p) {
-            return p.name.toLowerCase().indexOf(q) > -1;
-        }).slice(0, 5);
-    },
-    
-    renderProductCards: function(products, containerId) {
-        var container = document.getElementById(containerId);
-        if (!container) return;
-        if (!products || products.length === 0) {
-            container.innerHTML = '<div class="empty-products-message"><span style="font-size:48px;">📦</span><p>Products coming soon!</p></div>';
-            return;
+    // Load categories list
+    async loadCategoriesList() {
+        if (this.categoriesCache) return this.categoriesCache;
+        
+        try {
+            const response = await fetch(CONFIG.urls.categoriesList);
+            const data = await response.json();
+            this.categoriesCache = data.categories;
+            return this.categoriesCache;
+        } catch (e) {
+            console.error('Failed to load categories:', e);
+            return [];
         }
-        container.innerHTML = products.map(createProductCardHTML).join('');
-        
-        // Add to Cart buttons
-        var addBtns = container.querySelectorAll('.card-add-btn');
-        addBtns.forEach(function(btn) {
-            btn.onclick = function(e) {
-                e.stopPropagation();
-                var id = this.getAttribute('data-product-id');
-                var product = products.find(function(p) { return p.id === id; });
-                if (product) {
-                    Cart.addItem(product, 1);
-                    UI.showCartToast(product.name);
-                    UI.addToRecentlyViewed(product);
-                }
-            };
-        });
-        
-        // Buy Now buttons
-        var buyBtns = container.querySelectorAll('.card-buy-btn');
-        buyBtns.forEach(function(btn) {
-            btn.onclick = function(e) {
-                e.stopPropagation();
-                var id = this.getAttribute('data-product-id');
-                var product = products.find(function(p) { return p.id === id; });
-                if (product && typeof CheckoutModal !== 'undefined') CheckoutModal.open(product);
-            };
-        });
-        
-        // Card click
-        var cards = container.querySelectorAll('.product-card');
-        cards.forEach(function(card) {
-            card.onclick = function() {
-                var id = this.getAttribute('data-product-id');
-                var product = products.find(function(p) { return p.id === id; });
-                if (product) UI.addToRecentlyViewed(product);
-                window.location.href = 'product.html?id=' + id;
-            };
-        });
     },
     
-    getFallback: function() {
-        return [
-            { id:'fb1', name:'Maggi Noodles', weight:'4-Pack', price:55, mrp:60, icon:'🍜', rating:4.7, reviews:500, badge:'popular', inStock:true, mostOrdered:true },
-            { id:'fb2', name:'Parle-G Biscuit', weight:'800g', price:65, mrp:70, icon:'🍪', rating:4.8, reviews:250, badge:'best-seller', inStock:true, mostOrdered:true },
-            { id:'fb3', name:'Coca Cola', weight:'750ml', price:40, mrp:45, icon:'🥤', rating:4.4, reviews:400, badge:'popular', inStock:true, mostOrdered:true },
-            { id:'fb4', name:'Tata Atta', weight:'5kg', price:300, mrp:350, icon:'🍚', rating:4.2, reviews:120, badge:null, inStock:true, mostOrdered:true },
-            { id:'fb5', name:'Surf Excel', weight:'1kg', price:180, mrp:220, icon:'🧴', rating:4.3, reviews:89, badge:'discount', inStock:true, mostOrdered:true },
-            { id:'fb6', name:'Fortune Oil', weight:'1L', price:165, mrp:180, icon:'🧂', rating:4.1, reviews:65, badge:null, inStock:true, mostOrdered:true },
-            { id:'fb7', name:'Amul Doodh', weight:'500ml', price:25, mrp:28, icon:'🥛', rating:4.6, reviews:200, badge:null, inStock:true, mostOrdered:true },
-            { id:'fb8', name:'Taj Chai', weight:'250g', price:130, mrp:150, icon:'☕', rating:4.4, reviews:78, badge:null, inStock:true, mostOrdered:true }
-        ];
+    // Load products for a category
+    async loadCategoryProducts(categoryId) {
+        if (this.productsCache[categoryId]) return this.productsCache[categoryId];
+        
+        try {
+            const categories = await this.loadCategoriesList();
+            const category = categories.find(c => c.id === categoryId);
+            if (!category) return { products: [] };
+            
+            const response = await fetch(category.file);
+            const data = await response.json();
+            this.productsCache[categoryId] = data;
+            return data;
+        } catch (e) {
+            console.error(`Failed to load products for ${categoryId}:`, e);
+            return { products: [] };
+        }
+    },
+    
+    // Load most ordered products
+    async loadMostOrdered(limit = CONFIG.features.mostOrderedLimit) {
+        const categories = await this.loadCategoriesList();
+        let allProducts = [];
+        
+        const priorityCats = categories.filter(c => c.priority);
+        const otherCats = categories.filter(c => !c.priority);
+        const sortedCats = [...priorityCats, ...otherCats];
+        
+        for (const cat of sortedCats) {
+            if (allProducts.length >= limit) break;
+            
+            try {
+                const data = await this.loadCategoryProducts(cat.id);
+                const popular = data.products
+                    .filter(p => p.mostOrdered && p.inStock)
+                    .slice(0, limit - allProducts.length);
+                    
+                popular.forEach(p => p.category = cat.id);
+                allProducts = [...allProducts, ...popular];
+            } catch (e) {
+                continue;
+            }
+        }
+        
+        return allProducts.slice(0, limit);
+    },
+    
+    // Load all products (for shop page)
+    async loadAllProducts() {
+        const categories = await this.loadCategoriesList();
+        let allProducts = [];
+        
+        for (const cat of categories) {
+            try {
+                const data = await this.loadCategoryProducts(cat.id);
+                data.products.forEach(p => {
+                    p.category = cat.id;
+                    p.categoryName = cat.name;
+                });
+                allProducts = [...allProducts, ...data.products.filter(p => p.inStock)];
+            } catch (e) {
+                continue;
+            }
+        }
+        
+        return allProducts;
+    },
+    
+    // Search products across all categories
+    async searchProducts(query, maxResults = CONFIG.features.searchSuggestionsLimit) {
+        if (!query || query.length < 2) return [];
+        
+        const categories = await this.loadCategoriesList();
+        let results = [];
+        
+        const priorityCats = categories.filter(c => c.priority);
+        const otherCats = categories.filter(c => !c.priority);
+        const sortedCats = [...priorityCats, ...otherCats];
+        
+        for (const cat of sortedCats) {
+            if (results.length >= maxResults * 2) break;
+            
+            try {
+                const data = await this.loadCategoryProducts(cat.id);
+                
+                for (const product of data.products) {
+                    if (!product.inStock) continue;
+                    
+                    const result = Utils.fuzzyMatch(query, product.name);
+                    if (result.match) {
+                        results.push({
+                            ...product,
+                            category: cat.id,
+                            categoryName: cat.name,
+                            searchScore: result.score
+                        });
+                    }
+                }
+            } catch (e) {
+                continue;
+            }
+        }
+        
+        // Sort by score, then by most ordered
+        results.sort((a, b) => {
+            if (b.searchScore !== a.searchScore) return b.searchScore - a.searchScore;
+            return (b.mostOrdered ? 1 : 0) - (a.mostOrdered ? 1 : 0);
+        });
+        
+        return results.slice(0, maxResults);
+    },
+    
+    // Get single product by ID
+    async getProductById(productId) {
+        const categories = await this.loadCategoriesList();
+        
+        for (const cat of categories) {
+            try {
+                const data = await this.loadCategoryProducts(cat.id);
+                const product = data.products.find(p => p.id === productId);
+                if (product) {
+                    return { ...product, category: cat.id, categoryName: cat.name };
+                }
+            } catch (e) {
+                continue;
+            }
+        }
+        
+        return null;
+    },
+    
+    // Render product card HTML
+    renderProductCard(product) {
+        const discount = Utils.calculateDiscount(product.mrp, product.price);
+        
+        let badgeHTML = '';
+        if (product.badge === 'best-seller') {
+            badgeHTML = '<span class="card-badge badge-best-seller">⭐ Best</span>';
+        } else if (product.badge === 'premium') {
+            badgeHTML = '<span class="card-badge badge-premium">Premium</span>';
+        } else if (product.badge === 'new') {
+            badgeHTML = '<span class="card-badge badge-new">New</span>';
+        } else if (discount > 0) {
+            badgeHTML = `<span class="card-badge badge-discount">-${discount}%</span>`;
+        }
+        
+        return `
+            <div class="product-card" data-id="${product.id}" onclick="showProductDetail('${product.id}')">
+                <div class="card-image-wrapper">
+                    <img src="${product.image || CONFIG.urls.placeholderImage + '?random=' + product.id}" 
+                         alt="${product.name}" 
+                         loading="lazy"
+                         onerror="this.src='${CONFIG.urls.placeholderImage}?random=' + Math.random()">
+                    ${badgeHTML}
+                    <div class="price-overlay">
+                        <span>${Utils.formatPrice(product.price)}</span>
+                    </div>
+                </div>
+                <div class="card-info">
+                    <div class="card-name-row">
+                        <span class="card-name">${product.name}</span>
+                        <span class="card-weight">${product.weight}</span>
+                    </div>
+                    ${discount > 0 ? `<div class="card-discount">-${discount}% OFF</div>` : ''}
+                    <div class="card-actions">
+                        <button class="btn-cart" onclick="event.stopPropagation(); addToCartFromCard('${product.id}')">
+                            🛒 Cart
+                        </button>
+                        <button class="btn-buy" onclick="event.stopPropagation(); buyNow('${product.id}')">
+                            🛍️ Buy
+                        </button>
+                    </div>
+                </div>
+            </div>
+        `;
+    },
+    
+    // Render compact card (for recently viewed)
+    renderCompactCard(product) {
+        const discount = Utils.calculateDiscount(product.mrp, product.price);
+        
+        return `
+            <div class="recent-card" data-id="${product.id}" onclick="showProductDetail('${product.id}')">
+                <div class="card-image-wrapper">
+                    <img src="${product.image || CONFIG.urls.placeholderImage + '?random=' + product.id}" 
+                         alt="${product.name}" 
+                         loading="lazy"
+                         onerror="this.src='${CONFIG.urls.placeholderImage}?random=' + Math.random()">
+                    <div class="price-overlay">
+                        <span>${Utils.formatPrice(product.price)}</span>
+                    </div>
+                </div>
+                <div class="card-info">
+                    <div class="card-name">${Utils.truncateText(product.name, 20)}</div>
+                    <div class="card-weight">${product.weight}</div>
+                    ${discount > 0 ? `<div class="card-discount">-${discount}%</div>` : ''}
+                    <button class="btn-cart" onclick="event.stopPropagation(); addToCartFromCard('${product.id}')">
+                        🛒 Add
+                    </button>
+                </div>
+            </div>
+        `;
     }
 };
-
-function createProductCardHTML(product) {
-    var badgeHTML = '';
-    if (product.badge) {
-        var badgeText = '';
-        if (product.badge === 'best-seller') badgeText = '🏆 Best Seller';
-        else if (product.badge === 'popular') badgeText = '🔥 Popular';
-        else if (product.badge === 'new') badgeText = '✨ New';
-        else if (product.badge === 'discount') {
-            var d = product.mrp ? Math.round(((product.mrp - product.price) / product.mrp) * 100) : 0;
-            badgeText = d + '% OFF';
-        }
-        badgeHTML = '<span class="card-badge ' + product.badge + '">' + badgeText + '</span>';
-    }
-    
-    var imageHTML;
-    if (product.image && product.image.indexOf('http') === 0) {
-        imageHTML = '<img src="' + product.image + '" alt="' + product.name + '" class="card-image" loading="lazy" onerror="this.parentElement.innerHTML=\'<div class=card-image-placeholder>' + (product.icon || '📦') + '</div>\'">';
-    } else {
-        imageHTML = '<div class="card-image-placeholder">' + (product.icon || '📦') + '</div>';
-    }
-    
-    var discount = product.mrp ? Math.round(((product.mrp - product.price) / product.mrp) * 100) : 0;
-    
-    var discountRow = '';
-    if (discount > 0) {
-        discountRow = '<div class="card-discount-row"><span class="card-discount-badge">' + discount + '% OFF</span></div>';
-    }
-    
-    var ratingRow = '';
-    if (product.rating) {
-        ratingRow = '<div class="card-rating"><span class="card-rating-stars">' + '⭐'.repeat(Math.round(product.rating)) + '</span><span>' + product.rating + ' (' + (product.reviews || 0) + ')</span></div>';
-    }
-    
-    return '<div class="product-card" data-product-id="' + product.id + '">' +
-        '<div class="card-image-wrapper">' +
-            badgeHTML +
-            imageHTML +
-            '<div class="card-price-overlay">₹' + product.price + '</div>' +
-        '</div>' +
-        '<div class="card-info">' +
-            '<div class="card-name-row">' +
-                '<span class="card-name">' + product.name + '</span>' +
-                '<span class="card-weight">' + (product.weight || '') + '</span>' +
-            '</div>' +
-            discountRow +
-            ratingRow +
-            '<div class="card-price-row">' +
-                '<span class="card-price">₹' + product.price + '</span>' +
-                (product.mrp ? '<span class="card-mrp">₹' + product.mrp + '</span>' : '') +
-            '</div>' +
-            '<div class="card-buttons">' +
-                '<button class="card-add-btn" data-product-id="' + product.id + '">🛒 Add</button>' +
-                '<button class="card-buy-btn" data-product-id="' + product.id + '">⚡ Buy</button>' +
-            '</div>' +
-        '</div>' +
-    '</div>';
-}
