@@ -1,7 +1,10 @@
+/* ========== CSS VARIABLES ========== */
 :root {
+    /* ========== COLORS ========== */
     --primary: #1A3A5C;
     --primary-light: #234B7A;
     --primary-dark: #122840;
+    
     --blue-dark: #1A3A5C;
     --blue-mid: #4A6FA5;
     --blue-soft: #5B8DB5;
@@ -11,41 +14,43 @@
     --blue-icon: #5B8DB5;
     --blue-focus: #4A6FA5;
     --blue-glow: rgba(74, 111, 165, 0.15);
-    --blue-glow-light: rgba(74, 111, 165, 0.06);
+    
     --gold: #FFD700;
     --gold-dark: #B8860B;
     --gold-light: rgba(255, 215, 0, 0.08);
     --gold-border: rgba(255, 215, 0, 0.2);
-    --gold-glow: rgba(255, 215, 0, 0.1);
+    
     --pink: #FF6B8A;
     --pink-dark: #E85D75;
     --pink-glow: rgba(255, 107, 138, 0.5);
-    --pink-hover: rgba(255, 107, 138, 0.03);
-    --pink-border: rgba(255, 107, 138, 0.15);
+    --pink-hover: rgba(255, 107, 138, 0.04);
+    
     --bg: #F0F4F8;
     --bg-white: #FFFFFF;
     --bg-card: #FFFFFF;
-    --text-dark: #212121;
-    --text-grey: #757575;
-    --text-light: #9E9E9E;
+    --text-dark: #1A1A2E;
+    --text-grey: #6B7280;
+    --text-light: #9CA3AF;
     --text-input: #1A1A2E;
-    --text-gold: #8B6914;
-    --danger: #F44336;
-    --success: #4CAF50;
-    --warning: #FFC107;
-    --nav-bg: rgba(13, 27, 42, 0.88);
+    
+    --danger: #EF4444;
+    --success: #10B981;
+    --warning: #F59E0B;
+    
+    /* Navbar */
+    --nav-bg: rgba(13, 27, 42, 0.9);
     --nav-border: rgba(255, 255, 255, 0.08);
     --nav-active: #FF6B8A;
     --nav-active-glow: rgba(255, 107, 138, 0.4);
     --nav-inactive: rgba(255, 255, 255, 0.5);
-    --nav-inactive-icon: rgba(255, 255, 255, 0.55);
     --nav-text-active: #FFFFFF;
     --nav-whatsapp: #25D366;
-    --nav-whatsapp-glow: rgba(37, 211, 102, 0.5);
     --nav-badge: #FF3366;
-    --nav-badge-text: #FFFFFF;
+    
+    /* ========== TYPOGRAPHY ========== */
     --font-heading: 'Poppins', sans-serif;
     --font-body: 'Nunito', sans-serif;
+    
     --text-xs: 10px;
     --text-sm: 13px;
     --text-base: 14px;
@@ -53,42 +58,55 @@
     --text-lg: 18px;
     --text-xl: 22px;
     --text-2xl: 28px;
+    --text-3xl: 32px;
+    
+    /* ========== SIZES ========== */
     --header-height: 60px;
     --header-height-mobile: 52px;
-    --header-bg: #1A3A5C;
-    --header-bg-gradient: linear-gradient(135deg, #1A3A5C 0%, #234B7A 50%, #1A3A5C 100%);
-    --header-text: #FFFFFF;
     --search-height: 50px;
-    --search-width: 65%;
-    --search-max-width: 600px;
-    --search-border-radius: 40px;
     --search-wrapper-height: 74px;
     --cat-bar-height: 72px;
     --nav-height: 64px;
     --nav-height-mobile: 60px;
-    --nav-max-width: 520px;
+    
+    /* ========== SPACING ========== */
     --space-xs: 4px;
     --space-sm: 8px;
     --space-md: 12px;
     --space-base: 16px;
     --space-lg: 20px;
     --space-xl: 24px;
+    --space-2xl: 32px;
+    --space-3xl: 48px;
+    
+    /* ========== BORDERS ========== */
     --radius-sm: 8px;
     --radius-base: 12px;
     --radius-lg: 16px;
     --radius-xl: 20px;
+    --radius-2xl: 24px;
     --radius-full: 50px;
+    
+    /* ========== SHADOWS ========== */
+    --shadow-xs: 0 1px 2px rgba(0,0,0,0.04);
     --shadow-sm: 0 1px 3px rgba(0,0,0,0.06);
     --shadow-base: 0 2px 12px rgba(0,0,0,0.08);
-    --shadow-md: 0 4px 16px rgba(0,0,0,0.12);
-    --shadow-header: 0 2px 12px rgba(0,0,0,0.2);
-    --shadow-search: 0 2px 8px rgba(26,58,92,0.03), 0 6px 20px rgba(26,58,92,0.04);
-    --shadow-search-focus: 0 4px 20px rgba(74,111,165,0.15), 0 0 0 4px rgba(74,111,165,0.06);
+    --shadow-md: 0 4px 20px rgba(0,0,0,0.12);
+    --shadow-lg: 0 8px 32px rgba(0,0,0,0.16);
+    --shadow-xl: 0 12px 40px rgba(0,0,0,0.2);
+    --shadow-header: 0 2px 12px rgba(0,0,0,0.15);
+    --shadow-search: 0 4px 16px rgba(26,58,92,0.04), 0 8px 32px rgba(26,58,92,0.04);
+    --shadow-search-focus: 0 4px 20px rgba(74,111,165,0.15), 0 0 0 6px rgba(74,111,165,0.04);
     --shadow-nav: 0 -8px 32px rgba(0,0,0,0.35);
-    --shadow-card: 0 1px 3px rgba(0,0,0,0.03);
-    --shadow-card-hover: 0 4px 16px rgba(0,0,0,0.08);
-    --transition-fast: 0.15s ease;
-    --transition-base: 0.3s ease;
-    --transition-slow: 0.5s ease;
-    --transition-spring: 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+    --shadow-card: 0 2px 8px rgba(0,0,0,0.04);
+    --shadow-card-hover: 0 8px 30px rgba(0,0,0,0.1);
+    --shadow-button: 0 4px 12px rgba(0,0,0,0.1);
+    --shadow-button-hover: 0 6px 20px rgba(0,0,0,0.15);
+    
+    /* ========== TRANSITIONS ========== */
+    --transition-fast: 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+    --transition-base: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    --transition-slow: 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+    --transition-spring: 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+    --transition-bounce: 0.5s cubic-bezier(0.68, -0.55, 0.27, 1.55);
 }
