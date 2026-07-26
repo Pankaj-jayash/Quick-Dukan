@@ -1,0 +1,87 @@
+{
+    "shopName": "Quick Dukan",
+    "shopNameHi": "क्विक दुकान",
+    "version": "1.0.0",
+    "categories": [
+        {
+            "id": "dal",
+            "name": "Dal",
+            "nameHi": "दालें",
+            "nameEn": "Pulses",
+            "file": "dal.json",
+            "icon": "🫘",
+            "color": "#FF6B6B",
+            "bgColor": "#FFF0F0"
+        },
+        {
+            "id": "chawal-atta",
+            "name": "Rice & Flour",
+            "nameHi": "चावल और आटा",
+            "nameEn": "Rice & Flour",
+            "file": "chawal-atta.json",
+            "icon": "🍚",
+            "color": "#4ECDC4",
+            "bgColor": "#F0FFFE"
+        },
+        {
+            "id": "tel-ghee",
+            "name": "Oil & Ghee",
+            "nameHi": "तेल और घी",
+            "nameEn": "Oil & Ghee",
+            "file": "tel-ghee.json",
+            "icon": "🫒",
+            "color": "#FFD93D",
+            "bgColor": "#FFFDE7"
+        },
+        {
+            "id": "masale",
+            "name": "Spices",
+            "nameHi": "मसाले",
+            "nameEn": "Spices",
+            "file": "masale.json",
+            "icon": "🌶️",
+            "color": "#E65100",
+            "bgColor": "#FFF3E0"
+        },
+        {
+            "id": "chai-kafi",
+            "name": "Tea & Coffee",
+            "nameHi": "चाय और कॉफी",
+            "nameEn": "Tea & Coffee",
+            "file": "chai-kafi.json",
+            "icon": "☕",
+            "color": "#795548",
+            "bgColor": "#EFEBE9"
+        },
+        {
+            "id": "dairy",
+            "name": "Dairy",
+            "nameHi": "डेयरी",
+            "nameEn": "Dairy",
+            "file": "dairy.json",
+            "icon": "🥛",
+            "color": "#2196F3",
+            "bgColor": "#E3F2FD"
+        },
+        {
+            "id": "snacks",
+            "name": "Snacks",
+            "nameHi": "नमकीन और स्नैक्स",
+            "nameEn": "Snacks",
+            "file": "snacks.json",
+            "icon": "🍪",
+            "color": "#FF9800",
+            "bgColor": "#FFF8E1"
+        },
+        {
+            "id": "sabji",
+            "name": "Vegetables",
+            "nameHi": "सब्ज़ियाँ",
+            "nameEn": "Vegetables",
+            "file": "sabji.json",
+            "icon": "🥬",
+            "color": "#4CAF50",
+            "bgColor": "#E8F5E9"
+        }
+    ]
+}
