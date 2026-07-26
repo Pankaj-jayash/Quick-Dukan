@@ -1,0 +1,243 @@
+/* ============================================
+   BOTTOM-NAV.CSS - Bottom Navigation Bar
+   ============================================ */
+
+.bottom-nav {
+    display: flex;
+    align-items: center;
+    justify-content: space-around;
+    padding: var(--spacing-xs) 0;
+    box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
+}
+
+.nav-btn {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 2px;
+    background: transparent;
+    color: rgba(255,255,255,0.7);
+    font-size: var(--font-size-xs);
+    padding: var(--spacing-xs);
+    border-radius: var(--radius-sm);
+    transition: all var(--transition-normal);
+    min-width: 50px;
+    position: relative;
+}
+
+.nav-btn i {
+    font-size: 20px;
+    transition: all var(--transition-normal);
+}
+
+.nav-btn span {
+    font-size: 10px;
+    font-weight: 500;
+}
+
+.nav-btn.active {
+    color: #FFD700;
+}
+
+.nav-btn.active i {
+    transform: scale(1.15);
+}
+
+.nav-btn:active {
+    transform: scale(0.9);
+}
+
+/* Cart Badge */
+.cart-badge {
+    position: absolute;
+    top: 0px;
+    right: 2px;
+    background: #FF1744;
+    color: white;
+    font-size: 10px;
+    font-weight: 700;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    animation: pop 0.3s ease;
+}
+
+/* Back to Top Button */
+.back-to-top {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    background: #FFD700;
+    color: var(--primary);
+    font-size: 18px;
+    box-shadow: var(--shadow-md);
+    position: relative;
+    bottom: 5px;
+}
+
+.back-to-top i {
+    font-size: 22px;
+}
+
+.back-to-top:hover {
+    background: #FFC107;
+    transform: translateY(-3px);
+}
+
+/* Mobile adjustments */
+@media (max-width: 360px) {
+    .nav-btn i {
+        font-size: 18px;
+    }
+    .nav-btn span {
+        font-size: 9px;
+    }
+}
+
+/* ============================================
+   BOTTOM-NAV.CSS - Bottom Navigation Bar
+   ============================================ */
+
+.bottom-nav {
+    display: flex;
+    align-items: center;
+    justify-content: space-around;
+    padding: 6px 4px;
+    padding-bottom: max(6px, env(safe-area-inset-bottom));
+    box-shadow: 0 -2px 15px rgba(0,0,0,0.1);
+    background: var(--primary);
+    gap: 2px;
+}
+
+.nav-btn {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 2px;
+    background: transparent;
+    color: rgba(255,255,255,0.7);
+    font-size: var(--font-size-xs);
+    padding: 6px 8px;
+    border-radius: 12px;
+    transition: all var(--transition-normal);
+    min-width: 52px;
+    position: relative;
+    flex: 1;
+    max-width: 70px;
+}
+
+.nav-btn .nav-icon {
+    font-size: 22px;
+    transition: all var(--transition-normal);
+    line-height: 1;
+}
+
+.nav-btn .nav-label {
+    font-size: 10px;
+    font-weight: 500;
+    white-space: nowrap;
+}
+
+.nav-btn.active {
+    color: #FFD700;
+    background: rgba(255,255,255,0.1);
+}
+
+.nav-btn.active .nav-icon {
+    transform: scale(1.15);
+}
+
+.nav-btn:active {
+    transform: scale(0.9);
+}
+
+/* Cart Badge */
+.cart-badge {
+    position: absolute;
+    top: 0px;
+    right: 4px;
+    background: #FF1744;
+    color: white;
+    font-size: 10px;
+    font-weight: 700;
+    min-width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2px;
+    animation: pop 0.3s ease;
+    border: 2px solid var(--primary);
+}
+
+/* Back to Top Button */
+.back-to-top {
+    position: relative;
+    bottom: 8px;
+    width: 48px !important;
+    height: 48px !important;
+    border-radius: 50% !important;
+    background: #FFD700 !important;
+    color: var(--primary) !important;
+    box-shadow: 0 4px 15px rgba(255, 215, 0, 0.4);
+    flex: 0 0 auto !important;
+    max-width: 48px !important;
+    min-width: 48px !important;
+    padding: 0 !important;
+    margin-top: -20px;
+}
+
+.back-to-top .nav-icon {
+    font-size: 24px !important;
+}
+
+.back-to-top:hover {
+    background: #FFC107 !important;
+    transform: translateY(-5px) !important;
+    box-shadow: 0 6px 20px rgba(255, 215, 0, 0.6);
+}
+
+.back-to-top:active {
+    transform: translateY(-2px) !important;
+}
+
+/* Active state for back-to-top */
+.back-to-top.active {
+    background: #FFD700 !important;
+}
+
+/* Mobile adjustments */
+@media (max-width: 360px) {
+    .nav-btn {
+        min-width: 44px;
+        padding: 4px 4px;
+    }
+    .nav-btn .nav-icon {
+        font-size: 18px;
+    }
+    .nav-btn .nav-label {
+        font-size: 8px;
+    }
+    .back-to-top {
+        width: 40px !important;
+        height: 40px !important;
+        min-width: 40px !important;
+        max-width: 40px !important;
+    }
+    .back-to-top .nav-icon {
+        font-size: 20px !important;
+    }
+}
+
+/* Safe area for iPhone */
+@supports (padding-bottom: env(safe-area-inset-bottom)) {
+    .bottom-nav {
+        padding-bottom: calc(6px + env(safe-area-inset-bottom));
+    }
+}
