@@ -14,7 +14,8 @@ class DataLoader {
     async loadAllData() {
         try {
             // Step 1: Load master index.json
-            const masterResponse = await fetch('data/index.json');
+            const timestamp = Date.now();
+const masterResponse = await fetch(`data/index.json?v=${timestamp}`);
             if (!masterResponse.ok) throw new Error('Failed to load index.json');
             this.masterData = await masterResponse.json();
             this.categories = this.masterData.categories || [];
@@ -42,7 +43,8 @@ class DataLoader {
     
     async loadCategoryData(category) {
         try {
-            const response = await fetch(`data/${category.file}`);
+            const timestamp = Date.now();
+const response = await fetch(`data/${category.file}?v=${timestamp}`);
             if (!response.ok) throw new Error(`Failed to load ${category.file}`);
             const products = await response.json();
             
