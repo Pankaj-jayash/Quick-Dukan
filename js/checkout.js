@@ -376,6 +376,16 @@ class CheckoutManager {
         const name = this.customerName?.value?.trim();
         const phone = this.customerPhone?.value?.replace(/\D/g, '');
         const villageCity = this.villageCity?.value?.trim();
+    
+// Save order to history
+if (window.ordersManager) {
+    const savedOrder = window.ordersManager.saveOrder({...});
+    
+    // ⭐ Dispatch event with order ID ⭐
+    document.dispatchEvent(new CustomEvent('orderPlaced', {
+        detail: { orderId: savedOrder?.id }
+    }));
+}
         
         if (!name) {
             this.showToast('⚠️ कृपया अपना नाम लिखें');
