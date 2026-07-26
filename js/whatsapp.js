@@ -1,6 +1,6 @@
 // ============================================
 // WHATSAPP.JS - WhatsApp Message Handler
-// Compact & Bilingual WhatsApp Message with Emoji Separators
+// Compact & Bilingual WhatsApp Message
 // ============================================
 
 class WhatsAppManager {
@@ -9,14 +9,24 @@ class WhatsAppManager {
         console.log('✅ WhatsApp Manager Ready | Number:', this.phoneNumber);
     }
 
+    /**
+     * Send order via WhatsApp
+     * @param {Object} orderData - Complete order data
+     */
     sendOrder(orderData) {
         const message = this.buildOrderMessage(orderData);
         const encodedMessage = encodeURIComponent(message);
         const whatsappUrl = `https://wa.me/${this.phoneNumber}?text=${encodedMessage}`;
+
+        // Open WhatsApp
         window.open(whatsappUrl, '_blank');
+
         return true;
     }
 
+    /**
+     * Build compact bilingual WhatsApp message
+     */
     buildOrderMessage(data) {
         const lang = window.languageManager?.currentLang || 'hi';
         const now = new Date();
@@ -31,22 +41,22 @@ class WhatsAppManager {
 
         // Header
         msg += '🛒 *Quick Dukan - New Order / नया ऑर्डर*\n';
-        msg += '🔸───────────────────────────────🔸\n';
+        msg += '━━━━━━━━━━━━━━━━━━━━\n';
 
         // Customer Info
         if (data.customer) {
             msg += `👤 Customer / ग्राहक: ${data.customer.name || ''}\n`;
             msg += `📱 Phone / फ़ोन: ${data.customer.phone || ''}\n`;
-            if (data.customer.villageCity) msg += `🏙️ City / शहर: ${data.customer.villageCity}\n`;
-            if (data.customer.landmark) msg += `📍 Landmark / आस-पास: ${data.customer.landmark}\n`;
+            if (data.customer.villageCity) msg += `📍 City / शहर: ${data.customer.villageCity}\n`;
+            if (data.customer.landmark) msg += `🏫 Landmark / आस-पास: ${data.customer.landmark}\n`;
             if (data.customer.pincode) msg += `📮 Pincode / पिन कोड: ${data.customer.pincode}\n`;
         }
 
+        // Date & Time
         msg += `📅 Date / तारीख: ${dateStr} | ⏰ Time / समय: ${timeStr}\n`;
 
         // Items
         msg += '\n📦 Items / आइटम्स\n';
-        msg += '🟢───────────────────────────────🟢\n';
         if (data.items && data.items.length > 0) {
             data.items.forEach((item, index) => {
                 const itemNameEn = item.name?.en || item.name?.hi || 'Product';
@@ -68,7 +78,7 @@ class WhatsAppManager {
 
         // Totals
         if (data.totals) {
-            msg += '\n🔸───────────────────────────────🔸\n';
+            msg += '\n━━━━━━━━━━━━━━━━━━━━\n';
             msg += `📦 Total Items / कुल आइटम: ${data.totals.itemCount || 0}\n`;
             msg += `💰 Amount / कुल राशि: ₹${data.totals.total || 0}\n`;
             if (data.totals.total >= 500) {
@@ -84,7 +94,6 @@ class WhatsAppManager {
         // Location
         if (data.location && data.location.lat && data.location.lng) {
             msg += '\n📍 Location / लोकेशन\n';
-            msg += '🟢───────────────────────────────🟢\n';
             const mapsUrl = data.location.url || 
                 `https://maps.google.com/?q=${data.location.lat},${data.location.lng}`;
             msg += `   🔗 ${mapsUrl}\n`;
@@ -92,13 +101,16 @@ class WhatsAppManager {
         }
 
         // Footer
-        msg += '\n🔸───────────────────────────────🔸\n';
+        msg += '\n━━━━━━━━━━━━━━━━━━━━\n';
         msg += '🙏 Please confirm the order and share delivery time.\n';
         msg += 'धन्यवाद! 🛒✨';
 
         return msg;
     }
 
+    /**
+     * Quick message for single product
+     */
     sendQuickOrder(product) {
         const nameEn = product.name?.en || product.name?.hi || '';
         const nameHi = product.name?.hi || product.name?.en || '';
@@ -107,18 +119,22 @@ class WhatsAppManager {
         const price = product.price || 0;
 
         const message = `🛒 *Quick Dukan - New Order / नया ऑर्डर*\n` +
-            '🟢───────────────────────────────🟢\n' +
+            `👤 I want to order / मैं ऑर्डर करना चाहता हूँ:\n` +
             `📦 ${nameEn} (${nameHi})\n` +
             `📏 ${unitEn} (${unitHi})\n` +
             `💰 Price / कीमत: ₹${price}\n\n` +
-            '🙏 Please confirm delivery.\nधन्यवाद! 🛒';
+            `🙏 Please confirm delivery.\nधन्यवाद! 🛒`;
 
         const encodedMessage = encodeURIComponent(message);
         const whatsappUrl = `https://wa.me/${this.phoneNumber}?text=${encodedMessage}`;
+
         window.open(whatsappUrl, '_blank');
         return true;
     }
 
+    /**
+     * Get phone number
+     */
     getPhoneNumber() {
         return this.phoneNumber;
     }
