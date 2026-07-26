@@ -1,124 +1,243 @@
-// ========== CATEGORIES MANAGEMENT ==========
+// ============================================
+// CATEGORIES.JS - Categories Section Logic
+// With Icons, Colors, Ripple & Animations
+// ============================================
 
-const Categories = {
-    currentCategory: null,
+class CategoriesManager {
+    constructor() {
+        this.categoriesScroll = document.getElementById('categoriesScroll');
+        this.scrollLeft = document.getElementById('scrollLeft');
+        this.scrollRight = document.getElementById('scrollRight');
+        this.activeCategory = 'all';
+        
+        this.init();
+    }
     
-    async render() {
-        const container = document.getElementById('categoriesScroll');
-        const indicator = document.getElementById('scrollIndicator');
-        if (!container) return;
-        
-        const categories = await ProductLoader.loadCategoriesList();
-        
-        // Render categories
-        container.innerHTML = categories.map(cat => `
-            <div class="category-item ${cat.priority ? 'priority' : ''} ${this.currentCategory === cat.id ? 'active' : ''}" 
-                 data-category="${cat.id}"
-                 onclick="Categories.select('${cat.id}')">
-                <span class="category-icon">${cat.icon}</span>
-                <span class="category-name">${cat.name}</span>
-                ${cat.priority ? '<span class="priority-badge">🔥</span>' : ''}
-            </div>
-        `).join('');
-        
-        // Render scroll indicator
-        if (indicator) {
-            const totalDots = Math.min(categories.length, 5);
-            indicator.innerHTML = Array.from({ length: totalDots }, (_, i) => 
-                `<span class="scroll-dot ${i === 0 ? 'active' : ''}" data-index="${i}"></span>`
-            ).join('');
-        }
-        
-        this.setupScroll();
-    },
-    
-    setupScroll() {
-        const scrollContainer = document.getElementById('categoriesScroll');
-        const leftArrow = document.getElementById('catScrollLeft');
-        const rightArrow = document.getElementById('catScrollRight');
-        
-        if (!scrollContainer) return;
-        
-        // Arrow clicks
-        if (leftArrow) {
-            leftArrow.addEventListener('click', () => {
-                scrollContainer.scrollBy({ left: -150, behavior: 'smooth' });
-            });
-        }
-        
-        if (rightArrow) {
-            rightArrow.addEventListener('click', () => {
-                scrollContainer.scrollBy({ left: 150, behavior: 'smooth' });
-            });
-        }
-        
-        // Update scroll indicator
-        scrollContainer.addEventListener('scroll', Utils.debounce(() => {
-            const scrollLeft = scrollContainer.scrollLeft;
-            const scrollWidth = scrollContainer.scrollWidth - scrollContainer.clientWidth;
-            const progress = scrollWidth > 0 ? scrollLeft / scrollWidth : 0;
-            
-            document.querySelectorAll('.scroll-dot').forEach((dot, i) => {
-                const dotProgress = i / (document.querySelectorAll('.scroll-dot').length - 1);
-                dot.classList.toggle('active', Math.abs(progress - dotProgress) < 0.15);
-            });
-        }, 50));
-    },
-    
-    async select(categoryId) {
-        this.currentCategory = categoryId;
-        
-        // Update category items active state
-        document.querySelectorAll('.category-item').forEach(item => {
-            item.classList.toggle('active', item.dataset.category === categoryId);
+    init() {
+        // Wait for data to load
+        document.addEventListener('dataLoaded', (e) => {
+            this.renderCategories(e.detail.categories);
         });
         
-        // Show category products
-        const recentSection = document.getElementById('recentlySection');
-        const categorySection = document.getElementById('categoryProductsSection');
-        const categoryTitle = document.getElementById('categoryProductsTitle');
-        const categoryGrid = document.getElementById('categoryProductsGrid');
+        // Scroll buttons
+        this.scrollLeft.addEventListener('click', () => this.scroll(-250));
+        this.scrollRight.addEventListener('click', () => this.scroll(250));
         
-        if (recentSection) recentSection.style.display = 'none';
-        if (categorySection) categorySection.style.display = 'block';
+        // Touch scroll detection
+        this.categoriesScroll.addEventListener('scroll', () => this.updateScrollButtons());
         
-        // Load and render products
-        const data = await ProductLoader.loadCategoryProducts(categoryId);
-        const categories = await ProductLoader.loadCategoriesList();
-        const cat = categories.find(c => c.id === categoryId);
+        // Initial scroll button state
+        this.updateScrollButtons();
         
-        if (categoryTitle && cat) {
-            categoryTitle.textContent = `${cat.icon} ${cat.name} (${data.products.filter(p => p.inStock).length} products)`;
-        }
-        
-        if (categoryGrid) {
-            categoryGrid.innerHTML = data.products
-                .filter(p => p.inStock)
-                .map(p => ProductLoader.renderProductCard({ ...p, category: categoryId }))
-                .join('');
-        }
-        
-        // Scroll to category products
-        if (categorySection) {
-            categorySection.scrollIntoView({ behavior: 'smooth', block: 'start' });
-        }
-    },
+        // Listen for language changes
+        document.addEventListener('languageChanged', (e) => {
+            this.updateLanguage(e.detail.language);
+        });
+    }
     
-    deselect() {
-        this.currentCategory = null;
+    renderCategories(categories) {
+        // Keep "All" button and clear rest
+        const allBtn = this.categoriesScroll.querySelector('[data-category="all"]');
+        this.categoriesScroll.innerHTML = '';
         
-        document.querySelectorAll('.category-item').forEach(item => {
-            item.classList.remove('active');
+        // Re-add "All" button
+        if (allBtn) {
+            this.categoriesScroll.appendChild(allBtn);
+        } else {
+            const btn = this.createCategoryButton({
+                id: 'all',
+                name: 'All',
+                nameHi: 'सब',
+                nameEn: 'All',
+                icon: '🌟',
+                color: '#667eea',
+                bgColor: '#f0f0ff'
+            });
+            btn.classList.add('active');
+            this.categoriesScroll.appendChild(btn);
+        }
+        
+        // Add category buttons
+        categories.forEach((cat, index) => {
+            const btn = this.createCategoryButton(cat, index);
+            this.categoriesScroll.appendChild(btn);
         });
         
-        const categorySection = document.getElementById('categoryProductsSection');
-        if (categorySection) categorySection.style.display = 'none';
+        // Add click handlers
+        this.categoriesScroll.querySelectorAll('.category-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                this.selectCategory(btn, e);
+            });
+        });
         
-        // Show recent if exists
-        const recent = Storage.getRecent();
-        const recentSection = document.getElementById('recentlySection');
-        if (recentSection && recent.length > 0) {
-            recentSection.style.display = 'block';
+        this.updateScrollButtons();
+    }
+    
+    createCategoryButton(cat, index = 0) {
+        const btn = document.createElement('button');
+        btn.className = 'category-btn';
+        btn.setAttribute('data-category', cat.id);
+        
+        const lang = window.languageManager?.currentLang || 'hi';
+        const name = lang === 'hi' ? (cat.nameHi || cat.name) : (cat.nameEn || cat.name);
+        const icon = cat.icon || '📦';
+        const color = cat.color || CONFIG.categoryColors[index % CONFIG.categoryColors.length];
+        const bgColor = cat.bgColor || '#f5f5f5';
+        
+        // Set button HTML with icon
+        btn.innerHTML = `
+            <span class="category-icon">${icon}</span>
+            <span class="category-name">${name}</span>
+        `;
+        
+        // Apply colors (not for "all" button)
+        if (cat.id !== 'all') {
+            btn.style.background = bgColor;
+            btn.style.color = color;
+            btn.style.borderColor = color + '30';
+        }
+        
+        // Store data for language switching
+        btn.setAttribute('data-name-hi', cat.nameHi || cat.name);
+        btn.setAttribute('data-name-en', cat.nameEn || cat.name);
+        btn.setAttribute('data-icon', icon);
+        btn.setAttribute('data-color', color);
+        btn.setAttribute('data-bg-color', bgColor);
+        
+        return btn;
+    }
+    
+    selectCategory(btn, event) {
+        const categoryId = btn.getAttribute('data-category');
+        
+        // If same category, do nothing
+        if (this.activeCategory === categoryId) return;
+        
+        // Remove active from all buttons
+        this.categoriesScroll.querySelectorAll('.category-btn').forEach(b => {
+            b.classList.remove('active');
+            this.resetButtonStyle(b);
+        });
+        
+        // Add active to selected
+        btn.classList.add('active');
+        this.activeCategory = categoryId;
+        
+        // Apply active style
+        this.applyActiveStyle(btn);
+        
+        // Ripple effect on click
+        if (event) {
+            this.addRippleEffect(btn, event);
+        }
+        
+        // Smooth scroll to button
+        btn.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+        
+        // Dispatch event
+        document.dispatchEvent(new CustomEvent('categoryChanged', {
+            detail: { categoryId: this.activeCategory }
+        }));
+    }
+    
+    applyActiveStyle(btn) {
+        const categoryId = btn.getAttribute('data-category');
+        
+        if (categoryId === 'all') {
+            // Keep gradient style for "all"
+            btn.style.background = 'linear-gradient(135deg, #5a32a3, #6c4fb8)';
+            btn.style.color = 'white';
+        } else {
+            const color = btn.getAttribute('data-color');
+            // Solid color background when active
+            btn.style.background = color;
+            btn.style.color = 'white';
+            btn.style.borderColor = color;
         }
     }
-};
+    
+    resetButtonStyle(btn) {
+        const categoryId = btn.getAttribute('data-category');
+        
+        if (categoryId === 'all') {
+            btn.style.background = 'linear-gradient(135deg, #667eea, #764ba2)';
+            btn.style.color = 'white';
+            btn.style.borderColor = 'transparent';
+        } else {
+            const bgColor = btn.getAttribute('data-bg-color');
+            const color = btn.getAttribute('data-color');
+            btn.style.background = bgColor;
+            btn.style.color = color;
+            btn.style.borderColor = color + '30';
+        }
+    }
+    
+    addRippleEffect(btn, event) {
+        // Remove any existing ripples
+        const existingRipples = btn.querySelectorAll('.ripple-span');
+        existingRipples.forEach(r => r.remove());
+        
+        const ripple = document.createElement('span');
+        ripple.className = 'ripple-span';
+        
+        const rect = btn.getBoundingClientRect();
+        const size = Math.max(rect.width, rect.height);
+        const x = event.clientX - rect.left - size / 2;
+        const y = event.clientY - rect.top - size / 2;
+        
+        ripple.style.cssText = `
+            width: ${size}px;
+            height: ${size}px;
+            left: ${x}px;
+            top: ${y}px;
+        `;
+        
+        btn.appendChild(ripple);
+        
+        ripple.addEventListener('animationend', () => {
+            ripple.remove();
+        });
+    }
+    
+    scroll(amount) {
+        this.categoriesScroll.scrollBy({
+            left: amount,
+            behavior: 'smooth'
+        });
+    }
+    
+    updateScrollButtons() {
+        const { scrollLeft, scrollWidth, clientWidth } = this.categoriesScroll;
+        
+        // Left arrow
+        if (scrollLeft <= 3) {
+            this.scrollLeft.classList.add('disabled');
+        } else {
+            this.scrollLeft.classList.remove('disabled');
+        }
+        
+        // Right arrow
+        if (scrollLeft + clientWidth >= scrollWidth - 3) {
+            this.scrollRight.classList.add('disabled');
+        } else {
+            this.scrollRight.classList.remove('disabled');
+        }
+    }
+    
+    updateLanguage(lang) {
+        this.categoriesScroll.querySelectorAll('.category-btn').forEach(btn => {
+            if (btn.getAttribute('data-category') === 'all') {
+                btn.querySelector('.category-name').textContent = lang === 'hi' ? 'सब' : 'All';
+            } else {
+                const nameHi = btn.getAttribute('data-name-hi');
+                const nameEn = btn.getAttribute('data-name-en');
+                btn.querySelector('.category-name').textContent = lang === 'hi' ? nameHi : nameEn;
+            }
+        });
+    }
+}
+
+// Initialize on DOM ready
+document.addEventListener('DOMContentLoaded', () => {
+    window.categoriesManager = new CategoriesManager();
+});
