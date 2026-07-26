@@ -107,6 +107,7 @@ class OrdersManager {
         });
         localStorage.setItem(this.storageKey, JSON.stringify(orders));
         console.log('✅ Order saved:', orders[0].id);
+return newOrder;
     }
     
     // Filter orders
