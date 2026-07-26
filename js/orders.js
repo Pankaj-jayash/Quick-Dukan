@@ -1,5 +1,5 @@
 // ============================================
-// ORDERS.JS - My Orders Logic
+// ORDERS.JS - My Orders Logic (FIXED)
 // ============================================
 
 class OrdersManager {
@@ -14,8 +14,9 @@ class OrdersManager {
         this.storageKey = 'quick-dukan-orders';
         this.expandedOrder = null;
         
+        // Check if modal exists
         if (!this.ordersModal) {
-            console.error('❌ Orders Modal not found!');
+            console.error('❌ Orders Modal not found in DOM! Check if id="ordersModal" exists in HTML');
             return;
         }
         
@@ -26,52 +27,58 @@ class OrdersManager {
     }
     
     init() {
+        // Close button
         if (this.closeOrdersBtn) {
-            const newBtn = this.closeOrdersBtn.cloneNode(true);
-            this.closeOrdersBtn.parentNode.replaceChild(newBtn, this.closeOrdersBtn);
-            this.closeOrdersBtn = newBtn;
             this.closeOrdersBtn.addEventListener('click', () => this.close());
+        } else {
+            console.warn('⚠️ Close button #closeOrders not found');
         }
         
+        // Overlay click
         if (this.ordersOverlay) {
-            const newOverlay = this.ordersOverlay.cloneNode(true);
-            this.ordersOverlay.parentNode.replaceChild(newOverlay, this.ordersOverlay);
-            this.ordersOverlay = newOverlay;
             this.ordersOverlay.addEventListener('click', () => this.close());
         }
         
+        // Filter buttons
         this.filterBtns.forEach(btn => {
             btn.addEventListener('click', () => {
                 this.setFilter(btn);
             });
         });
         
+        // Start shopping button
         const startBtn = document.querySelector('.start-shopping-btn');
         if (startBtn) {
             startBtn.addEventListener('click', () => {
                 this.close();
                 const allProducts = document.getElementById('allProductsSection');
-                if (allProducts) allProducts.scrollIntoView({ behavior: 'smooth' });
+                if (allProducts) {
+                    allProducts.scrollIntoView({ behavior: 'smooth' });
+                }
             });
         }
         
+        // DIRECT EVENT LISTENER for orders button in bottom nav
         document.addEventListener('click', (e) => {
             const ordersBtn = e.target.closest('[data-nav="orders"]');
             if (ordersBtn) {
                 e.preventDefault();
                 e.stopPropagation();
+                console.log('📋 Orders button clicked via direct listener');
                 this.open();
                 return;
             }
         });
         
+        // Keyboard shortcut
         document.addEventListener('keydown', (e) => {
-            if (e.key === 'Escape' && !this.ordersModal.classList.contains('hidden')) {
+            if (e.key === 'Escape') {
                 this.close();
             }
         });
     }
     
+    // Get all orders from localStorage
     getOrders() {
         try {
             const data = localStorage.getItem(this.storageKey);
@@ -82,9 +89,10 @@ class OrdersManager {
         }
     }
     
+    // Save a new order
     saveOrder(orderData) {
         const orders = this.getOrders();
-        const newOrder = {
+        orders.unshift({
             id: 'ORD-' + Date.now().toString(36).toUpperCase(),
             date: new Date().toISOString(),
             status: 'pending',
@@ -96,35 +104,12 @@ class OrdersManager {
                 { label: 'कन्फर्म', time: null, completed: false },
                 { label: 'डिलीवर्ड', time: null, completed: false },
             ],
-        };
-        orders.unshift(newOrder);
+        });
         localStorage.setItem(this.storageKey, JSON.stringify(orders));
-        console.log('✅ Order saved:', newOrder.id);
-        return newOrder;
+        console.log('✅ Order saved:', orders[0].id);
     }
     
-    updateOrderStatus(orderId, status) {
-        const orders = this.getOrders();
-        const order = orders.find(o => o.id === orderId);
-        if (!order) return;
-        
-        order.status = status;
-        const now = new Date().toISOString();
-        
-        if (status === 'confirmed') {
-            order.timeline[1].completed = true;
-            order.timeline[1].time = now;
-        } else if (status === 'delivered') {
-            order.timeline[1].completed = true;
-            order.timeline[2].completed = true;
-            order.timeline[2].time = now;
-            if (!order.timeline[1].time) order.timeline[1].time = now;
-        }
-        
-        localStorage.setItem(this.storageKey, JSON.stringify(orders));
-        console.log(`📋 Order ${orderId} updated to: ${status}`);
-    }
-    
+    // Filter orders
     getFilteredOrders() {
         const orders = this.getOrders();
         if (this.activeFilter === 'all') return orders;
@@ -139,7 +124,12 @@ class OrdersManager {
     }
     
     open() {
-        if (!this.ordersModal) return;
+        if (!this.ordersModal) {
+            console.error('❌ Cannot open - ordersModal is null');
+            return;
+        }
+        
+        console.log('📋 Opening orders modal...');
         this.render();
         this.ordersModal.classList.remove('hidden');
         document.body.style.overflow = 'hidden';
@@ -153,7 +143,10 @@ class OrdersManager {
     }
     
     render() {
-        if (!this.ordersList) return;
+        if (!this.ordersList) {
+            console.error('❌ ordersList element not found');
+            return;
+        }
         
         const orders = this.getFilteredOrders();
         this.ordersList.innerHTML = '';
@@ -169,13 +162,6 @@ class OrdersManager {
             const card = this.createOrderCard(order);
             this.ordersList.appendChild(card);
         });
-        
-        // Add timer displays after render
-        setTimeout(() => {
-            if (window.orderPopupManager) {
-                window.orderPopupManager.addTimerDisplays();
-            }
-        }, 100);
     }
     
     createOrderCard(order) {
@@ -254,6 +240,7 @@ class OrdersManager {
             </div>
         `;
         
+        // Event Listeners
         card.querySelector('.reorder-btn').addEventListener('click', (e) => {
             e.stopPropagation();
             this.reorder(order);
@@ -285,10 +272,15 @@ class OrdersManager {
     }
     
     reorder(order) {
-        if (!window.cartManager) return;
+        if (!window.cartManager) {
+            console.error('❌ Cart manager not available');
+            return;
+        }
         
+        // Clear current cart
         window.cartManager.cart = [];
         
+        // Add all items from order
         order.items.forEach(item => {
             window.cartManager.cart.push({
                 id: item.id || ('RE-' + Date.now().toString(36)),
@@ -304,6 +296,7 @@ class OrdersManager {
         window.cartManager.saveCart();
         window.cartManager.updateBadge();
         
+        // Close orders and open cart
         this.close();
         setTimeout(() => {
             if (window.cartManager) window.cartManager.openCart();
@@ -311,7 +304,9 @@ class OrdersManager {
     }
 }
 
+// Initialize on DOM ready
 document.addEventListener('DOMContentLoaded', () => {
+    // Wait a tiny bit to ensure DOM is fully ready
     setTimeout(() => {
         window.ordersManager = new OrdersManager();
     }, 100);
