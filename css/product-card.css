@@ -45,18 +45,18 @@
 
 /* Price Overlay - Gold, Blur, Right-Bottom */
 .price-overlay {
-    position: absolute;
-    bottom: 8px;
-    right: 8px;
-    background: transparent;
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(8px);
-    padding: 4px 10px;
-    border-radius: var(--radius-full);
-    color: #FFD700;
-    font-weight: 700;
-    font-size: 18px;
-    z-index: 2;
+    position: absolute;   
+    bottom: 8px;             
+    right: 10px;              
+    font-size: 18px;             
+    font-weight: 700;            
+    color: #FFD700;              
+    text-shadow: 0 1px 4px rgba(0,0,0,0.8); 
+    background: rgba(0,0,0,0.5); 
+    padding: 5px 12px;           
+    border-radius: 20px;         
+    backdrop-filter: blur(4px);  
+    z-index: 2;   
 }
 
 /* Product Info - 44% */
