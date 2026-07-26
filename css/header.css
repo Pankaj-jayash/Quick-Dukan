@@ -1,0 +1,167 @@
+/* ============================================
+   HEADER.CSS - Top Header Section
+   ============================================ */
+
+.top-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 12px;
+    gap: 8px;
+    background: var(--primary);
+    color: var(--text-on-primary);
+}
+
+.header-left {
+    display: flex;
+    align-items: center;
+    gap: 1px;
+    flex-shrink: 0;
+    
+}
+
+.header-icon {
+    font-size: 20px;
+    display: inline-block;
+    cursor: default;
+    filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2));
+}
+
+.brand-name {
+    display: flex;
+    align-items: baseline;
+    gap: 3px;
+}
+
+.quick-text {
+    font-family: var(--font-heading);
+    font-size: 24px;
+    font-weight: 800;
+    color: #cccccc;
+    letter-spacing: 0.5px;
+    text-shadow: 0 1px 2px rgba(0,0,0,0.2);
+}
+
+.dukan-text {
+    font-family: var(--font-heading);
+    font-size: 18px;
+    font-weight: 500;
+    color: #dec712;
+    letter-spacing: 0.3px;
+}
+
+.header-center {
+    display: flex;
+    align-items: center;
+    flex-shrink: 1;
+    min-width: 0;
+}
+
+.free-delivery-badge {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    background: rgba(255,255,255,0.15);
+    padding: 5px 10px;
+    border-radius: var(--radius-full);
+    white-space: nowrap;
+    border: 1px solid rgba(255,255,255,0.1);
+}
+
+.truck-icon {
+    font-size: 16px;
+    display: inline-block;
+}
+
+.free-delivery-text {
+    color: #FFFFFF;
+    font-weight: 500;
+    font-size: 11px;
+}
+
+.header-right {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex-shrink: 0;
+}
+
+.toggle-btn {
+    width: 38px;
+    height: 32px;
+    border-radius: var(--radius-full);
+    background: rgba(255,255,255,0.15);
+    color: #FFFFFF;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    font-weight: 600;
+    transition: all var(--transition-normal);
+    border: 1px solid rgba(255,255,255,0.2);
+    cursor: pointer;
+}
+
+.toggle-btn:hover {
+    background: rgba(255,255,255,0.25);
+}
+
+.toggle-btn:active {
+    transform: scale(0.92);
+}
+
+.lang-toggle {
+    width: 42px;
+}
+
+.lang-text {
+    font-size: 12px;
+    font-weight: 700;
+}
+
+.theme-toggle {
+    width: 36px;
+}
+
+.theme-icon {
+    font-size: 18px;
+    transition: transform var(--transition-normal);
+    display: inline-block;
+}
+
+/* Mobile adjustments */
+@media (max-width: 380px) {
+    .quick-text {
+        font-size: 18px;
+    }
+    .dukan-text {
+        font-size: 13px;
+    }
+    .header-icon {
+        font-size: 24px;
+    }
+    .free-delivery-badge {
+        padding: 4px 8px;
+    }
+    .free-delivery-text {
+        font-size: 10px;
+    }
+    .truck-icon {
+        font-size: 14px;
+    }
+}
+
+@media (max-width: 340px) {
+    .header-left {
+        gap: 3px;
+    }
+    .quick-text {
+        font-size: 16px;
+    }
+    .dukan-text {
+        font-size: 11px;
+    }
+    .free-delivery-text {
+        display: none;
+    }
+}
