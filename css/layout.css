@@ -1,0 +1,189 @@
+/* ============================================
+   LAYOUT.CSS - Sizes, Spacing, Grid, Layout
+   ============================================ */
+
+body {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+    max-width: 480px;
+    margin: 0 auto;
+    position: relative;
+    box-shadow: var(--shadow-lg);
+}
+
+/* Fixed Sections */
+.top-header {
+    position: fixed;
+    top: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 100%;
+    max-width: 480px;
+    height: var(--header-height);
+    z-index: 1000;
+    background-color: var(--primary);
+    color: var(--text-on-primary);
+}
+
+.search-section {
+    position: fixed;
+    top: var(--header-height);
+    left: 50%;
+    transform: translateX(-50%);
+    width: 100%;
+    max-width: 480px;
+    z-index: 999;
+    padding: var(--spacing-sm) 0;
+    background-color: var(--bg-primary);
+    transition: background-color var(--transition-normal);
+}
+
+.categories-section {
+    position: fixed;
+    top: calc(var(--header-height) + var(--search-height) + 16px);
+    left: 50%;
+    transform: translateX(-50%);
+    width: 100%;
+    max-width: 480px;
+    height: var(--categories-height);
+    z-index: 998;
+    background-color: var(--bg-primary);
+    display: flex;
+    align-items: center;
+    padding: 0 30px;
+    transition: background-color var(--transition-normal);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+}
+
+/* 
+   MAIN CONTENT AREA
+   - Starts EXACTLY after categories section ends
+   - Has proper gap from categories
+   - Only this area scrolls
+*/
+.main-content {
+    position: fixed;
+    top: calc(var(--header-height) + var(--search-height) + var(--categories-height) + 24px);
+    left: 50%;
+    transform: translateX(-50%);
+    width: 100%;
+    max-width: 480px;
+    bottom: var(--bottom-nav-height);
+    overflow-y: auto;
+    overflow-x: hidden;
+    -webkit-overflow-scrolling: touch;
+    padding: var(--spacing-md);
+    padding-top: 8px;
+    background-color: var(--bg-primary);
+    transition: background-color var(--transition-normal);
+    z-index: 1;
+}
+
+.bottom-spacer {
+    height: 20px;
+}
+
+/* Bottom Navbar */
+.bottom-nav {
+    position: fixed;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 100%;
+    max-width: 480px;
+    height: var(--bottom-nav-height);
+    z-index: 1000;
+    background-color: var(--primary);
+    color: var(--text-on-primary);
+}
+
+/* Products Grid */
+.products-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--spacing-md);
+    padding: var(--spacing-sm) 0;
+}
+
+/* Horizontal Scroll */
+.horizontal-scroll {
+    display: flex;
+    gap: var(--spacing-md);
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    -webkit-overflow-scrolling: touch;
+    padding: var(--spacing-sm) 0;
+    scroll-behavior: smooth;
+}
+
+.horizontal-scroll > * {
+    scroll-snap-align: start;
+    flex-shrink: 0;
+}
+
+/* Section Titles - Updated */
+.section-title {
+    font-family: var(--font-heading);
+    font-size: var(--font-size-lg);
+    margin: var(--spacing-md) 0 var(--spacing-sm);
+    padding: 8px 4px;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    display: inline-block;
+}
+
+/* Blur backdrop for sticky title */
+.section-title::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -14px;
+    right: -14px;
+    bottom: 0;
+    background: rgba(245, 245, 220, 0.8);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    z-index: -1;
+    border-radius: 10px;
+}
+
+body.dark-mode .section-title::before {
+    background: rgba(26, 26, 46, 0.8);
+}
+
+/* Category section title - top of main content */
+.category-products-section .section-title {
+    margin-top: 0;
+    padding-top: 4px;
+    font-size: 19px;
+    font-weight: 800;
+}
+
+/* Responsive */
+@media (min-width: 481px) {
+    body {
+        border-left: 1px solid #e0e0e0;
+        border-right: 1px solid #e0e0e0;
+    }
+}
+
+@media (max-width: 360px) {
+    :root {
+        --card-width: 150px;
+        --header-height: 50px;
+        --search-height: 42px;
+        --categories-height: 48px;
+        --bottom-nav-height: 52px;
+    }
+    
+    .categories-section {
+        top: calc(var(--header-height) + var(--search-height) + 10px);
+        padding: 0 24px;
+    }
+    
+    .main-content {
+        top: calc(var(--header-height) + var(--search-height) + var(--categories-height) + 18px);
+    }
+}
