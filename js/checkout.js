@@ -1,5 +1,5 @@
 // ============================================
-// CHECKOUT.JS - Checkout Logic
+// CHECKOUT.JS - Checkout Logic (NO SCROLL + ANIMATION)
 // ============================================
 
 class CheckoutManager {
@@ -93,19 +93,25 @@ class CheckoutManager {
         
         this.cartItems = cartItems || [];
         
+        // Fill summary
         if (this.checkoutItemCount) this.checkoutItemCount.textContent = `${totalItems} आइटम`;
         if (this.checkoutTotal) this.checkoutTotal.textContent = `₹${totalPrice}`;
         
         this.renderSummaryDetail();
+        
+        // Auto-fill saved data
         this.fillSavedData();
         
+        // Show modal with animation
         this.checkoutModal.classList.remove('hidden');
         document.body.style.overflow = 'hidden';
         
+        // ⭐ AUTO GET LOCATION ⭐
         setTimeout(() => {
             this.autoGetLocation();
         }, 500);
         
+        // Scroll to top of checkout
         const checkoutContent = this.checkoutModal.querySelector('.checkout-content');
         if (checkoutContent) {
             checkoutContent.scrollTop = 0;
@@ -115,14 +121,15 @@ class CheckoutManager {
     close() {
         if (!this.checkoutModal) return;
         
+        // Add closing animation
         const checkoutContent = this.checkoutModal.querySelector('.checkout-content');
         if (checkoutContent) {
-            checkoutContent.style.animation = 'scaleOut 0.28s ease forwards';
+            checkoutContent.style.animation = 'slideDownCheckout 0.3s ease forwards';
             setTimeout(() => {
                 this.checkoutModal.classList.add('hidden');
                 document.body.style.overflow = '';
                 checkoutContent.style.animation = '';
-            }, 270);
+            }, 280);
         } else {
             this.checkoutModal.classList.add('hidden');
             document.body.style.overflow = '';
@@ -133,6 +140,7 @@ class CheckoutManager {
         if (!this.summaryDetail) return;
         
         this.summaryDetail.innerHTML = '';
+        
         const lang = window.languageManager?.currentLang || 'hi';
         
         this.cartItems.forEach(item => {
@@ -171,6 +179,7 @@ class CheckoutManager {
             if (this.landmark && data.landmark) this.landmark.value = data.landmark;
             if (this.pincode && data.pincode) this.pincode.value = data.pincode;
             
+            // Apply saved location coordinates
             const savedLoc = localStorage.getItem(this.locationStorageKey);
             if (savedLoc) {
                 const loc = JSON.parse(savedLoc);
@@ -185,28 +194,35 @@ class CheckoutManager {
                 if (this.locationText) this.locationText.classList.remove('hidden');
                 this.isLocationLoaded = true;
             }
-        } catch (e) {}
+        } catch (e) {
+            // ignore
+        }
     }
     
     saveUserInfo() {
         if (!this.saveInfo || !this.saveInfo.checked) return;
         
         const data = {
-            name: this.customerName?.value?.trim() || '',
-            phone: this.customerPhone?.value?.replace(/\D/g, '') || '',
-            villageCity: this.villageCity?.value?.trim() || '',
-            landmark: this.landmark?.value?.trim() || '',
-            pincode: this.pincode?.value?.trim() || '',
+            name: this.customerName?.value || '',
+            phone: this.customerPhone?.value || '',
+            villageCity: this.villageCity?.value || '',
+            landmark: this.landmark?.value || '',
+            pincode: this.pincode?.value || '',
         };
         
         try {
             localStorage.setItem(this.storageKey, JSON.stringify(data));
-        } catch (e) {}
+        } catch (e) {
+            // ignore
+        }
     }
     
+    // ⭐ AUTO GET LOCATION ⭐
     autoGetLocation() {
+        // Check if location already loaded
         if (this.isLocationLoaded) return;
         
+        // Check if saved location exists
         const savedLoc = localStorage.getItem(this.locationStorageKey);
         if (savedLoc) {
             try {
@@ -218,6 +234,7 @@ class CheckoutManager {
             } catch (e) {}
         }
         
+        // Try to get new location
         if (!navigator.geolocation) return;
         
         if (this.locationBtn) {
@@ -236,7 +253,7 @@ class CheckoutManager {
                 this.reverseGeocode(lat, lng);
             },
             (error) => {
-                console.log('📍 Auto location failed');
+                console.log('📍 Auto location failed, user can click button');
                 if (this.locationBtn) {
                     this.locationBtn.innerHTML = '<span class="location-icon">📍</span> लोकेशन लें';
                     this.locationBtn.classList.remove('loading');
@@ -246,6 +263,7 @@ class CheckoutManager {
         );
     }
     
+    // ⭐ MANUAL GET LOCATION ⭐
     getLiveLocation() {
         if (!navigator.geolocation) {
             alert('आपके ब्राउज़र में लोकेशन सपोर्ट नहीं है');
@@ -269,11 +287,17 @@ class CheckoutManager {
                 this.showToast('✅ लोकेशन मिल गई!');
             },
             (error) => {
+                console.error('Location error:', error);
                 if (this.locationBtn) {
                     this.locationBtn.innerHTML = '<span class="location-icon">📍</span> लोकेशन लें';
                     this.locationBtn.classList.remove('loading');
                 }
-                this.showToast('⚠️ लोकेशन नहीं मिली');
+                
+                let msg = 'लोकेशन नहीं मिल पाई';
+                if (error.code === error.PERMISSION_DENIED) {
+                    msg = '⚠️ लोकेशन की परमिशन दें (ब्राउज़र सेटिंग में)';
+                }
+                this.showToast(msg);
             },
             { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
         );
@@ -291,6 +315,7 @@ class CheckoutManager {
         }
         
         if (this.locationText) this.locationText.classList.remove('hidden');
+        
         this.isLocationLoaded = true;
     }
     
@@ -370,8 +395,10 @@ class CheckoutManager {
             return;
         }
         
+        // Save user info
         this.saveUserInfo();
         
+        // ⭐ USE WHATSAPP MANAGER TO SEND ⭐
         const orderData = {
             customer: {
                 name: name,
@@ -393,15 +420,18 @@ class CheckoutManager {
             }
         };
         
+        // Send via WhatsApp Manager
         if (window.whatsappManager) {
             window.whatsappManager.sendOrder(orderData);
         } else {
+            // Fallback
             const fallbackUrl = `https://wa.me/919719312956?text=${encodeURIComponent('नमस्ते! Quick Dukan ऑर्डर')}`;
             window.open(fallbackUrl, '_blank');
         }
         
+        // Save order to history
         if (window.ordersManager) {
-            const savedOrder = window.ordersManager.saveOrder({
+            window.ordersManager.saveOrder({
                 items: this.cartItems.map(item => ({
                     id: item.id,
                     name: item.name,
@@ -414,14 +444,12 @@ class CheckoutManager {
                 total: orderData.totals.total,
                 itemCount: orderData.totals.itemCount,
             });
-            
-            document.dispatchEvent(new CustomEvent('orderPlaced', {
-                detail: { orderId: savedOrder?.id }
-            }));
         }
         
+        // Close checkout
         this.close();
         
+        // Clear cart
         if (window.cartManager) {
             window.cartManager.cart = [];
             window.cartManager.saveCart();
@@ -449,6 +477,7 @@ class CheckoutManager {
     }
 }
 
+// Initialize
 document.addEventListener('DOMContentLoaded', () => {
     window.checkoutManager = new CheckoutManager();
 });
