@@ -20,7 +20,7 @@
             "nameHi": "दालें",
             "nameEn": "Pulses",
             "file": "dal.json",
-            "icon": "🫘",
+            "icon": "🍲",
             "color": "#FF6B6B",
             "bgColor": "#FFF0F0"
         },
@@ -40,7 +40,7 @@
             "nameHi": "तेल और घी",
             "nameEn": "Oil & Ghee",
             "file": "tel-ghee.json",
-            "icon": "🫒",
+            "icon": "🍯",
             "color": "#FFD93D",
             "bgColor": "#FFFDE7"
         },
