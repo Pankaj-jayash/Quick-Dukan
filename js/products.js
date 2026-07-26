@@ -1,225 +1,191 @@
-// ========== PRODUCT LOADING & RENDERING ==========
+// ============================================
+// PRODUCTS.JS - Product Card Creation & All Products Section
+// ============================================
 
-const ProductLoader = {
-    categoriesCache: null,
-    productsCache: {},
+class ProductsManager {
+    constructor() {
+        this.allProductsGrid = document.getElementById('allProductsGrid');
+        
+        this.init();
+    }
     
-    // Load categories list
-    async loadCategoriesList() {
-        if (this.categoriesCache) return this.categoriesCache;
-        
-        try {
-            const response = await fetch(CONFIG.urls.categoriesList);
-            const data = await response.json();
-            this.categoriesCache = data.categories;
-            return this.categoriesCache;
-        } catch (e) {
-            console.error('Failed to load categories:', e);
-            return [];
-        }
-    },
-    
-    // Load products for a category
-    async loadCategoryProducts(categoryId) {
-        if (this.productsCache[categoryId]) return this.productsCache[categoryId];
-        
-        try {
-            const categories = await this.loadCategoriesList();
-            const category = categories.find(c => c.id === categoryId);
-            if (!category) return { products: [] };
-            
-            const response = await fetch(category.file);
-            const data = await response.json();
-            this.productsCache[categoryId] = data;
-            return data;
-        } catch (e) {
-            console.error(`Failed to load products for ${categoryId}:`, e);
-            return { products: [] };
-        }
-    },
-    
-    // Load most ordered products
-    async loadMostOrdered(limit = CONFIG.features.mostOrderedLimit) {
-        const categories = await this.loadCategoriesList();
-        let allProducts = [];
-        
-        const priorityCats = categories.filter(c => c.priority);
-        const otherCats = categories.filter(c => !c.priority);
-        const sortedCats = [...priorityCats, ...otherCats];
-        
-        for (const cat of sortedCats) {
-            if (allProducts.length >= limit) break;
-            
-            try {
-                const data = await this.loadCategoryProducts(cat.id);
-                const popular = data.products
-                    .filter(p => p.mostOrdered && p.inStock)
-                    .slice(0, limit - allProducts.length);
-                    
-                popular.forEach(p => p.category = cat.id);
-                allProducts = [...allProducts, ...popular];
-            } catch (e) {
-                continue;
-            }
-        }
-        
-        return allProducts.slice(0, limit);
-    },
-    
-    // Load all products (for shop page)
-    async loadAllProducts() {
-        const categories = await this.loadCategoriesList();
-        let allProducts = [];
-        
-        for (const cat of categories) {
-            try {
-                const data = await this.loadCategoryProducts(cat.id);
-                data.products.forEach(p => {
-                    p.category = cat.id;
-                    p.categoryName = cat.name;
-                });
-                allProducts = [...allProducts, ...data.products.filter(p => p.inStock)];
-            } catch (e) {
-                continue;
-            }
-        }
-        
-        return allProducts;
-    },
-    
-    // Search products across all categories
-    async searchProducts(query, maxResults = CONFIG.features.searchSuggestionsLimit) {
-        if (!query || query.length < 2) return [];
-        
-        const categories = await this.loadCategoriesList();
-        let results = [];
-        
-        const priorityCats = categories.filter(c => c.priority);
-        const otherCats = categories.filter(c => !c.priority);
-        const sortedCats = [...priorityCats, ...otherCats];
-        
-        for (const cat of sortedCats) {
-            if (results.length >= maxResults * 2) break;
-            
-            try {
-                const data = await this.loadCategoryProducts(cat.id);
-                
-                for (const product of data.products) {
-                    if (!product.inStock) continue;
-                    
-                    const result = Utils.fuzzyMatch(query, product.name);
-                    if (result.match) {
-                        results.push({
-                            ...product,
-                            category: cat.id,
-                            categoryName: cat.name,
-                            searchScore: result.score
-                        });
-                    }
-                }
-            } catch (e) {
-                continue;
-            }
-        }
-        
-        // Sort by score, then by most ordered
-        results.sort((a, b) => {
-            if (b.searchScore !== a.searchScore) return b.searchScore - a.searchScore;
-            return (b.mostOrdered ? 1 : 0) - (a.mostOrdered ? 1 : 0);
+    init() {
+        document.addEventListener('dataLoaded', (e) => {
+            this.renderAllProducts(e.detail.allProducts);
         });
         
-        return results.slice(0, maxResults);
-    },
+        document.addEventListener('languageChanged', () => {
+            this.refreshAllProducts();
+        });
+    }
     
-    // Get single product by ID
-    async getProductById(productId) {
-        const categories = await this.loadCategoriesList();
+    renderAllProducts(products) {
+        if (!this.allProductsGrid) return;
+        this.allProductsGrid.innerHTML = '';
         
-        for (const cat of categories) {
-            try {
-                const data = await this.loadCategoryProducts(cat.id);
-                const product = data.products.find(p => p.id === productId);
-                if (product) {
-                    return { ...product, category: cat.id, categoryName: cat.name };
-                }
-            } catch (e) {
-                continue;
-            }
-        }
-        
-        return null;
-    },
+        products.forEach(product => {
+            const card = this.createProductCard(product);
+            this.allProductsGrid.appendChild(card);
+        });
+    }
     
-    // Render product card HTML
-    renderProductCard(product) {
-        const discount = Utils.calculateDiscount(product.mrp, product.price);
-        
-        let badgeHTML = '';
-        if (product.badge === 'best-seller') {
-            badgeHTML = '<span class="card-badge badge-best-seller">⭐ Best</span>';
-        } else if (product.badge === 'premium') {
-            badgeHTML = '<span class="card-badge badge-premium">Premium</span>';
-        } else if (product.badge === 'new') {
-            badgeHTML = '<span class="card-badge badge-new">New</span>';
-        } else if (discount > 0) {
-            badgeHTML = `<span class="card-badge badge-discount">-${discount}%</span>`;
+    refreshAllProducts() {
+        if (window.dataLoader && window.dataLoader.isLoaded) {
+            this.renderAllProducts(window.dataLoader.allProducts);
         }
+    }
+    
+    createProductCard(product) {
+        const lang = window.languageManager?.currentLang || 'hi';
+        const name = product.name ? (product.name[lang] || product.name.hi || product.name.en || '') : '';
+        const unit = product.unit ? (product.unit[lang] || product.unit.hi || product.unit.en || '') : '';
+        const price = product.price || 0;
+        const discount = product.discount || 0;
+        const image = product.image || 'https://via.placeholder.com/300?text=No+Image';
         
-        return `
-            <div class="product-card" data-id="${product.id}" onclick="showProductDetail('${product.id}')">
-                <div class="card-image-wrapper">
-                    <img src="${product.image || CONFIG.urls.placeholderImage + '?random=' + product.id}" 
-                         alt="${product.name}" 
-                         loading="lazy"
-                         onerror="this.src='${CONFIG.urls.placeholderImage}?random=' + Math.random()">
-                    ${badgeHTML}
-                    <div class="price-overlay">
-                        <span>${Utils.formatPrice(product.price)}</span>
-                    </div>
-                </div>
-                <div class="card-info">
-                    <div class="card-name-row">
-                        <span class="card-name">${product.name}</span>
-                        <span class="card-weight">${product.weight}</span>
-                    </div>
-                    ${discount > 0 ? `<div class="card-discount">-${discount}% OFF</div>` : ''}
-                    <div class="card-actions">
-                        <button class="btn-cart" onclick="event.stopPropagation(); addToCartFromCard('${product.id}')">
-                            🛒 Cart
-                        </button>
-                        <button class="btn-buy" onclick="event.stopPropagation(); buyNow('${product.id}')">
-                            🛍️ Buy
-                        </button>
-                    </div>
-                </div>
+        const card = document.createElement('div');
+        card.className = 'product-card fade-in';
+        card.setAttribute('data-product-id', product.id);
+        card.setAttribute('data-product-name', JSON.stringify(product.name || {}));
+        card.setAttribute('data-product-unit', JSON.stringify(product.unit || {}));
+        
+        card.innerHTML = `
+            <div class="product-card-image">
+                <img src="${image}" 
+                     alt="${name}" 
+                     loading="lazy"
+                     onerror="this.src='https://via.placeholder.com/300?text=No+Image'">
+                <div class="price-overlay">₹${price}</div>
             </div>
-        `;
-    },
-    
-    // Render compact card (for recently viewed)
-    renderCompactCard(product) {
-        const discount = Utils.calculateDiscount(product.mrp, product.price);
-        
-        return `
-            <div class="recent-card" data-id="${product.id}" onclick="showProductDetail('${product.id}')">
-                <div class="card-image-wrapper">
-                    <img src="${product.image || CONFIG.urls.placeholderImage + '?random=' + product.id}" 
-                         alt="${product.name}" 
-                         loading="lazy"
-                         onerror="this.src='${CONFIG.urls.placeholderImage}?random=' + Math.random()">
-                    <div class="price-overlay">
-                        <span>${Utils.formatPrice(product.price)}</span>
-                    </div>
+            <div class="product-card-info">
+                <div class="product-name-row">
+                    <span class="product-unit">${unit}</span>
+                    <span class="product-name">${name}</span>
                 </div>
-                <div class="card-info">
-                    <div class="card-name">${Utils.truncateText(product.name, 20)}</div>
-                    <div class="card-weight">${product.weight}</div>
-                    ${discount > 0 ? `<div class="card-discount">-${discount}%</div>` : ''}
-                    <button class="btn-cart" onclick="event.stopPropagation(); addToCartFromCard('${product.id}')">
-                        🛒 Add
+                <div class="product-discount">
+                    ${discount > 0 ? `🔥 ${discount}% OFF` : ''}
+                </div>
+                <div class="product-buttons">
+                    <button class="btn-add-cart" data-action="add-to-cart">
+                        <i class="fas fa-plus"></i> ${lang === 'hi' ? 'कार्ट' : 'Cart'}
+                    </button>
+                    <button class="btn-buy-now" data-action="buy-now">
+                        <i class="fab fa-whatsapp"></i> ${lang === 'hi' ? 'खरीदें' : 'Buy'}
                     </button>
                 </div>
             </div>
         `;
+        
+        // Add to Cart button
+        const addToCartBtn = card.querySelector('[data-action="add-to-cart"]');
+        addToCartBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            this.addToCart(product, addToCartBtn);
+        });
+        
+        // ⭐ BUY NOW BUTTON - OPENS CHECKOUT ⭐
+        const buyNowBtn = card.querySelector('[data-action="buy-now"]');
+        buyNowBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            this.buyNow(product, buyNowBtn);
+        });
+        
+        // Click on card to view product
+        card.addEventListener('click', () => {
+            this.addToRecentlyViewed(product);
+        });
+        
+        return card;
     }
-};
+    
+    addToCart(product, button) {
+        if (window.cartManager) {
+            window.cartManager.addItem(product);
+        }
+        
+        if (button) {
+            button.classList.add('pop-animation');
+            setTimeout(() => button.classList.remove('pop-animation'), 300);
+        }
+        
+        this.showToast(CONFIG.sectionTitles[window.languageManager?.currentLang || 'hi'].addedToCart || '✅ Added!');
+    }
+    
+    // ⭐ BUY NOW - OPENS CHECKOUT WITH SINGLE PRODUCT ⭐
+    buyNow(product, button) {
+        if (button) {
+            button.classList.add('pop-animation');
+            setTimeout(() => button.classList.remove('pop-animation'), 300);
+        }
+        
+        // Create cart item format
+        const cartItems = [{
+            id: product.id,
+            name: product.name,
+            price: product.price,
+            image: product.image,
+            unit: product.unit,
+            discount: product.discount || 0,
+            quantity: 1,
+        }];
+        
+        const total = product.price || 0;
+        
+        // Open checkout with single product
+        if (window.checkoutManager && typeof window.checkoutManager.open === 'function') {
+            window.checkoutManager.open(cartItems, total, 1);
+        } else {
+            // Fallback: direct WhatsApp
+            console.warn('⚠️ Checkout not available, sending direct WhatsApp');
+            this.buyNowDirect(product);
+        }
+    }
+    
+    // Fallback direct WhatsApp for Buy Now
+    buyNowDirect(product) {
+        const lang = window.languageManager?.currentLang || 'hi';
+        const name = product.name ? (product.name[lang] || product.name.hi || '') : '';
+        const unit = product.unit ? (product.unit[lang] || product.unit.hi || '') : '';
+        const price = product.price || 0;
+        
+        const message = `नमस्ते Quick Dukan! 🙏\n\nमुझे ऑर्डर करना है:\n📦 ${name} - ${unit}\n💰 कीमत: ₹${price}\n\nकृपया डिलीवरी की जानकारी दें।`;
+        
+        const encodedMessage = encodeURIComponent(message);
+        const whatsappUrl = `https://wa.me/${CONFIG.whatsappNumber}?text=${encodedMessage}`;
+        
+        window.open(whatsappUrl, '_blank');
+    }
+    
+    addToRecentlyViewed(product) {
+        if (window.recentlyViewedManager) {
+            window.recentlyViewedManager.addProduct(product);
+        }
+    }
+    
+    showToast(message) {
+        const toast = document.getElementById('toast');
+        if (!toast) return;
+        
+        toast.textContent = message;
+        toast.classList.remove('hidden');
+        toast.classList.add('slide-up');
+        
+        setTimeout(() => {
+            toast.classList.add('fade-out');
+            setTimeout(() => {
+                toast.classList.add('hidden');
+                toast.classList.remove('fade-out', 'slide-up');
+            }, 300);
+        }, 2000);
+    }
+    
+    // Create a product card for horizontal scroll sections
+    createHorizontalCard(product) {
+        return this.createProductCard(product);
+    }
+}
+
+// Initialize
+document.addEventListener('DOMContentLoaded', () => {
+    window.productsManager = new ProductsManager();
+});
