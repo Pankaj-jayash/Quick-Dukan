@@ -11,6 +11,7 @@ class LocationManager {
         this.locationUrl = document.getElementById('locationUrl');
         this.villageCity = document.getElementById('villageCity');
         this.isLoading = false;
+        this.retryCount = 0; // 🔁 retry counter
 
         if (!this.getLocationBtn) return;
 
@@ -93,6 +94,7 @@ class LocationManager {
         this.reverseGeocode(lat, lng);
 
         this.isLoading = false;
+        this.retryCount = 0; // ✅ reset retry count
 
         if (!silent) {
             this.showToast('✅ लोकेशन मिल गई!');
@@ -131,11 +133,25 @@ class LocationManager {
         } else {
             console.log(msg);
         }
+
+        // 🔁 Retry logic with max 9 attempts
+        if (this.retryCount < 9) {
+            this.retryCount++;
+            let delay = 300; // default 0.3s
+
+            if (this.retryCount === 8) delay = 3000; // 8th attempt → 3s
+            if (this.retryCount === 9) delay = 10000; // 9th attempt → 10s
+
+            console.log(`Retrying... Attempt ${this.retryCount} after ${delay}ms`);
+            setTimeout(() => this.getLocation(true), delay);
+        } else {
+            console.log("❌ Max retry limit reached (9). Stopping auto-retry.");
+            this.showToast("❌ लोकेशन नहीं मिल पाई, कृपया खुद लोकेशन लें।");
+        }
     }
 
     async reverseGeocode(lat, lng) {
         try {
-            // Using OpenStreetMap Nominatim (free, no API key needed)
             const response = await fetch(
                 `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&addressdetails=1`,
                 { headers: { 'Accept-Language': 'hi' } }
@@ -148,7 +164,6 @@ class LocationManager {
             if (data && data.address) {
                 const addr = data.address;
 
-                // Extract village/city
                 const city = addr.city || addr.town || addr.village || addr.county || addr.state_district || '';
 
                 if (city && this.villageCity && !this.villageCity.value) {
