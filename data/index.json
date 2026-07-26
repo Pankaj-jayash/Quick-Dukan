@@ -3,6 +3,17 @@
     "shopNameHi": "क्विक दुकान",
     "version": "1.0.0",
     "categories": [
+
+             {
+    "id": "cold-drinks",
+    "name": "Cold Drinks",
+    "nameHi": "कोल्ड ड्रिंक्स",
+    "nameEn": "Cold Drinks",
+    "file": "cold-drinks.json",
+    "icon": "💈",
+    "color": "#1E88E5",
+    "bgColor": "#E3F2FD"
+},
         {
             "id": "dal",
             "name": "Dal",
