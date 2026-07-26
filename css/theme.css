@@ -1,0 +1,221 @@
+/* ============================================
+   THEME.CSS - Colors, Fonts, Global Theme
+   ============================================ */
+
+:root {
+    /* Primary Colors */
+    --primary: #1e5c52;
+    --primary-light: #8E24AA;
+    --primary-dark: #4A148C;
+    
+    /* Background Colors */
+    --bg-primary: #f8edff;
+    --bg-secondary: #FFFFFF;
+    --bg-card: #FFFFFF;
+    
+    /* Text Colors */
+    --text-primary: #1a1a1a;
+    --text-secondary: #555555;
+    --text-light: #888888;
+    --text-on-primary: #FFFFFF;
+    
+    /* Accent Colors */
+    --gold: #D4A017;
+    --gold-light: #FFD700;
+    --gold-glow: rgba(212, 160, 23, 0.6);
+    --success: #2E7D32;
+    --error: #C62828;
+    --warning: #F57F17;
+    
+    /* Shadow */
+    --shadow-sm: 0 2px 4px rgba(0,0,0,0.1);
+    --shadow-md: 0 4px 12px rgba(0,0,0,0.15);
+    --shadow-lg: 0 8px 24px rgba(0,0,0,0.2);
+    
+    /* Border Radius */
+    --radius-sm: 8px;
+    --radius-md: 12px;
+    --radius-lg: 20px;
+    --radius-full: 50px;
+    
+    /* Spacing */
+    --spacing-xs: 4px;
+    --spacing-sm: 8px;
+    --spacing-md: 16px;
+    --spacing-lg: 24px;
+    --spacing-xl: 32px;
+    
+    /* Fonts */
+    --font-heading: 'Poppins', 'Noto Sans Devanagari', sans-serif;
+    --font-body: 'Poppins', 'Noto Sans Devanagari', sans-serif;
+    --font-size-xs: 12px;
+    --font-size-sm: 14px;
+    --font-size-md: 16px;
+    --font-size-lg: 20px;
+    --font-size-xl: 24px;
+    --font-size-xxl: 32px;
+    
+    /* Animation */
+    --transition-fast: 0.2s ease;
+    --transition-normal: 0.3s ease;
+    --transition-slow: 0.5s ease;
+    
+    /* Layout */
+    --header-height: 60px;
+    --search-height: 50px;
+    --categories-height: 55px;
+    --bottom-nav-height: 60px;
+    --card-width: 170px;
+    --card-image-height: 56%;
+}
+
+/* Reset and Base */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+html {
+    scroll-behavior: smooth;
+    -webkit-tap-highlight-color: transparent;
+}
+
+body {
+    font-family: var(--font-body);
+    background-color: var(--bg-primary);
+    color: var(--text-primary);
+    overflow-x: hidden;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    transition: background-color var(--transition-normal), color var(--transition-normal);
+}
+
+a {
+    text-decoration: none;
+    color: inherit;
+}
+
+button {
+    cursor: pointer;
+    border: none;
+    outline: none;
+    font-family: inherit;
+    -webkit-tap-highlight-color: transparent;
+}
+
+img {
+    max-width: 100%;
+    display: block;
+}
+
+/* Scrollbar Styling */
+::-webkit-scrollbar {
+    width: 4px;
+    height: 4px;
+}
+
+::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+    background: var(--primary-light);
+    border-radius: var(--radius-full);
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: var(--primary);
+}
+
+/* Utility */
+.hidden {
+    display: none !important;
+}
+
+.text-center {
+    text-align: center;
+}
+
+/* ============================================
+   SECTION TITLES - Golden Yellow with Blur
+   ============================================ */
+.section-title {
+    font-family: var(--font-heading);
+    font-size: 18px;
+    font-weight: 700;
+    color: #B8860B;
+    margin: 12px 0 8px;
+    padding: 6px 0;
+    position: sticky;
+    top: 0;
+    z-index: 5;
+    display: inline-block;
+    letter-spacing: 0.3px;
+    
+    /* Blur background - only behind text */
+    background: transparent;
+    position: relative;
+}
+
+/* Blur effect behind text using pseudo element */
+.section-title::before {
+    content: '';
+    position: absolute;
+    top: -2px;
+    left: -12px;
+    right: -12px;
+    bottom: -2px;
+    background: inherit;
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    z-index: -1;
+    border-radius: 8px;
+}
+
+/* Dark mode golden color */
+body.dark-mode .section-title {
+    color: #FFD700;
+    text-shadow: 0 0 10px rgba(255, 215, 0, 0.3);
+}
+
+/* Category products section title */
+.category-products-section .section-title {
+    color: #B8860B;
+    font-size: 19px;
+    font-weight: 800;
+}
+
+body.dark-mode .category-products-section .section-title {
+    color: #FFD700;
+    text-shadow: 0 0 15px rgba(255, 215, 0, 0.4);
+}
+
+/* Recently viewed section title */
+.recently-viewed-section .section-title {
+    color: #8B7355;
+}
+
+body.dark-mode .recently-viewed-section .section-title {
+    color: #DEB887;
+}
+
+/* Most orders section title */
+.most-orders-section .section-title {
+    color: #CD853F;
+}
+
+body.dark-mode .most-orders-section .section-title {
+    color: #F4A460;
+    text-shadow: 0 0 10px rgba(244, 164, 96, 0.3);
+}
+
+/* All products section title */
+.all-products-section .section-title {
+    color: #6A1B9A;
+}
+
+body.dark-mode .all-products-section .section-title {
+    color: #BB86FC;
+    text-shadow: 0 0 10px rgba(187, 134, 252, 0.3);
+}
