@@ -48,14 +48,14 @@
     position: absolute;
     bottom: 8px;
     right: 8px;
-    background: rgba(0, 0, 0, 0.5);
-    backdrop-filter: blur(8px);
+    background: transparent;
+    backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(8px);
     padding: 4px 10px;
     border-radius: var(--radius-full);
     color: #FFD700;
     font-weight: 700;
-    font-size: var(--font-size-sm);
+    font-size: 18px;
     z-index: 2;
 }
 
