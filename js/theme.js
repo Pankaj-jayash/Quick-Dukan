@@ -59,4 +59,4 @@ class ThemeManager {
 // Initialize on DOM ready
 document.addEventListener('DOMContentLoaded', () => {
     window.themeManager = new ThemeManager();
-});
+}); 
