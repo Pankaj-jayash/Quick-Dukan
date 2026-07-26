@@ -1,0 +1,47 @@
+/* ============================================
+   RECENTLY-VIEWED.CSS - Section 6
+   ============================================ */
+
+.recently-viewed-section {
+    margin-bottom: var(--spacing-md);
+}
+
+.recently-viewed-section .section-title {
+    color: #8B7355;
+    font-weight: 700;
+    display: inline-block;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+}
+
+/* Blur behind title */
+.recently-viewed-section .section-title::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -14px;
+    right: -14px;
+    bottom: 0;
+    background: rgba(245, 245, 220, 0.85);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    z-index: -1;
+    border-radius: 10px;
+}
+
+body.dark-mode .recently-viewed-section .section-title::before {
+    background: rgba(26, 26, 46, 0.85);
+}
+
+body.dark-mode .recently-viewed-section .section-title {
+    color: #DEB887;
+}
+
+.recently-viewed-section .horizontal-scroll {
+    min-height: 200px;
+}
+
+.recently-viewed-section .product-card {
+    animation: slideUp 0.3s ease;
+}
