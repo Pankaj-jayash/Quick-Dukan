@@ -1,7 +1,5 @@
-
-
 // ============================================
-// CHECKOUT.JS - Checkout Logic
+// CHECKOUT.JS - Checkout Logic (NO SCROLL + ANIMATION)
 // ============================================
 
 class CheckoutManager {
@@ -30,8 +28,14 @@ class CheckoutManager {
         this.summaryDetail = document.getElementById('summaryDetail');
         this.summaryToggle = document.getElementById('summaryToggle');
         
+        // Location
+        this.locationBtn = document.getElementById('getLocationBtn');
+        this.locationText = document.getElementById('locationText');
+        
         this.cartItems = [];
         this.storageKey = 'quick-dukan-user-info';
+        this.locationStorageKey = 'quick-dukan-location';
+        this.isLocationLoaded = false;
         
         if (!this.checkoutModal) return;
         
@@ -71,9 +75,16 @@ class CheckoutManager {
             this.summaryToggle.addEventListener('click', () => this.toggleSummary());
         }
         
+        // Location button
+        if (this.locationBtn) {
+            this.locationBtn.addEventListener('click', () => this.getLiveLocation());
+        }
+        
         // Escape key
         document.addEventListener('keydown', (e) => {
-            if (e.key === 'Escape') this.close();
+            if (e.key === 'Escape' && !this.checkoutModal.classList.contains('hidden')) {
+                this.close();
+            }
         });
     }
     
@@ -86,31 +97,43 @@ class CheckoutManager {
         if (this.checkoutItemCount) this.checkoutItemCount.textContent = `${totalItems} आइटम`;
         if (this.checkoutTotal) this.checkoutTotal.textContent = `₹${totalPrice}`;
         
-        // Fill summary detail
         this.renderSummaryDetail();
         
         // Auto-fill saved data
         this.fillSavedData();
         
-        // Show modal
+        // Show modal with animation
         this.checkoutModal.classList.remove('hidden');
         document.body.style.overflow = 'hidden';
         
-        // Trigger location auto-detect
-        document.dispatchEvent(new CustomEvent('checkoutOpened'));
-        
-        // Try to apply saved location
+        // ⭐ AUTO GET LOCATION ⭐
         setTimeout(() => {
-            if (window.locationManager) {
-                window.locationManager.applySavedLocation();
-            }
-        }, 300);
+            this.autoGetLocation();
+        }, 500);
+        
+        // Scroll to top of checkout
+        const checkoutContent = this.checkoutModal.querySelector('.checkout-content');
+        if (checkoutContent) {
+            checkoutContent.scrollTop = 0;
+        }
     }
     
     close() {
         if (!this.checkoutModal) return;
-        this.checkoutModal.classList.add('hidden');
-        document.body.style.overflow = '';
+        
+        // Add closing animation
+        const checkoutContent = this.checkoutModal.querySelector('.checkout-content');
+        if (checkoutContent) {
+            checkoutContent.style.animation = 'slideDownCheckout 0.3s ease forwards';
+            setTimeout(() => {
+                this.checkoutModal.classList.add('hidden');
+                document.body.style.overflow = '';
+                checkoutContent.style.animation = '';
+            }, 280);
+        } else {
+            this.checkoutModal.classList.add('hidden');
+            document.body.style.overflow = '';
+        }
     }
     
     renderSummaryDetail() {
@@ -118,8 +141,9 @@ class CheckoutManager {
         
         this.summaryDetail.innerHTML = '';
         
+        const lang = window.languageManager?.currentLang || 'hi';
+        
         this.cartItems.forEach(item => {
-            const lang = window.languageManager?.currentLang || 'hi';
             const name = item.name ? (item.name[lang] || item.name.hi || item.name.en || '') : '';
             
             const row = document.createElement('div');
@@ -147,16 +171,29 @@ class CheckoutManager {
             const data = JSON.parse(saved);
             
             if (this.customerName && data.name) this.customerName.value = data.name;
-            if (this.customerPhone && data.phone) this.customerPhone.value = data.phone;
+            if (this.customerPhone && data.phone) {
+                this.customerPhone.value = data.phone;
+                this.validatePhone();
+            }
             if (this.villageCity && data.villageCity) this.villageCity.value = data.villageCity;
             if (this.landmark && data.landmark) this.landmark.value = data.landmark;
             if (this.pincode && data.pincode) this.pincode.value = data.pincode;
-            if (this.latitude && data.lat) this.latitude.value = data.lat;
-            if (this.longitude && data.lng) this.longitude.value = data.lng;
-            if (this.locationUrl && data.locationUrl) this.locationUrl.value = data.locationUrl;
             
-            // Auto-validate phone
-            if (data.phone) this.validatePhone();
+            // Apply saved location coordinates
+            const savedLoc = localStorage.getItem(this.locationStorageKey);
+            if (savedLoc) {
+                const loc = JSON.parse(savedLoc);
+                if (this.latitude) this.latitude.value = loc.lat || '';
+                if (this.longitude) this.longitude.value = loc.lng || '';
+                if (this.locationUrl) this.locationUrl.value = loc.url || '';
+                
+                if (this.locationBtn) {
+                    this.locationBtn.innerHTML = '<span class="location-icon">✅</span> लोकेशन मिल गई';
+                    this.locationBtn.style.background = '#25D366';
+                }
+                if (this.locationText) this.locationText.classList.remove('hidden');
+                this.isLocationLoaded = true;
+            }
         } catch (e) {
             // ignore
         }
@@ -171,15 +208,145 @@ class CheckoutManager {
             villageCity: this.villageCity?.value || '',
             landmark: this.landmark?.value || '',
             pincode: this.pincode?.value || '',
-            lat: this.latitude?.value || '',
-            lng: this.longitude?.value || '',
-            locationUrl: this.locationUrl?.value || '',
         };
         
         try {
             localStorage.setItem(this.storageKey, JSON.stringify(data));
         } catch (e) {
             // ignore
+        }
+    }
+    
+    // ⭐ AUTO GET LOCATION ⭐
+    autoGetLocation() {
+        // Check if location already loaded
+        if (this.isLocationLoaded) return;
+        
+        // Check if saved location exists
+        const savedLoc = localStorage.getItem(this.locationStorageKey);
+        if (savedLoc) {
+            try {
+                const loc = JSON.parse(savedLoc);
+                if (loc.lat && loc.lng) {
+                    this.applyLocation(loc.lat, loc.lng, loc.url);
+                    return;
+                }
+            } catch (e) {}
+        }
+        
+        // Try to get new location
+        if (!navigator.geolocation) return;
+        
+        if (this.locationBtn) {
+            this.locationBtn.innerHTML = '<span class="location-icon">⏳</span> लोकेशन ले रहे हैं...';
+            this.locationBtn.classList.add('loading');
+        }
+        
+        navigator.geolocation.getCurrentPosition(
+            (position) => {
+                const lat = position.coords.latitude;
+                const lng = position.coords.longitude;
+                const url = `https://maps.google.com/?q=${lat},${lng}`;
+                
+                this.applyLocation(lat, lng, url);
+                this.saveLocationToStorage(lat, lng, url);
+                this.reverseGeocode(lat, lng);
+            },
+            (error) => {
+                console.log('📍 Auto location failed, user can click button');
+                if (this.locationBtn) {
+                    this.locationBtn.innerHTML = '<span class="location-icon">📍</span> लोकेशन लें';
+                    this.locationBtn.classList.remove('loading');
+                }
+            },
+            { enableHighAccuracy: true, timeout: 8000, maximumAge: 300000 }
+        );
+    }
+    
+    // ⭐ MANUAL GET LOCATION ⭐
+    getLiveLocation() {
+        if (!navigator.geolocation) {
+            alert('आपके ब्राउज़र में लोकेशन सपोर्ट नहीं है');
+            return;
+        }
+        
+        if (this.locationBtn) {
+            this.locationBtn.innerHTML = '<span class="location-icon">⏳</span> लोकेशन ले रहे हैं...';
+            this.locationBtn.classList.add('loading');
+        }
+        
+        navigator.geolocation.getCurrentPosition(
+            (position) => {
+                const lat = position.coords.latitude;
+                const lng = position.coords.longitude;
+                const url = `https://maps.google.com/?q=${lat},${lng}`;
+                
+                this.applyLocation(lat, lng, url);
+                this.saveLocationToStorage(lat, lng, url);
+                this.reverseGeocode(lat, lng);
+                this.showToast('✅ लोकेशन मिल गई!');
+            },
+            (error) => {
+                console.error('Location error:', error);
+                if (this.locationBtn) {
+                    this.locationBtn.innerHTML = '<span class="location-icon">📍</span> लोकेशन लें';
+                    this.locationBtn.classList.remove('loading');
+                }
+                
+                let msg = 'लोकेशन नहीं मिल पाई';
+                if (error.code === error.PERMISSION_DENIED) {
+                    msg = '⚠️ लोकेशन की परमिशन दें (ब्राउज़र सेटिंग में)';
+                }
+                this.showToast(msg);
+            },
+            { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
+        );
+    }
+    
+    applyLocation(lat, lng, url) {
+        if (this.latitude) this.latitude.value = lat;
+        if (this.longitude) this.longitude.value = lng;
+        if (this.locationUrl) this.locationUrl.value = url;
+        
+        if (this.locationBtn) {
+            this.locationBtn.innerHTML = '<span class="location-icon">✅</span> लोकेशन मिल गई';
+            this.locationBtn.style.background = '#25D366';
+            this.locationBtn.classList.remove('loading');
+        }
+        
+        if (this.locationText) this.locationText.classList.remove('hidden');
+        
+        this.isLocationLoaded = true;
+    }
+    
+    saveLocationToStorage(lat, lng, url) {
+        try {
+            localStorage.setItem(this.locationStorageKey, JSON.stringify({ lat, lng, url }));
+        } catch (e) {}
+    }
+    
+    async reverseGeocode(lat, lng) {
+        try {
+            const response = await fetch(
+                `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&addressdetails=1`,
+                { headers: { 'Accept-Language': 'hi' } }
+            );
+            
+            if (!response.ok) return;
+            
+            const data = await response.json();
+            
+            if (data && data.address) {
+                const addr = data.address;
+                const city = addr.city || addr.town || addr.village || addr.county || addr.state_district || '';
+                
+                if (city && this.villageCity && !this.villageCity.value) {
+                    this.villageCity.value = city;
+                    this.villageCity.classList.add('valid');
+                }
+            }
+        } catch (error) {
+            console.log('Reverse geocoding skipped');
         }
     }
     
@@ -198,17 +365,14 @@ class CheckoutManager {
             this.customerPhone.classList.remove('error');
             this.customerPhone.classList.add('valid');
             if (this.phoneError) this.phoneError.classList.add('hidden');
-        } else {
+        } else if (phone.length >= 10) {
             this.customerPhone.classList.remove('valid');
             this.customerPhone.classList.add('error');
-            if (this.phoneError && phone.length >= 10) {
-                this.phoneError.classList.remove('hidden');
-            }
+            if (this.phoneError) this.phoneError.classList.remove('hidden');
         }
     }
     
     submitOrder() {
-        // Validate
         const name = this.customerName?.value?.trim();
         const phone = this.customerPhone?.value?.replace(/\D/g, '');
         const villageCity = this.villageCity?.value?.trim();
@@ -231,18 +395,41 @@ class CheckoutManager {
             return;
         }
         
-        // Save info
+        // Save user info
         this.saveUserInfo();
         
-        // Build WhatsApp message
-        const message = this.buildWhatsAppMessage(name, phone);
+        // ⭐ USE WHATSAPP MANAGER TO SEND ⭐
+        const orderData = {
+            customer: {
+                name: name,
+                phone: '+91 ' + phone,
+                villageCity: villageCity,
+                landmark: this.landmark?.value?.trim() || '',
+                pincode: this.pincode?.value?.trim() || '',
+                notes: this.orderNotes?.value?.trim() || '',
+            },
+            items: this.cartItems,
+            totals: {
+                total: this.cartItems.reduce((sum, item) => sum + (item.price * (item.quantity || 1)), 0),
+                itemCount: this.cartItems.reduce((sum, item) => sum + (item.quantity || 1), 0),
+            },
+            location: {
+                lat: this.latitude?.value || '',
+                lng: this.longitude?.value || '',
+                url: this.locationUrl?.value || '',
+            }
+        };
         
-        // Open WhatsApp
-        const encodedMessage = encodeURIComponent(message);
-        const whatsappUrl = `https://wa.me/${CONFIG.whatsappNumber}?text=${encodedMessage}`;
-        window.open(whatsappUrl, '_blank');
+        // Send via WhatsApp Manager
+        if (window.whatsappManager) {
+            window.whatsappManager.sendOrder(orderData);
+        } else {
+            // Fallback
+            const fallbackUrl = `https://wa.me/919719312956?text=${encodeURIComponent('नमस्ते! Quick Dukan ऑर्डर')}`;
+            window.open(fallbackUrl, '_blank');
+        }
         
-        // Save order
+        // Save order to history
         if (window.ordersManager) {
             window.ordersManager.saveOrder({
                 items: this.cartItems.map(item => ({
@@ -254,8 +441,8 @@ class CheckoutManager {
                     discount: item.discount || 0,
                     quantity: item.quantity || 1,
                 })),
-                total: this.cartItems.reduce((sum, item) => sum + (item.price * (item.quantity || 1)), 0),
-                itemCount: this.cartItems.reduce((sum, item) => sum + (item.quantity || 1), 0),
+                total: orderData.totals.total,
+                itemCount: orderData.totals.itemCount,
             });
         }
         
@@ -267,79 +454,12 @@ class CheckoutManager {
             window.cartManager.cart = [];
             window.cartManager.saveCart();
             window.cartManager.updateBadge();
-            window.cartManager.closeCart();
+            if (!document.getElementById('cartModal').classList.contains('hidden')) {
+                window.cartManager.closeCart();
+            }
         }
         
         this.showToast('✅ ऑर्डर WhatsApp पर भेज दिया!');
-    }
-    
-    buildWhatsAppMessage(name, phone) {
-        const lang = window.languageManager?.currentLang || 'hi';
-        
-        let msg = '🛒 *Quick Dukan - नया ऑर्डर*\n\n';
-        msg += '━━━━━━━━━━━━━━━━\n\n';
-        
-        // Customer info
-        msg += '👤 *ग्राहक की जानकारी*\n';
-        msg += `   नाम: ${name}\n`;
-        msg += `   फ़ोन: +91 ${phone}\n`;
-        
-        const villageCity = this.villageCity?.value?.trim();
-        const landmark = this.landmark?.value?.trim();
-        const pincode = this.pincode?.value?.trim();
-        
-        if (villageCity) msg += `   गाँव/शहर: ${villageCity}\n`;
-        if (landmark) msg += `   आस-पास: ${landmark}\n`;
-        if (pincode) msg += `   पिन कोड: ${pincode}\n`;
-        
-        msg += '\n━━━━━━━━━━━━━━━━\n\n';
-        
-        // Order items
-        msg += '📦 *ऑर्डर डिटेल*\n\n';
-        
-        this.cartItems.forEach((item, i) => {
-            const itemName = item.name ? (item.name[lang] || item.name.hi || item.name.en || '') : '';
-            const unit = item.unit ? (item.unit[lang] || item.unit.hi || item.unit.en || '') : '';
-            const price = item.price || 0;
-            const qty = item.quantity || 1;
-            
-            msg += `${i + 1}. ${itemName}\n`;
-            msg += `   ${unit} × ${qty} = ₹${price * qty}\n`;
-        });
-        
-        const total = this.cartItems.reduce((sum, item) => sum + (item.price * (item.quantity || 1)), 0);
-        const itemCount = this.cartItems.reduce((sum, item) => sum + (item.quantity || 1), 0);
-        
-        msg += '\n━━━━━━━━━━━━━━━━\n';
-        msg += `📦 कुल आइटम: ${itemCount}\n`;
-        msg += `💰 कुल राशि: ₹${total}\n`;
-        
-        if (total >= 500) {
-            msg += '🚚 डिलीवरी: *फ्री!* 🎉\n';
-        }
-        
-        msg += '\n━━━━━━━━━━━━━━━━\n\n';
-        
-        // Order notes
-        const notes = this.orderNotes?.value?.trim();
-        if (notes) {
-            msg += `📝 *नोट:* ${notes}\n\n`;
-        }
-        
-        // Location
-        const lat = this.latitude?.value;
-        const lng = this.longitude?.value;
-        const locationUrl = this.locationUrl?.value;
-        
-        if (lat && lng && locationUrl) {
-            msg += '📍 *लाइव लोकेशन:*\n';
-            msg += `   ${locationUrl}\n\n`;
-            msg += '   (मैप खोलने के लिए लिंक पर क्लिक करें)\n';
-        }
-        
-        msg += '\n🙏 कृपया ऑर्डर कन्फर्म करें।';
-        
-        return msg;
     }
     
     showToast(msg) {
@@ -361,4 +481,3 @@ class CheckoutManager {
 document.addEventListener('DOMContentLoaded', () => {
     window.checkoutManager = new CheckoutManager();
 });
-
