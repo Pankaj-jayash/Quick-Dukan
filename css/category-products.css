@@ -1,0 +1,19 @@
+/* ============================================
+   CATEGORY-PRODUCTS.CSS - Section 5
+   ============================================ */
+
+.category-products-section {
+    margin-bottom: var(--spacing-md);
+    padding-top: 4px;
+}
+
+.category-products-section .section-title {
+    color: var(--primary);
+    font-weight: 700;
+    margin-top: 0;
+    padding-top: 8px;
+}
+
+.category-products-section .products-grid {
+    animation: fadeIn 0.4s ease;
+}
