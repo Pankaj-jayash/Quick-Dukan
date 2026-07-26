@@ -1,5 +1,5 @@
 /* ============================================
-   PRODUCT-CARD.CSS - Compact Square Card
+   PRODUCT-CARD.CSS - Product Card Design
    ============================================ */
 
 .product-card {
@@ -12,21 +12,21 @@
     position: relative;
     display: flex;
     flex-direction: column;
-    border: 1px solid rgba(0,0,0,0.04);
 }
 
 .product-card:hover {
     box-shadow: var(--shadow-md);
-    transform: translateY(-2px);
+    transform: translateY(-3px);
 }
 
-/* ⭐ IMAGE - 100% Square but Card is Compact ⭐ */
+/* Image Container - 56% */
 .product-card-image {
     position: relative;
     width: 100%;
-    padding-bottom: 100%; /* Square */
+    height: 0;
+    padding-bottom: 100%; /* 56% ratio */
     overflow: hidden;
-    background: #f8f8f8;
+    background: #f0f0f0;
 }
 
 .product-card-image img {
@@ -35,8 +35,7 @@
     left: 0;
     width: 100%;
     height: 100%;
-    object-fit: contain; /* contain = पूरी इमेज दिखे, cover से बेहतर */
-    padding: 8px;
+    object-fit: cover;
     transition: transform var(--transition-normal);
 }
 
@@ -44,44 +43,48 @@
     transform: scale(1.05);
 }
 
-/* ⭐ PRICE OVERLAY - Only Blur, No Color, Big Text ⭐ */
+/* Price Overlay - Gold, Blur, Right-Bottom */
 .price-overlay {
     position: absolute;
     bottom: 8px;
     right: 8px;
-    background: transparent;
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
-    padding: 4px 8px;
-    border-radius: 6px;
+    background: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    padding: 4px 10px;
+    border-radius: var(--radius-full);
     color: #FFD700;
-    font-weight: 800;
-    font-size: 16px; /* बड़ा टेक्स्ट */
+    font-weight: 700;
+    font-size: var(--font-size-sm);
     z-index: 2;
-    text-shadow: 0 1px 3px rgba(0,0,0,0.4);
-    letter-spacing: 0.5px;
-    line-height: 1;
 }
 
-/* ⭐ PRODUCT INFO - Compact ⭐ */
+/* Product Info - 44% */
 .product-card-info {
-    padding: 8px 10px;
+    padding: 10px;
     flex: 1;
     display: flex;
     flex-direction: column;
-    gap: 3px;
+    gap: 4px;
 }
 
-/* ⭐ NAME & UNIT ROW - Name Left, Unit Right ⭐ */
+/* Name and Unit Row */
 .product-name-row {
     display: flex;
     justify-content: space-between;
-    align-items: center;
-    gap: 6px;
+    align-items: flex-start;
+    gap: var(--spacing-xs);
+}
+
+.product-unit {
+    font-size: var(--font-size-xs);
+    color: var(--text-light);
+    white-space: nowrap;
+    flex-shrink: 0;
 }
 
 .product-name {
-    font-size: 12px;
+    font-size: var(--font-size-sm);
     font-weight: 600;
     color: var(--text-primary);
     line-height: 1.3;
@@ -89,44 +92,34 @@
     -webkit-line-clamp: 2;
     -webkit-box-orient: vertical;
     overflow: hidden;
-    text-align: left; /* ⭐ बायीं तरफ */
+    text-align: right;
     flex: 1;
-}
-
-.product-unit {
-    font-size: 11px;
-    color: var(--text-light);
-    white-space: nowrap;
-    flex-shrink: 0;
-    text-align: right; /* ⭐ दायीं तरफ */
 }
 
 /* Discount */
 .product-discount {
-    font-size: 11px;
+    font-size: var(--font-size-xs);
     color: var(--success);
     font-weight: 700;
-    min-height: 16px;
+    min-height: 18px;
 }
 
-/* ⭐ BUTTONS - Compact ⭐ */
+/* Buttons Row */
 .product-buttons {
     display: flex;
-    gap: 4px;
+    gap: var(--spacing-xs);
     margin-top: auto;
 }
 
 .btn-add-cart,
 .btn-buy-now {
     flex: 1;
-    padding: 6px 2px;
-    border-radius: 6px;
-    font-size: 10px;
-    font-weight: 700;
+    padding: 8px 4px;
+    border-radius: var(--radius-sm);
+    font-size: var(--font-size-xs);
+    font-weight: 600;
     text-align: center;
     transition: all var(--transition-fast);
-    border: none;
-    cursor: pointer;
 }
 
 .btn-add-cart {
@@ -149,48 +142,30 @@
 
 .btn-add-cart:active,
 .btn-buy-now:active {
-    transform: scale(0.93);
+    transform: scale(0.95);
 }
 
-/* Horizontal scroll cards */
+/* Horizontal Card (for horizontal scroll sections) */
 .horizontal-scroll .product-card {
-    width: 140px; /* ⭐ और छोटा */
+    width: var(--card-width);
     flex-shrink: 0;
 }
 
-/* Grid cards - 2 per row */
-.products-grid .product-card {
-    /* Default, grid handles size */
-}
-
-/* Mobile */
+/* Mobile adjustments */
 @media (max-width: 360px) {
-    .product-card-info {
-        padding: 6px 8px;
+    .product-card {
+        --card-width: 140px;
     }
-    
-    .product-name {
-        font-size: 11px;
-    }
-    
-    .product-unit {
-        font-size: 10px;
-    }
-    
     .price-overlay {
-        font-size: 14px;
-        padding: 3px 6px;
-        bottom: 6px;
-        right: 6px;
+        font-size: 11px;
+        padding: 3px 8px;
     }
-    
+    .product-name {
+        font-size: 12px;
+    }
     .btn-add-cart,
     .btn-buy-now {
-        padding: 5px 2px;
-        font-size: 9px;
-    }
-    
-    .horizontal-scroll .product-card {
-        width: 120px;
+        padding: 6px 2px;
+        font-size: 10px;
     }
 }
