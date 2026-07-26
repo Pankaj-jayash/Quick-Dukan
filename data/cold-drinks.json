@@ -1,0 +1,87 @@
+{
+  "category": "cold-drinks",
+  "products": [
+    {
+      "id": "cold-001",
+      "name": { "hi": "पेप्सी (750ml)",
+      "en": "Pepsi (750ml)" },
+      "price": 45,
+      "unit": { "hi": "750 ml", "en": "750 ml" },
+      "image": "https://m.media-amazon.com/images/I/71lLqGv0aTL._SL1500_.jpg",
+      "discount": 0,
+      "mostOrdered": true
+    },
+    {
+      "id": "cold-002",
+      "name": { "hi": "पेप्सी (2 लीटर)", "en": "Pepsi (2 Litre)" },
+      "price": 100,
+      "unit": { "hi": "2 लीटर", "en": "2 Litre" },
+      "image": "https://m.media-amazon.com/images/I/61Qk7P8xVYL._SL1500_.jpg",
+      "discount": 5,
+      "mostOrdered": true
+    },
+    {
+      "id": "cold-004",
+      "name": { "hi": "मिरिंडा (750ml)", "en": "Mirinda (750ml)" },
+      "price": 45,
+      "unit": { "hi": "750 ml", "en": "750 ml" },
+      "image": "https://m.media-amazon.com/images/I/61v8L0h1mDL._SL1500_.jpg",
+      "discount": 0,
+      "mostOrdered": true
+    },
+    {
+      "id": "cold-005",
+      "name": { "hi": "माउंटेन ड्यू (750ml)", "en": "Mountain Dew (750ml)" },
+      "price": 45,
+      "unit": { "hi": "750 ml", "en": "750 ml" },
+      "image": "https://m.media-amazon.com/images/I/61ZmWqFGy3L._SL1500_.jpg",
+      "discount": 0,
+      "mostOrdered": false
+    },
+    {
+      "id": "cold-006",
+      "name": { "hi": "7अप (750ml)", "en": "7Up (750ml)" },
+      "price": 45,
+      "unit": { "hi": "750 ml", "en": "750 ml" },
+      "image": "https://m.media-amazon.com/images/I/61ZmWqFGy3L._SL1500_.jpg",
+      "discount": 0,
+      "mostOrdered": false
+    },
+    {
+      "id": "cold-009",
+      "name": { "hi": "स्प्राइट (750ml)", "en": "Sprite (750ml)" },
+      "price": 45,
+      "unit": { "hi": "750 ml", "en": "750 ml" },
+      "image": "https://m.media-amazon.com/images/I/71xZzQk7P8L._SL1500_.jpg",
+      "discount": 0,
+      "mostOrdered": true
+    },
+    {
+      "id": "cold-010",
+      "name": { "hi": "फैंटा (750ml)", "en": "Fanta (750ml)" },
+      "price": 45,
+      "unit": { "hi": "750 ml", "en": "750 ml" },
+      "image": "https://m.media-amazon.com/images/I/71yFanta750ml.jpg",
+      "discount": 0,
+      "mostOrdered": false
+    },
+    {
+      "id": "cold-011",
+      "name": { "hi": "कैंपा कोला (750ml)", "en": "Campa Cola (750ml)" },
+      "price": 40,
+      "unit": { "hi": "750 ml", "en": "750 ml" },
+      "image": "https://m.media-amazon.com/images/I/71CampaCola.jpg",
+      "discount": 0,
+      "mostOrdered": true
+    },
+    {
+      "id": "cold-012",
+      "name": { "hi": "कोक ज़ीरो (330ml कैन)", "en": "Coke Zero (330ml Can)" },
+      "price": 199,
+      "unit": { "hi": "330 ml", "en": "330 ml" },
+      "image": "https://m.media-amazon.com/images/I/71CokeZero.jpg",
+      "discount": 0,
+      "mostOrdered": false
+    }
+  ]
+}
