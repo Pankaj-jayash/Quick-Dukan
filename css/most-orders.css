@@ -1,0 +1,60 @@
+/* ============================================
+   MOST-ORDERS.CSS - Section 7
+   ============================================ */
+
+.most-orders-section {
+    margin-bottom: var(--spacing-md);
+}
+
+.most-orders-section .section-title {
+    color: #0f614e;
+    font-weight: 700;
+    display: inline-block;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+}
+
+/* Blur behind title */
+.most-orders-section .section-title::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -14px;
+    right: -14px;
+    bottom: 0;
+    background: rgba(245, 245, 220, 0.85);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    z-index: -1;
+    border-radius: 10px;
+}
+
+body.dark-mode .most-orders-section .section-title::before {
+    background: rgba(26, 26, 46, 0.85);
+}
+
+body.dark-mode .most-orders-section .section-title {
+    color: #F4A460;
+    text-shadow: 0 0 10px rgba(244, 164, 96, 0.3);
+}
+
+.most-orders-section .horizontal-scroll {
+    min-height: 200px;
+}
+
+.most-orders-section .product-card {
+    border: 2px solid rgba(205, 133, 63, 0.2);
+}
+
+.most-orders-section .product-card:hover {
+    border-color: rgba(205, 133, 63, 0.5);
+}
+
+body.dark-mode .most-orders-section .product-card {
+    border-color: rgba(244, 164, 96, 0.2);
+}
+
+body.dark-mode .most-orders-section .product-card:hover {
+    border-color: rgba(244, 164, 96, 0.5);
+}
