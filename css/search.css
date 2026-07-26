@@ -1,0 +1,167 @@
+/* ============================================
+   SEARCH.CSS - Search Bar Section
+   ============================================ */
+
+.search-section {
+    display: flex;
+    flex-direction: column;
+    padding: 8px 15%;
+    z-index: 999;
+}
+
+.search-container {
+    position: relative;
+    width: 100%;
+    display: flex;
+    align-items: center;
+}
+
+.search-input {
+    width: 100%;
+    height: 42px;
+    padding: 0 45px 0 16px;
+    border: 2px solid var(--primary-light);
+    border-radius: var(--radius-full);
+    font-size: var(--font-size-sm);
+    font-family: var(--font-body);
+    background: transparent;
+    color: var(--text-primary);
+    transition: all var(--transition-normal);
+    outline: none;
+}
+
+.search-input::placeholder {
+    color: var(--text-light);
+    font-style: italic;
+}
+
+.search-input:focus {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(106, 27, 154, 0.1);
+}
+
+.search-icon-btn {
+    position: absolute;
+    right: 6px;
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    background: var(--primary);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    transition: all var(--transition-normal);
+    cursor: pointer;
+    border: none;
+}
+
+.search-icon-btn span {
+    font-size: 16px;
+}
+
+.search-icon-btn:hover {
+    background: var(--primary-dark);
+    transform: scale(1.05);
+}
+
+.search-icon-btn:active {
+    transform: scale(0.9);
+}
+
+/* Search Results Dropdown */
+.search-results {
+    position: absolute;
+    top: calc(100% + 4px);
+    left: 15%;
+    right: 15%;
+    background: var(--bg-card);
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-lg);
+    max-height: 300px;
+    overflow-y: auto;
+    z-index: 10;
+}
+
+.search-result-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 14px;
+    cursor: pointer;
+    transition: background var(--transition-fast);
+}
+
+.search-result-item:hover {
+    background: var(--bg-primary);
+}
+
+.search-result-item img {
+    width: 40px;
+    height: 40px;
+    border-radius: var(--radius-sm);
+    object-fit: cover;
+}
+
+.search-result-info {
+    flex: 1;
+}
+
+.search-result-name {
+    font-size: var(--font-size-sm);
+    font-weight: 500;
+}
+
+.search-result-price {
+    font-size: var(--font-size-xs);
+    color: var(--primary);
+    font-weight: 600;
+}
+
+/* No Results */
+.no-results {
+    position: absolute;
+    top: calc(100% + 4px);
+    left: 15%;
+    right: 15%;
+    background: var(--bg-card);
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-lg);
+    padding: 16px;
+    text-align: center;
+    z-index: 10;
+}
+
+.no-results-msg {
+    font-size: var(--font-size-sm);
+    color: var(--text-secondary);
+    margin-bottom: 12px;
+}
+
+.suggested-products {
+    display: flex;
+    gap: 10px;
+    overflow-x: auto;
+    padding: 4px 0;
+}
+
+/* Mobile adjustments */
+@media (max-width: 360px) {
+    .search-section {
+        padding: 6px 10%;
+    }
+    .search-results,
+    .no-results {
+        left: 10%;
+        right: 10%;
+    }
+    .search-input {
+        height: 36px;
+        font-size: 13px;
+    }
+    .search-icon-btn {
+        width: 30px;
+        height: 30px;
+    }
+}
