@@ -24,7 +24,7 @@
     position: relative;
     width: 100%;
     height: 0;
-    padding-bottom: 56%; /* 56% ratio */
+    padding-bottom: 100%; /* 56% ratio */
     overflow: hidden;
     background: #f0f0f0;
 }
