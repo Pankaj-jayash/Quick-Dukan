@@ -1,252 +1,236 @@
-// ========== SEARCH FUNCTIONALITY ==========
+// ============================================
+// SEARCH.JS - Search Bar Logic
+// ============================================
 
-const Search = {
-    placeholderIndex: 0,
-    placeholderInterval: null,
-    voiceRecognition: null,
-    isListening: false,
+class SearchManager {
+    constructor() {
+        this.searchInput = document.getElementById('searchInput');
+        this.searchIcon = document.getElementById('searchIcon');
+        this.searchResults = document.getElementById('searchResults');
+        this.noResults = document.getElementById('noResults');
+        this.suggestedProducts = document.getElementById('suggestedProducts');
+        
+        this.placeholderIndex = 0;
+        this.placeholderInterval = null;
+        this.debounceTimer = null;
+        this.isSearchOpen = false;
+        
+        this.init();
+    }
     
     init() {
-        const searchInput = document.getElementById('searchInput');
-        const searchBtn = document.getElementById('searchBtn');
-        const voiceBtn = document.getElementById('voiceSearchBtn');
-        const searchModal = document.getElementById('searchModal');
-        const searchModalClose = document.getElementById('searchModalClose');
-        const searchOverlay = document.getElementById('searchOverlay');
+        // Rotating placeholder text
+        this.startPlaceholderRotation();
         
-        if (!searchInput) return;
-        
-        // Rotating placeholders
-        this.startPlaceholderRotation(searchInput);
-        
-        // Clear placeholder on focus
-        searchInput.addEventListener('focus', () => {
-            searchInput.dataset.previousPlaceholder = searchInput.placeholder;
-            searchInput.placeholder = '';
+        // Search on typing (with debounce)
+        this.searchInput.addEventListener('input', () => {
+            this.handleSearch();
         });
         
-        searchInput.addEventListener('blur', () => {
-            if (!searchInput.value) {
-                searchInput.placeholder = searchInput.dataset.previousPlaceholder || CONFIG.searchPlaceholders[0];
-            }
+        // Focus event
+        this.searchInput.addEventListener('focus', () => {
+            this.isSearchOpen = true;
+            this.stopPlaceholderRotation();
+            this.searchInput.placeholder = '';
+            this.searchInput.classList.add('focused');
         });
         
-        // Auto-search on typing (debounced)
-        const debouncedSearch = Utils.debounce((query) => {
-            this.performSearch(query);
-        }, 300);
-        
-        searchInput.addEventListener('input', () => {
-            const query = searchInput.value.trim();
-            if (query.length >= 2) {
-                debouncedSearch(query);
-            } else if (query.length === 0) {
-                UI.hidePopup('searchOverlay');
-            }
+        // Blur event
+        this.searchInput.addEventListener('blur', () => {
+            setTimeout(() => {
+                this.isSearchOpen = false;
+                this.searchResults.innerHTML = '';
+                this.noResults.classList.add('hidden');
+                this.startPlaceholderRotation();
+                this.searchInput.classList.remove('focused');
+            }, 200);
         });
         
-        // Search button click
-        if (searchBtn) {
-            searchBtn.addEventListener('click', () => {
-                const query = searchInput.value.trim();
-                if (query.length >= 2) {
-                    this.performSearch(query);
-                }
-            });
-        }
+        // Search icon click
+        this.searchIcon.addEventListener('click', () => {
+            this.performSearch();
+            this.searchIcon.classList.add('pop-animation');
+            setTimeout(() => this.searchIcon.classList.remove('pop-animation'), 300);
+        });
         
         // Enter key
-        searchInput.addEventListener('keydown', (e) => {
+        this.searchInput.addEventListener('keydown', (e) => {
             if (e.key === 'Enter') {
-                const query = searchInput.value.trim();
-                if (query.length >= 2) {
-                    this.performSearch(query);
-                }
+                this.performSearch();
             }
         });
         
-        // Voice search
-        if (voiceBtn && CONFIG.features.enableVoiceSearch) {
-            this.initVoiceSearch(voiceBtn);
-        } else if (voiceBtn) {
-            voiceBtn.style.display = 'none';
-        }
-        
-        // Close modal
-        if (searchModalClose) {
-            searchModalClose.addEventListener('click', () => {
-                UI.hidePopup('searchOverlay');
-            });
-        }
-        
-        if (searchOverlay) {
-            searchOverlay.addEventListener('click', function(e) {
-                if (e.target === searchOverlay) {
-                    UI.hidePopup('searchOverlay');
-                }
-            });
-        }
-        
-        document.addEventListener('keydown', (e) => {
-            if (e.key === 'Escape') {
-                UI.hidePopup('searchOverlay');
-            }
+        // Listen for language change
+        document.addEventListener('languageChanged', () => {
+            this.updatePlaceholder();
         });
-    },
+    }
     
-    startPlaceholderRotation(input) {
+    startPlaceholderRotation() {
         if (this.placeholderInterval) clearInterval(this.placeholderInterval);
         
-        input.placeholder = CONFIG.searchPlaceholders[0];
+        const texts = CONFIG.searchPlaceholderTexts[window.languageManager?.currentLang || 'hi'];
+        this.placeholderIndex = 0;
+        this.searchInput.placeholder = texts[0];
         
         this.placeholderInterval = setInterval(() => {
-            this.placeholderIndex = (this.placeholderIndex + 1) % CONFIG.searchPlaceholders.length;
-            if (document.activeElement !== input) {
-                input.placeholder = CONFIG.searchPlaceholders[this.placeholderIndex];
-            }
-        }, 4000);
-    },
+            this.placeholderIndex = (this.placeholderIndex + 1) % texts.length;
+            this.searchInput.placeholder = texts[this.placeholderIndex];
+        }, 3000);
+    }
     
-    async performSearch(query) {
-        const modalBody = document.getElementById('searchModalBody');
-        const modalTitle = document.getElementById('searchModalTitle');
-        
-        if (!modalBody) return;
-        
-        // Show loading
-        modalBody.innerHTML = '<div style="text-align:center;padding:30px;"><i class="fa-solid fa-spinner animate-spin"></i> Searching...</div>';
-        UI.showPopup('searchOverlay');
-        
-        if (modalTitle) {
-            modalTitle.textContent = `🔍 Results for "${query}"`;
+    stopPlaceholderRotation() {
+        if (this.placeholderInterval) {
+            clearInterval(this.placeholderInterval);
+            this.placeholderInterval = null;
         }
-        
-        // Search across all categories
-        const results = await ProductLoader.searchProducts(query, 8);
-        
-        if (results.length === 0) {
-            // No results - show empty state with popular products
-            this.renderEmptyResults(query, modalBody);
-        } else {
-            // Show results
-            this.renderResults(results, query, modalBody);
-        }
-    },
+    }
     
-    renderResults(results, query, container) {
-        const didYouMean = results[0].searchScore < 70 ? results[0].name : null;
-        
-        let html = '';
-        
-        if (didYouMean && results[0].searchScore < 80) {
-            html += `<p style="font-size:13px;color:var(--text-grey);margin-bottom:10px;">⚡ Did you mean: <strong>"${didYouMean}"</strong>?</p>`;
-        }
-        
-        results.forEach(product => {
-            html += `
-                <div class="search-result-item" onclick="showProductDetail('${product.id}'); UI.hidePopup('searchOverlay');">
-                    <img src="${product.image || CONFIG.urls.placeholderImage + '?random=' + product.id}" 
-                         alt="${product.name}"
-                         onerror="this.src='${CONFIG.urls.placeholderImage}?random=' + Math.random()">
-                    <div class="search-result-info">
-                        <h4>${product.name}</h4>
-                        <p>${product.weight} · ${Utils.formatPrice(product.price)}</p>
-                    </div>
-                    <span style="color:var(--star);">⭐ ${product.rating || '4.0'}</span>
-                </div>
-            `;
-        });
-        
-        if (results.length >= 5) {
-            html += `
-                <div style="text-align:center;margin-top:12px;">
-                    <a href="shop.html?search=${encodeURIComponent(query)}" class="btn btn-outline" style="font-size:12px;">
-                        📋 View all results →
-                    </a>
-                </div>
-            `;
-        }
-        
-        container.innerHTML = html;
-    },
+    updatePlaceholder() {
+        const texts = CONFIG.searchPlaceholderTexts[window.languageManager?.currentLang || 'hi'];
+        this.searchInput.placeholder = texts[this.placeholderIndex];
+    }
     
-    async renderEmptyResults(query, container) {
-        // Load popular products as fallback
-        const popularProducts = await ProductLoader.loadMostOrdered(4);
+    handleSearch() {
+        const query = this.searchInput.value.trim();
         
-        let popularHTML = '';
-        popularProducts.forEach(p => {
-            popularHTML += ProductLoader.renderCompactCard(p);
-        });
+        // Clear previous timer
+        if (this.debounceTimer) clearTimeout(this.debounceTimer);
         
-        container.innerHTML = `
-            <div class="search-empty">
-                <div class="empty-icon">😅</div>
-                <h4>"${query}" abhi available nahi hai yaar!</h4>
-                <p>⚡ Fikar mat karo, jald add karenge!</p>
-                <a href="https://wa.me/${CONFIG.store.phone}?text=Please%20add%20this%20product:%20${encodeURIComponent(query)}" 
-                   target="_blank" 
-                   class="btn btn-whatsapp" 
-                   style="margin-bottom:16px;">
-                    💬 Request on WhatsApp
-                </a>
-                <p style="font-weight:600;margin-bottom:10px;">🔥 Tab tak ye dekh lo:</p>
-                <div class="recent-scroll">${popularHTML}</div>
-            </div>
-        `;
-    },
-    
-    initVoiceSearch(voiceBtn) {
-        // Check browser support
-        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-        
-        if (!SpeechRecognition) {
-            voiceBtn.style.display = 'none';
+        // If empty, clear results
+        if (query.length === 0) {
+            this.searchResults.innerHTML = '';
+            this.noResults.classList.add('hidden');
             return;
         }
         
-        this.voiceRecognition = new SpeechRecognition();
-        this.voiceRecognition.lang = 'hi-IN';
-        this.voiceRecognition.interimResults = false;
-        this.voiceRecognition.maxAlternatives = 1;
+        // Debounce: search after 300ms of no typing
+        this.debounceTimer = setTimeout(() => {
+            this.performLiveSearch(query);
+        }, 300);
+    }
+    
+    performLiveSearch(query) {
+        if (!window.dataLoader || !window.dataLoader.isLoaded) return;
         
-        this.voiceRecognition.onstart = () => {
-            this.isListening = true;
-            voiceBtn.classList.add('listening');
-            voiceBtn.querySelector('i').className = 'fa-solid fa-microphone';
-        };
+        // Try exact search first, then fuzzy
+        let results = window.dataLoader.searchProducts(query);
         
-        this.voiceRecognition.onresult = (event) => {
-            const transcript = event.results[0][0].transcript;
-            const searchInput = document.getElementById('searchInput');
-            if (searchInput) {
-                searchInput.value = transcript;
-                this.performSearch(transcript);
-            }
-        };
+        if (results.length === 0 && CONFIG.features.spellCorrection) {
+            results = window.dataLoader.fuzzySearch(query);
+        }
         
-        this.voiceRecognition.onend = () => {
-            this.isListening = false;
-            voiceBtn.classList.remove('listening');
-            voiceBtn.querySelector('i').className = 'fa-solid fa-microphone';
-        };
+        if (results.length > 0) {
+            this.showResults(results);
+            this.noResults.classList.add('hidden');
+        } else {
+            this.showNoResults(query);
+        }
+    }
+    
+    performSearch() {
+        const query = this.searchInput.value.trim();
+        if (!query || !window.dataLoader) return;
         
-        this.voiceRecognition.onerror = () => {
-            this.isListening = false;
-            voiceBtn.classList.remove('listening');
-            voiceBtn.querySelector('i').className = 'fa-solid fa-microphone';
-        };
+        this.performLiveSearch(query);
         
-        voiceBtn.addEventListener('click', () => {
-            if (this.isListening) {
-                this.voiceRecognition.stop();
-            } else {
-                try {
-                    this.voiceRecognition.start();
-                } catch (e) {
-                    // Already started
-                }
-            }
+        // Scroll to all products section and show filtered
+        const allProductsSection = document.getElementById('allProductsSection');
+        if (allProductsSection) {
+            allProductsSection.scrollIntoView({ behavior: 'smooth' });
+        }
+    }
+    
+    showResults(results) {
+        this.searchResults.innerHTML = '';
+        
+        results.slice(0, 10).forEach(product => {
+            const lang = window.languageManager?.currentLang || 'hi';
+            const name = product.name ? (product.name[lang] || product.name.hi || product.name.en || '') : '';
+            const price = product.price || 0;
+            const image = product.image || 'https://via.placeholder.com/60';
+            
+            const item = document.createElement('div');
+            item.className = 'search-result-item fade-in';
+            item.innerHTML = `
+                <img src="${image}" alt="${name}" onerror="this.src='https://via.placeholder.com/60?text=No+Image'">
+                <div class="search-result-info">
+                    <div class="search-result-name">${name}</div>
+                    <div class="search-result-price">₹${price}</div>
+                </div>
+            `;
+            
+            item.addEventListener('click', () => {
+                this.searchInput.value = name;
+                this.searchResults.innerHTML = '';
+                this.addToRecentlyViewed(product);
+                this.scrollToProduct(product);
+            });
+            
+            this.searchResults.appendChild(item);
         });
     }
-};
+    
+    showNoResults(query) {
+        this.searchResults.innerHTML = '';
+        this.noResults.classList.remove('hidden');
+        
+        // Update message language
+        const msgEl = this.noResults.querySelector('.no-results-msg');
+        if (msgEl) {
+            msgEl.textContent = CONFIG.noProductMessages[window.languageManager?.currentLang || 'hi'];
+        }
+        
+        // Show random suggested products
+        const suggested = window.dataLoader.getRandomProducts(5);
+        this.suggestedProducts.innerHTML = '';
+        
+        suggested.forEach(product => {
+            const lang = window.languageManager?.currentLang || 'hi';
+            const name = product.name ? (product.name[lang] || product.name.hi || '') : '';
+            const price = product.price || 0;
+            const image = product.image || 'https://via.placeholder.com/60';
+            
+            const card = document.createElement('div');
+            card.className = 'product-card';
+            card.style.width = '120px';
+            card.style.flexShrink = '0';
+            card.innerHTML = `
+                <div class="product-card-image">
+                    <img src="${image}" alt="${name}" onerror="this.src='https://via.placeholder.com/60?text=No+Image'">
+                    <div class="price-overlay">₹${price}</div>
+                </div>
+                <div class="product-card-info">
+                    <div class="product-name">${name}</div>
+                </div>
+            `;
+            
+            card.addEventListener('click', () => {
+                this.addToRecentlyViewed(product);
+                this.searchInput.value = name;
+                this.noResults.classList.add('hidden');
+            });
+            
+            this.suggestedProducts.appendChild(card);
+        });
+    }
+    
+    addToRecentlyViewed(product) {
+        if (window.recentlyViewedManager) {
+            window.recentlyViewedManager.addProduct(product);
+        }
+    }
+    
+    scrollToProduct(product) {
+        const allProductsGrid = document.getElementById('allProductsGrid');
+        if (allProductsGrid) {
+            allProductsGrid.scrollIntoView({ behavior: 'smooth' });
+        }
+    }
+}
+
+// Initialize on DOM ready
+document.addEventListener('DOMContentLoaded', () => {
+    window.searchManager = new SearchManager();
+});
+
