@@ -1,5 +1,8 @@
+'use strict';
+
 // ============================================
-// CATEGORY-PRODUCTS.JS - Section 5: Category Products
+// CATEGORY-PRODUCTS.JS - Section 5 (FIXED)
+// Category Products with Scroll Preservation
 // ============================================
 
 class CategoryProductsManager {
@@ -8,6 +11,7 @@ class CategoryProductsManager {
         this.title = document.getElementById('categoryProductsTitle');
         this.grid = document.getElementById('categoryProductsGrid');
         this.currentCategoryId = null;
+        this.savedMainScrollPosition = 0;  // 🔧 Save scroll position
         
         this.init();
     }
@@ -22,6 +26,29 @@ class CategoryProductsManager {
                 this.showCategoryProducts(this.currentCategoryId, true);
             }
         });
+
+        // 🔧 Listen to main content scroll for title effect
+        const mainContent = document.getElementById('mainContent');
+        if (mainContent) {
+            mainContent.addEventListener('scroll', () => {
+                this.handleMainScroll();
+            }, { passive: true });
+        }
+    }
+
+    // 🔧 Scroll-based title shrink
+    handleMainScroll() {
+        const mainContent = document.getElementById('mainContent');
+        if (!mainContent || !this.section || this.section.classList.contains('hidden')) return;
+        
+        const sectionTop = this.section.offsetTop;
+        const scrollTop = mainContent.scrollTop;
+        
+        if (scrollTop > sectionTop + 20) {
+            this.section.classList.add('scrolled');
+        } else {
+            this.section.classList.remove('scrolled');
+        }
     }
     
     showCategoryProducts(categoryId, silent = false) {
@@ -34,8 +61,8 @@ class CategoryProductsManager {
         
         const products = window.dataLoader.getProductsByCategory(categoryId);
         
-        if (products.length === 0) {
-            this.hide();
+        if (!products || products.length === 0) {
+            this.showEmptyState(categoryId);
             return;
         }
         
@@ -48,54 +75,95 @@ class CategoryProductsManager {
             ? (lang === 'hi' ? (category.nameHi || category.name) : (category.nameEn || category.name))
             : categoryId;
         
-        // Update title
-        this.title.textContent = `📂 ${catName}`;
+        // Update title with icon from category
+        const catIcon = category?.icon || '📂';
+        this.title.innerHTML = `<span>${catIcon}</span> ${catName}`;
         
-        // Render products
+        // Render products with staggered animation
         this.grid.innerHTML = '';
-        products.forEach(product => {
+        products.forEach((product, index) => {
             const card = window.productsManager.createProductCard(product);
+            card.style.animationDelay = `${index * 0.04}s`;
             this.grid.appendChild(card);
         });
         
-        // Show section FIRST
+        // Show section
         this.section.classList.remove('hidden');
         
-        // Update other sections visibility
+        // Update other sections
         this.updateOtherSections(true);
         
         if (!silent) {
-            // Small delay to ensure DOM is updated
+            // 🔧 Scroll to section smoothly
             setTimeout(() => {
-                // Scroll the category products section to top of main content
-                const mainContent = document.getElementById('mainContent');
-                const sectionTitle = this.section.querySelector('.section-title');
-                
-                if (mainContent && sectionTitle) {
-                    // Calculate scroll position to show section just below categories
-                    const sectionTop = this.section.offsetTop;
-                    mainContent.scrollTo({
-                        top: sectionTop - 8,
-                        behavior: 'smooth'
-                    });
-                }
+                this.scrollToSection();
             }, 100);
         }
+
+        // 🔧 Reset scrolled state
+        this.section.classList.remove('scrolled');
+    }
+    
+    showEmptyState(categoryId) {
+        this.currentCategoryId = categoryId;
+        
+        const category = window.dataLoader?.categories?.find(c => c.id === categoryId);
+        const lang = window.languageManager?.currentLang || 'hi';
+        const catName = category 
+            ? (lang === 'hi' ? (category.nameHi || category.name) : (category.nameEn || category.name))
+            : categoryId;
+        
+        this.title.innerHTML = `<span>📂</span> ${catName}`;
+        
+        this.grid.innerHTML = `
+            <div class="category-products-empty">
+                <span class="empty-icon">📭</span>
+                <p class="empty-text">${lang === 'hi' ? 'इस कैटेगरी में अभी कोई प्रोडक्ट नहीं है' : 'No products in this category yet'}</p>
+            </div>
+        `;
+        
+        this.section.classList.remove('hidden');
+        this.updateOtherSections(true);
+        
+        setTimeout(() => {
+            this.scrollToSection();
+        }, 100);
+    }
+
+    // 🔧 Scroll to section without hiding other content
+    scrollToSection() {
+        const mainContent = document.getElementById('mainContent');
+        if (!mainContent || !this.section) return;
+        
+        // Use scrollIntoView on the section
+        this.section.scrollIntoView({
+            behavior: 'smooth',
+            block: 'start',
+        });
     }
     
     hide() {
+        // 🔧 Save current scroll position before hiding
+        const mainContent = document.getElementById('mainContent');
+        if (mainContent) {
+            this.savedMainScrollPosition = mainContent.scrollTop;
+        }
+
         this.section.classList.add('hidden');
         this.currentCategoryId = null;
         this.grid.innerHTML = '';
         
-        // Update other sections visibility
+        // Update other sections
         this.updateOtherSections(false);
         
-        // Scroll main content to top
-        const mainContent = document.getElementById('mainContent');
+        // 🔧 Restore scroll position
         if (mainContent) {
-            mainContent.scrollTo({ top: 0, behavior: 'smooth' });
+            requestAnimationFrame(() => {
+                mainContent.scrollTop = this.savedMainScrollPosition;
+            });
         }
+
+        this.section.classList.remove('scrolled');
     }
     
     updateOtherSections(isCategoryActive) {
@@ -104,13 +172,10 @@ class CategoryProductsManager {
         const allProductsSection = document.getElementById('allProductsSection');
         
         if (isCategoryActive) {
-            // When category is active: hide recently viewed and all products
-            // Show most orders below category products
             if (recentlyViewedSection) recentlyViewedSection.classList.add('hidden');
             if (mostOrdersSection) mostOrdersSection.classList.remove('hidden');
             if (allProductsSection) allProductsSection.classList.add('hidden');
         } else {
-            // When no category: restore all
             if (allProductsSection) allProductsSection.classList.remove('hidden');
             this.restoreDefaultVisibility();
         }
