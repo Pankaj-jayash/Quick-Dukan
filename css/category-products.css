@@ -1,19 +1,83 @@
 /* ============================================
-   CATEGORY-PRODUCTS.CSS - Section 5
+   CATEGORY-PRODUCTS.CSS - Section 5 (FIXED V2)
+   Clean & Balanced Category Products
    ============================================ */
 
 .category-products-section {
     margin-bottom: var(--spacing-md);
     padding-top: 4px;
+    scroll-margin-top: 8px;
 }
 
+/* Title */
 .category-products-section .section-title {
     color: var(--primary);
-    font-weight: 700;
+    font-weight: 800;
     margin-top: 0;
     padding-top: 8px;
+    font-size: 18px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    transition: font-size 0.3s ease, opacity 0.3s ease;
 }
 
+.category-products-section .section-title span {
+    font-size: 22px;
+}
+
+.category-products-section.scrolled .section-title {
+    font-size: 14px;
+    opacity: 0.85;
+}
+
+/* Products grid */
 .category-products-section .products-grid {
-    animation: fadeIn 0.4s ease;
+    animation: fadeInUp 0.4s ease;
+    gap: 10px;
+    padding: 6px 8px;
+}
+
+@keyframes fadeInUp {
+    from { opacity: 0; transform: translateY(12px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* Empty state */
+.category-products-empty {
+    text-align: center;
+    padding: 40px 20px;
+    grid-column: 1 / -1;
+}
+
+.category-products-empty .empty-icon {
+    font-size: 52px;
+    display: block;
+    margin-bottom: 10px;
+}
+
+.category-products-empty .empty-text {
+    color: var(--text-secondary);
+    font-size: 14px;
+    font-weight: 500;
+}
+
+/* Dark mode */
+body.dark-mode .category-products-section .section-title {
+    color: #BB86FC;
+    text-shadow: 0 0 8px rgba(187, 134, 252, 0.25);
+}
+
+/* Mobile */
+@media (max-width: 400px) {
+    .category-products-section .section-title {
+        font-size: 16px;
+    }
+    .category-products-section.scrolled .section-title {
+        font-size: 13px;
+    }
+    .category-products-section .products-grid {
+        gap: 8px;
+        padding: 4px 6px;
+    }
 }
