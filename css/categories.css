@@ -1,6 +1,6 @@
 /* ============================================
-   CATEGORIES.CSS - Categories Section
-   Modern Netflix-Style Scroll Arrows
+   CATEGORIES.CSS - Categories Section (FINAL)
+   With Auto-Scroll + Push/Pull + Size Effect
    ============================================ */
 
 .categories-section {
@@ -12,6 +12,16 @@
     gap: 0;
     position: relative;
     overflow: visible;
+}
+
+/* Section title effect */
+.categories-section .section-title {
+    transition: font-size 0.3s ease, opacity 0.3s ease;
+}
+
+.categories-section.categories-scrolled .section-title {
+    font-size: 13px;
+    opacity: 0.8;
 }
 
 .categories-scroll {
@@ -39,13 +49,16 @@
         black 96%,
         transparent 100%
     );
+    position: relative;
 }
 
 .categories-scroll::-webkit-scrollbar {
     display: none;
 }
 
-/* Category Button - Default */
+/* ============================================
+   CATEGORY BUTTON - Base
+   ============================================ */
 .category-btn {
     display: flex;
     align-items: center;
@@ -55,7 +68,12 @@
     font-size: 13px;
     font-weight: 600;
     white-space: nowrap;
-    transition: all 0.3s cubic-bezier(0.68, -0.55, 0.27, 1.55);
+    /* SMOOTH SCALE TRANSITION for app.js size effect */
+    transition: transform 0.35s cubic-bezier(0.25, 0.46, 0.45, 0.94),
+                opacity 0.35s ease,
+                box-shadow 0.3s ease,
+                background 0.3s ease,
+                color 0.3s ease;
     flex-shrink: 0;
     cursor: pointer;
     border: 2px solid transparent;
@@ -66,27 +84,27 @@
     overflow: hidden;
     user-select: none;
     -webkit-tap-highlight-color: transparent;
+    will-change: transform, opacity;
 }
 
-/* Category Icon */
 .category-icon {
     font-size: 20px;
     line-height: 1;
-    transition: transform 0.3s ease;
+    transition: transform 0.35s ease;
     display: inline-block;
 }
 
-/* Category Name */
 .category-name {
     font-size: 13px;
     font-weight: 600;
-    transition: all 0.3s ease;
+    transition: all 0.35s ease;
 }
 
-/* Hover Effect */
+/* Hover - only when NOT being auto-scaled by JS */
 .category-btn:hover {
-    transform: translateY(-3px);
+    transform: translateY(-3px) !important;
     box-shadow: 0 6px 16px rgba(0,0,0,0.12);
+    z-index: 5;
 }
 
 .category-btn:hover .category-icon {
@@ -95,9 +113,17 @@
 
 /* Active State */
 .category-btn.active {
-    transform: translateY(-2px);
+    transform: scale(1) !important;
+    opacity: 1 !important;
     box-shadow: 0 6px 20px rgba(0,0,0,0.18);
     border-color: transparent;
+    animation: activeGlow 2s ease-in-out infinite;
+    z-index: 3;
+}
+
+@keyframes activeGlow {
+    0%, 100% { box-shadow: 0 6px 20px rgba(0,0,0,0.18); }
+    50% { box-shadow: 0 6px 28px rgba(0,0,0,0.28); }
 }
 
 .category-btn.active .category-icon {
@@ -109,13 +135,13 @@
     font-weight: 700;
 }
 
-/* Click Animation */
+/* Click */
 .category-btn:active {
     transform: scale(0.92) !important;
     transition: transform 0.1s ease !important;
 }
 
-/* Ripple on click */
+/* Ripple */
 .category-btn .ripple-span {
     position: absolute;
     border-radius: 50%;
@@ -139,7 +165,7 @@
     70% { transform: scale(1.2) rotate(2deg); }
 }
 
-/* "All" Category Special Style */
+/* "All" Button Special */
 .category-btn[data-category="all"] {
     background: linear-gradient(135deg, #667eea, #764ba2);
     color: white;
@@ -157,7 +183,52 @@
 }
 
 /* ============================================
-   MODERN SCROLL ARROWS - Netflix Style
+   AUTO-SCROLL PUSH/PULL ANIMATIONS
+   ============================================ */
+.category-btn.pushing {
+    animation: pushForward 0.6s cubic-bezier(0.68, -0.55, 0.27, 1.55);
+}
+
+@keyframes pushForward {
+    0% { transform: scale(1); }
+    30% { transform: scale(1.1) translateX(5px); }
+    60% { transform: scale(0.93) translateX(3px); }
+    100% { transform: scale(1) translateX(0); }
+}
+
+.category-btn.pulling {
+    animation: pullBack 0.6s cubic-bezier(0.68, -0.55, 0.27, 1.55);
+}
+
+@keyframes pullBack {
+    0% { transform: scale(1); }
+    30% { transform: scale(0.93) translateX(-5px); }
+    60% { transform: scale(1.07) translateX(-3px); }
+    100% { transform: scale(1) translateX(0); }
+}
+
+.category-btn.hinting {
+    animation: hintBounce 0.8s ease-in-out infinite;
+}
+
+@keyframes hintBounce {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(4px); }
+    75% { transform: translateX(-4px); }
+}
+
+.category-btn.highlight-push {
+    animation: highlightPush 0.5s ease;
+}
+
+@keyframes highlightPush {
+    0% { box-shadow: 0 2px 6px rgba(0,0,0,0.06); }
+    50% { box-shadow: 0 0 0 8px rgba(106, 27, 154, 0.2); }
+    100% { box-shadow: 0 2px 6px rgba(0,0,0,0.06); }
+}
+
+/* ============================================
+   SCROLL ARROWS
    ============================================ */
 .scroll-arrow {
     position: absolute;
@@ -189,13 +260,16 @@
     font-weight: bold;
 }
 
-/* Show on hover over categories section */
+.categories-section.auto-scrolling .scroll-arrow:not(.disabled) {
+    opacity: 0.7;
+    pointer-events: auto;
+}
+
 .categories-section:hover .scroll-arrow:not(.disabled) {
     opacity: 1;
     pointer-events: auto;
 }
 
-/* Also show if touch device (always slightly visible) */
 @media (hover: none) and (pointer: coarse) {
     .scroll-arrow:not(.disabled) {
         opacity: 0.6;
@@ -217,22 +291,18 @@
     transform: translateY(-50%) scale(0.9);
 }
 
-.scroll-left {
-    left: -2px;
-}
+.scroll-left { left: -2px; }
+.scroll-right { right: -2px; }
 
-.scroll-right {
-    right: -2px;
-}
-
-/* Disabled Arrow - Fully hidden */
 .scroll-arrow.disabled {
     opacity: 0 !important;
     pointer-events: none !important;
     cursor: default;
 }
 
-/* Dark Mode */
+/* ============================================
+   DARK MODE
+   ============================================ */
 body.dark-mode .scroll-arrow {
     background: rgba(30, 30, 50, 0.9);
     border-color: rgba(255,255,255,0.08);
@@ -269,7 +339,9 @@ body.dark-mode .category-btn[data-category="all"] {
     color: white;
 }
 
-/* Mobile */
+/* ============================================
+   MOBILE
+   ============================================ */
 @media (max-width: 360px) {
     .category-btn {
         padding: 8px 12px;
