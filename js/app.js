@@ -1,12 +1,14 @@
+'use strict';
 
 // ============================================
 // APP.JS - Main Application File
-// Connects everything together
+// With Scroll-Based Section Title Effects
 // ============================================
 
 class App {
     constructor() {
         this.ready = false;
+        this.scrollObservers = [];
         this.init();
     }
     
@@ -19,6 +21,9 @@ class App {
         
         // Setup global event listeners
         this.setupGlobalListeners();
+        
+        // Setup scroll-based title effects
+        this.setupScrollTitleEffects();
         
         // Initial UI setup
         this.initialUISetup();
@@ -76,9 +81,184 @@ class App {
         
         // Service worker registration (for PWA later)
         if ('serviceWorker' in navigator) {
-            // Will be implemented for PWA
             console.log('📱 PWA ready for future implementation');
         }
+
+        // Window resize handler
+        let resizeTimeout;
+        window.addEventListener('resize', () => {
+            clearTimeout(resizeTimeout);
+            resizeTimeout = setTimeout(() => {
+                this.updateAllScrollStates();
+            }, 150);
+        });
+    }
+    
+    // ============================================
+    // SCROLL-BASED TITLE EFFECTS
+    // ============================================
+    setupScrollTitleEffects() {
+        // Wait for DOM to be fully rendered
+        setTimeout(() => {
+            this.initHorizontalScrollEffects();
+            this.initCategoriesScrollEffect();
+        }, 500);
+    }
+
+    initHorizontalScrollEffects() {
+        // Recently Viewed Section
+        const recentlyViewedScroll = document.querySelector('#recentlyViewedScroll');
+        const recentlyViewedSection = document.getElementById('recentlyViewedSection');
+        
+        if (recentlyViewedScroll && recentlyViewedSection) {
+            this.addScrollEffect(recentlyViewedScroll, recentlyViewedSection);
+        }
+
+        // Most Orders Section
+        const mostOrdersScroll = document.querySelector('#mostOrdersScroll');
+        const mostOrdersSection = document.getElementById('mostOrdersSection');
+        
+        if (mostOrdersScroll && mostOrdersSection) {
+            this.addScrollEffect(mostOrdersScroll, mostOrdersSection);
+        }
+
+        // Any other horizontal scroll sections
+        document.querySelectorAll('.horizontal-scroll').forEach(scroll => {
+            const section = scroll.closest('section');
+            if (section && !section.classList.contains('scroll-effect-added')) {
+                this.addScrollEffect(scroll, section);
+            }
+        });
+    }
+
+    addScrollEffect(scrollElement, sectionElement) {
+        // Mark section to avoid duplicate listeners
+        sectionElement.classList.add('scroll-effect-added');
+
+        // Scroll event listener
+        const handleScroll = () => {
+            const scrollLeft = scrollElement.scrollLeft;
+            
+            if (scrollLeft > 15) {
+                sectionElement.classList.add('scrolled');
+            } else {
+                sectionElement.classList.remove('scrolled');
+            }
+
+            // Update scroll buttons if they exist
+            this.updateScrollArrows(sectionElement, scrollElement);
+        };
+
+        scrollElement.addEventListener('scroll', handleScroll, { passive: true });
+        
+        // Touch events for mobile
+        scrollElement.addEventListener('touchstart', () => {
+            sectionElement.classList.add('scrolling');
+        }, { passive: true });
+        
+        scrollElement.addEventListener('touchend', () => {
+            setTimeout(() => {
+                sectionElement.classList.remove('scrolling');
+                handleScroll();
+            }, 100);
+        });
+
+        // Store for cleanup
+        this.scrollObservers.push({
+            element: scrollElement,
+            handler: handleScroll,
+            section: sectionElement
+        });
+
+        // Initial check
+        handleScroll();
+    }
+
+    initCategoriesScrollEffect() {
+        const categoriesScroll = document.getElementById('categoriesScroll');
+        const categoriesSection = document.getElementById('categoriesSection');
+
+        if (!categoriesScroll || !categoriesSection) return;
+
+        const handleCategoriesScroll = () => {
+            const scrollLeft = categoriesScroll.scrollLeft;
+            const maxScroll = categoriesScroll.scrollWidth - categoriesScroll.clientWidth;
+            
+            // Add scrolled class for title effect
+            if (scrollLeft > 10) {
+                categoriesSection.classList.add('categories-scrolled');
+            } else {
+                categoriesSection.classList.remove('categories-scrolled');
+            }
+
+            // Adjust button sizes based on scroll position
+            this.updateCategoryButtonSizes(categoriesScroll, scrollLeft, maxScroll);
+        };
+
+        categoriesScroll.addEventListener('scroll', handleCategoriesScroll, { passive: true });
+
+        this.scrollObservers.push({
+            element: categoriesScroll,
+            handler: handleCategoriesScroll,
+            section: categoriesSection
+        });
+    }
+
+    updateCategoryButtonSizes(scrollElement, scrollLeft, maxScroll) {
+        const buttons = scrollElement.querySelectorAll('.category-btn:not(.active)');
+        
+        buttons.forEach((btn, index) => {
+            const rect = btn.getBoundingClientRect();
+            const containerRect = scrollElement.getBoundingClientRect();
+            
+            // Button center relative to container
+            const btnCenter = rect.left + rect.width / 2 - containerRect.left;
+            const containerCenter = containerRect.width / 2;
+            
+            // Distance from center (0 to 1)
+            const distanceFromCenter = Math.abs(btnCenter - containerCenter) / containerCenter;
+            
+            // Scale: center buttons bigger, edge buttons smaller
+            const scale = 1 - (distanceFromCenter * 0.15);
+            const finalScale = Math.max(0.8, Math.min(1, scale));
+            
+            // Apply smooth transform
+            btn.style.transform = `scale(${finalScale})`;
+            btn.style.opacity = 1 - (distanceFromCenter * 0.3);
+        });
+    }
+
+    updateScrollArrows(section, scrollElement) {
+        const scrollLeft = section.querySelector('.scroll-left');
+        const scrollRight = section.querySelector('.scroll-right');
+        
+        if (!scrollLeft && !scrollRight) return;
+        
+        const { scrollLeft: sl, scrollWidth, clientWidth } = scrollElement;
+        
+        if (scrollLeft) {
+            if (sl <= 3) {
+                scrollLeft.classList.add('disabled');
+            } else {
+                scrollLeft.classList.remove('disabled');
+            }
+        }
+        
+        if (scrollRight) {
+            if (sl + clientWidth >= scrollWidth - 3) {
+                scrollRight.classList.add('disabled');
+            } else {
+                scrollRight.classList.remove('disabled');
+            }
+        }
+    }
+
+    updateAllScrollStates() {
+        this.scrollObservers.forEach(({ handler }) => {
+            if (typeof handler === 'function') {
+                handler();
+            }
+        });
     }
     
     initialUISetup() {
@@ -118,6 +298,10 @@ class App {
         }, 3000);
     }
 }
+
+// ============================================
+// INITIALIZATION
+// ============================================
 
 // Initialize app when DOM is fully loaded
 document.addEventListener('DOMContentLoaded', () => {
