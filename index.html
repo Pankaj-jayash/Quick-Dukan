@@ -2,17 +2,19 @@
 <html lang="hi">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-   <!-- ⭐ Cache Control - Auto Refresh ⭐ -->
-<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
-<meta http-equiv="Pragma" content="no-cache">
-<meta http-equiv="Expires" content="0">
-
-<!-- PWA -->
-<meta name="theme-color" content="#6A1B9A">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="theme-color" content="#2E7D32">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <title>Quick Dukan - आपकी विश्वसनीय किराना दुकान</title>
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🛒</text></svg>">
+    
+    <!-- Font Preconnect for Performance -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&family=Noto+Sans+Devanagari:wght@400;500;700&display=swap" rel="stylesheet">
     
     <!-- ============ CSS FILES ============ -->
     <link rel="stylesheet" href="css/theme.css">
@@ -28,13 +30,30 @@
     <link rel="stylesheet" href="css/bottom-nav.css">
     <link rel="stylesheet" href="css/dark-mode.css">
     <link rel="stylesheet" href="css/orders.css">
-    
     <link rel="stylesheet" href="css/checkout.css">
     <link rel="stylesheet" href="css/cart.css">
+    
     <!-- Font Awesome Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    
+    <!-- Inline Critical CSS for Instant Font Rendering -->
+    <style>
+        body {
+            font-family: 'Noto Sans Devanagari', 'Poppins', sans-serif;
+        }
+        .fonts-loaded body {
+            font-family: 'Poppins', 'Noto Sans Devanagari', sans-serif;
+        }
+    </style>
 </head>
 <body>
+    
+    <!-- Noscript Warning -->
+    <noscript>
+        <div style="background: #C62828; color: white; padding: 12px; text-align: center; font-family: sans-serif;">
+            ⚠️ कृपया JavaScript चालू करें! हमारी साइट ठीक से काम करने के लिए JS की ज़रूरत है।
+        </div>
+    </noscript>
     
     <!-- ============================================ -->
     <!-- SECTION 1: TOP HEADER (FIXED) -->
@@ -42,7 +61,7 @@
     <header id="topHeader" class="top-header">
         <!-- LEFT: Icon + Brand Name -->
         <div class="header-left">
-            <span class="header-icon bounce-animation">🛒</span>
+            <span class="header-icon bounce-animation" aria-hidden="true">🛒</span>
             <div class="brand-name">
                 <span class="quick-text">Quick</span>
                 <span class="dukan-text">Dukan</span>
@@ -52,7 +71,7 @@
         <!-- CENTER: Free Delivery -->
         <div class="header-center">
             <span class="free-delivery-badge">
-                <span class="truck-icon pulse-animation">🚚</span>
+                <span class="truck-icon pulse-animation" aria-hidden="true">🚚</span>
                 <span class="free-delivery-text" data-lang-key="freeDelivery">फ्री डिलीवरी</span>
             </span>
         </div>
@@ -62,8 +81,8 @@
             <button id="langToggle" class="toggle-btn lang-toggle" aria-label="भाषा बदलें">
                 <span class="lang-text">हिं</span>
             </button>
-            <button id="themeToggle" class="toggle-btn theme-toggle" aria-label="Day/Night Mode">
-                <span class="theme-icon">🌙</span>
+            <button id="themeToggle" class="toggle-btn theme-toggle" aria-label="डार्क मोड टॉगल करें">
+                <span class="theme-icon" aria-hidden="true">🌙</span>
             </button>
         </div>
     </header>
@@ -74,19 +93,25 @@
     <div id="searchSection" class="search-section">
         <div class="search-container">
             <input 
-                type="text" 
+                type="search"
                 id="searchInput" 
                 class="search-input" 
                 data-lang-key="searchPlaceholder"
                 placeholder="आज क्या चाहिए? 😋" 
                 autocomplete="off"
+                aria-label="प्रोडक्ट खोजें"
+                
+    
             >
+            <button id="voiceSearchBtn" class="voice-search-btn" aria-label="आवाज़ से खोजें" title="बोलकर खोजें">
+                <span aria-hidden="true">🎤</span>
+            </button>
             <button id="searchIcon" class="search-icon-btn" aria-label="खोजें">
-                <span>🔍</span>
+                <span aria-hidden="true">🔍</span>
             </button>
         </div>
         <!-- Live Search Results -->
-        <div id="searchResults" class="search-results hidden"></div>
+        <div id="searchResults" class="search-results hidden" role="listbox" aria-label="खोज परिणाम"></div>
         <!-- No Results Found -->
         <div id="noResults" class="no-results hidden">
             <p class="no-results-msg" data-lang-key="noProductMsg">
@@ -97,29 +122,29 @@
     </div>
     
     <!-- ============================================ -->
-<!-- SECTION 3: CATEGORIES (FIXED) - NEW DESIGN -->
-<!-- ============================================ -->
-<div id="categoriesSection" class="categories-section">
-    <!-- Scroll Left Arrow -->
-    <button class="scroll-arrow scroll-left" id="scrollLeft" aria-label="बाएँ स्क्रॉल करें">
-        <span class="arrow-icon">◀</span>
-    </button>
-    
-    <!-- Categories Scroll Container -->
-    <div class="categories-scroll" id="categoriesScroll">
-        <!-- All Category Button -->
-        <button class="category-btn active" data-category="all">
-            <span class="category-icon">🌟</span>
-            <span class="category-name" data-lang-key="allCategory">सब</span>
+    <!-- SECTION 3: CATEGORIES (FIXED) -->
+    <!-- ============================================ -->
+    <div id="categoriesSection" class="categories-section">
+        <!-- Scroll Left Arrow -->
+        <button class="scroll-arrow scroll-left disabled" id="scrollLeft" aria-label="बाएँ स्क्रॉल करें" aria-disabled="true">
+            <span class="arrow-icon" aria-hidden="true">◀</span>
         </button>
-        <!-- More categories load dynamically from index.json -->
+        
+        <!-- Categories Scroll Container -->
+        <div class="categories-scroll" id="categoriesScroll" role="tablist" aria-label="प्रोडक्ट कैटेगरी">
+            <!-- All Category Button -->
+            <button class="category-btn active" data-category="all" role="tab" aria-selected="true">
+                <span class="category-icon" aria-hidden="true">🌟</span>
+                <span class="category-name" data-lang-key="allCategory">सब</span>
+            </button>
+            <!-- More categories load dynamically -->
+        </div>
+        
+        <!-- Scroll Right Arrow -->
+        <button class="scroll-arrow scroll-right" id="scrollRight" aria-label="दाएँ स्क्रॉल करें">
+            <span class="arrow-icon" aria-hidden="true">▶</span>
+        </button>
     </div>
-    
-    <!-- Scroll Right Arrow -->
-    <button class="scroll-arrow scroll-right" id="scrollRight" aria-label="दाएँ स्क्रॉल करें">
-        <span class="arrow-icon">▶</span>
-    </button>
-</div>
     
     <!-- ============================================ -->
     <!-- MAIN CONTENT AREA (SCROLLABLE) -->
@@ -127,329 +152,326 @@
     <main id="mainContent" class="main-content">
         
         <!-- SECTION 5: Category Products -->
-        <section id="categoryProductsSection" class="category-products-section hidden">
+        <section id="categoryProductsSection" class="category-products-section hidden" aria-labelledby="categoryProductsTitle">
             <h2 id="categoryProductsTitle" class="section-title"></h2>
             <div id="categoryProductsGrid" class="products-grid"></div>
         </section>
         
         <!-- SECTION 6: Recently Viewed -->
-        <section id="recentlyViewedSection" class="recently-viewed-section hidden">
-            <h2 class="section-title" data-lang-key="recentlyViewed">🕐 हाल ही में देखा</h2>
-            <div id="recentlyViewedScroll" class="horizontal-scroll"></div>
+        <section id="recentlyViewedSection" class="recently-viewed-section hidden" aria-labelledby="recentlyViewedTitle">
+            <h2 id="recentlyViewedTitle" class="section-title" data-lang-key="recentlyViewed">🕐 हाल ही में देखा</h2>
+            <div id="recentlyViewedScroll" class="horizontal-scroll" role="list" aria-label="हाल ही में देखे गए प्रोडक्ट"></div>
         </section>
         
         <!-- SECTION 7: Most Orders -->
-        <section id="mostOrdersSection" class="most-orders-section">
-            <h2 class="section-title" data-lang-key="mostOrders">🔥 सबसे ज़्यादा मँगाया जाने वाला</h2>
-            <div id="mostOrdersScroll" class="horizontal-scroll"></div>
+        <section id="mostOrdersSection" class="most-orders-section" aria-labelledby="mostOrdersTitle">
+            <h2 id="mostOrdersTitle" class="section-title" data-lang-key="mostOrders">🔥 सबसे ज़्यादा मँगाया जाने वाला</h2>
+            <div id="mostOrdersScroll" class="horizontal-scroll" role="list" aria-label="सबसे ज़्यादा ऑर्डर किए जाने वाले प्रोडक्ट"></div>
         </section>
         
         <!-- SECTION 4: All Products -->
-        <section id="allProductsSection" class="all-products-section">
-            <h2 class="section-title" data-lang-key="allProducts">📦 सभी प्रोडक्ट</h2>
-            <div id="allProductsGrid" class="products-grid"></div>
+        <section id="allProductsSection" class="all-products-section" aria-labelledby="allProductsTitle">
+            <h2 id="allProductsTitle" class="section-title" data-lang-key="allProducts">📦 सभी प्रोडक्ट</h2>
+            <div id="allProductsGrid" class="products-grid" role="list" aria-label="सभी प्रोडक्ट"></div>
         </section>
         
         <!-- Bottom Spacer -->
-        <div class="bottom-spacer"></div>
+        <div class="bottom-spacer" aria-hidden="true"></div>
         
     </main>
+    
+   
     
     <!-- ============================================ -->
     <!-- SECTION 8: BOTTOM NAVBAR (FIXED) -->
     <!-- ============================================ -->
-    <nav id="bottomNav" class="bottom-nav">
+    <nav id="bottomNav" class="bottom-nav" role="navigation" aria-label="मुख्य नेविगेशन">
         <!-- Home Button -->
-        <button class="nav-btn active" data-nav="home" aria-label="होम">
-            <span class="nav-icon">🏠</span>
+        <button class="nav-btn active" data-nav="home" aria-label="होम" aria-current="page">
+            <span class="nav-icon" aria-hidden="true">🏠</span>
             <span class="nav-label" data-lang-key="home">होम</span>
         </button>
         
         <!-- Search Button -->
         <button class="nav-btn" data-nav="search" aria-label="खोजें">
-            <span class="nav-icon">🔍</span>
+            <span class="nav-icon" aria-hidden="true">🔍</span>
             <span class="nav-label" data-lang-key="search">खोजें</span>
         </button>
         
         <!-- Cart Button -->
         <button class="nav-btn" data-nav="cart" aria-label="कार्ट">
-            <span class="nav-icon">🛒</span>
+            <span class="nav-icon" aria-hidden="true">🛒</span>
             <span class="nav-label" data-lang-key="cart">कार्ट</span>
-            <span id="cartBadge" class="cart-badge hidden">0</span>
+            <span id="cartBadge" class="cart-badge hidden" aria-hidden="true">0</span>
         </button>
         
         <!-- My Orders Button -->
         <button class="nav-btn" data-nav="orders" aria-label="मेरे ऑर्डर">
-            <span class="nav-icon">📋</span>
+            <span class="nav-icon" aria-hidden="true">📋</span>
             <span class="nav-label" data-lang-key="myOrders">ऑर्डर</span>
         </button>
         
-        <!-- Back to Top Button (Hidden by default) -->
+        <!-- Back to Top Button -->
         <button id="backToTopBtn" class="nav-btn back-to-top hidden" data-nav="top" aria-label="ऊपर जाएँ">
-            <span class="nav-icon">⬆️</span>
+            <span class="nav-icon" aria-hidden="true">⬆️</span>
             <span class="nav-label" data-lang-key="top">ऊपर</span>
         </button>
     </nav>
     
- <!-- ============================================ -->
-<!-- CART MODAL - PREMIUM DESIGN -->
-<!-- ============================================ -->
-<div id="cartModal" class="cart-modal hidden">
-    <div class="cart-overlay"></div>
-    <div class="cart-content">
-        <!-- Cart Header with Confetti Trigger -->
-        <div class="cart-header">
-            <div class="cart-header-left">
-                <span class="cart-header-icon">🛒</span>
-                <div>
-                    <h2 data-lang-key="yourCart">आपका कार्ट</h2>
-                    <p class="cart-subtitle" data-lang-key="cartSubtitle">सब कुछ सही है? 😊</p>
-                </div>
-            </div>
-            <button id="closeCart" class="close-btn" aria-label="बंद करें">
-                <span>✕</span>
-            </button>
-        </div>
-        
-        <!-- Progress Bar (Free Delivery) -->
-        <div class="cart-progress">
-            <div class="progress-bar">
-                <div class="progress-fill" id="progressFill"></div>
-            </div>
-            <p class="progress-text" id="progressText" data-lang-key="addMore">
-                🚚 फ्री डिलीवरी के लिए सिर्फ ₹500 और जोड़ें!
-            </p>
-        </div>
-        
-        <!-- Cart Items Container -->
-        <div class="cart-items-wrapper">
-            <div id="cartItems" class="cart-items"></div>
-            
-            <!-- Empty Cart State -->
-            <div id="emptyCart" class="empty-cart hidden">
-                <div class="empty-cart-animation">
-                    <span class="empty-cart-icon">🛒</span>
-                    <div class="empty-cart-dots">
-                        <span>.</span><span>.</span><span>.</span>
+    <!-- ============================================ -->
+    <!-- CART MODAL -->
+    <!-- ============================================ -->
+    <div id="cartModal" class="cart-modal hidden" role="dialog" aria-modal="true" aria-labelledby="cartTitle">
+        <div class="cart-overlay"></div>
+        <div class="cart-content">
+            <!-- Cart Header -->
+            <div class="cart-header">
+                <div class="cart-header-left">
+                    <span class="cart-header-icon" aria-hidden="true">🛒</span>
+                    <div>
+                        <h2 id="cartTitle" data-lang-key="yourCart">आपका कार्ट</h2>
+                        <p class="cart-subtitle" data-lang-key="cartSubtitle">सब कुछ सही है? 😊</p>
                     </div>
                 </div>
-                <h3 data-lang-key="emptyCart">आपका कार्ट खाली है</h3>
-                <p data-lang-key="emptyCartDesc">कुछ सामान जोड़ो, फिर मज़ा आएगा! 🛍️</p>
-                <button class="browse-products-btn" data-lang-key="browseProducts">
-                    🏪 प्रोडक्ट देखें
+                <button id="closeCart" class="close-btn" aria-label="कार्ट बंद करें">
+                    <span aria-hidden="true">✕</span>
+                </button>
+            </div>
+            
+            <!-- Progress Bar -->
+            <div class="cart-progress">
+                <div class="progress-bar" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="500">
+                    <div class="progress-fill" id="progressFill"></div>
+                </div>
+                <p class="progress-text" id="progressText" data-lang-key="addMore">
+                    🚚 फ्री डिलीवरी के लिए सिर्फ ₹500 और जोड़ें!
+                </p>
+            </div>
+            
+            <!-- Cart Items -->
+            <div class="cart-items-wrapper">
+                <div id="cartItems" class="cart-items" role="list" aria-label="कार्ट में मौजूद आइटम"></div>
+                
+                <!-- Empty Cart State -->
+                <div id="emptyCart" class="empty-cart">
+                    <div class="empty-cart-animation" aria-hidden="true">
+                        <span class="empty-cart-icon">🛒</span>
+                        <div class="empty-cart-dots">
+                            <span>.</span><span>.</span><span>.</span>
+                        </div>
+                    </div>
+                    <h3 data-lang-key="emptyCart">आपका कार्ट खाली है</h3>
+                    <p data-lang-key="emptyCartDesc">कुछ सामान जोड़ो, फिर मज़ा आएगा! 🛍️</p>
+                    <button class="browse-products-btn" data-lang-key="browseProducts">
+                        🏪 प्रोडक्ट देखें
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Cart Summary -->
+            <div id="cartSummary" class="cart-summary hidden">
+                <div class="summary-row">
+                    <span data-lang-key="totalItems">कुल आइटम</span>
+                    <span id="totalItems">0</span>
+                </div>
+                <div class="summary-row">
+                    <span data-lang-key="subtotal">सबटोटल</span>
+                    <span id="subtotal">₹0</span>
+                </div>
+                <div class="summary-row discount-row">
+                    <span data-lang-key="delivery">डिलीवरी</span>
+                    <span class="free-delivery-text">🎉 फ्री!</span>
+                </div>
+                <div class="summary-row total-row">
+                    <span data-lang-key="total">कुल राशि</span>
+                    <span id="totalPrice" class="total-price">₹0</span>
+                </div>
+            </div>
+            
+            <!-- Checkout Footer -->
+            <div class="cart-footer">
+                <button id="clearCartBtn" class="clear-cart-btn" data-lang-key="clearCart">
+                    🗑️ खाली करें
+                </button>
+                <button id="sendOrderBtn" class="send-order-btn" data-lang-key="sendOrder" data-loading-text="भेज रहे हैं...">
+                    <span class="whatsapp-icon" aria-hidden="true">💬</span>
+                    <span>WhatsApp पर भेजें</span>
+                    <span class="send-arrow" aria-hidden="true">→</span>
                 </button>
             </div>
         </div>
-        
-        <!-- Cart Summary -->
-        <div id="cartSummary" class="cart-summary hidden">
-            <div class="summary-row">
-                <span data-lang-key="totalItems">कुल आइटम</span>
-                <span id="totalItems">0</span>
-            </div>
-            <div class="summary-row">
-                <span data-lang-key="subtotal">सबटोटल</span>
-                <span id="subtotal">₹0</span>
-            </div>
-            <div class="summary-row discount-row">
-                <span data-lang-key="delivery">डिलीवरी</span>
-                <span class="free-delivery-text">🎉 फ्री!</span>
-            </div>
-            <div class="summary-row total-row">
-                <span data-lang-key="total">कुल राशि</span>
-                <span id="totalPrice" class="total-price">₹0</span>
-            </div>
-        </div>
-        
-        <!-- Checkout Button -->
-        <div class="cart-footer">
-            <button id="clearCartBtn" class="clear-cart-btn" data-lang-key="clearCart">
-                🗑️ खाली करें
-            </button>
-            <button id="sendOrderBtn" class="send-order-btn" data-lang-key="sendOrder">
-                <span class="whatsapp-icon">💬</span>
-                <span>WhatsApp पर भेजें</span>
-                <span class="send-arrow">→</span>
-            </button>
-        </div>
     </div>
-</div>
     
     <!-- ============================================ -->
     <!-- TOAST NOTIFICATION -->
     <!-- ============================================ -->
-    <div id="toast" class="toast hidden"></div>
+    <div id="toast" class="toast hidden" role="alert" aria-live="polite"></div>
     
     <!-- ============================================ -->
-<!-- MY ORDERS MODAL -->
-<!-- ============================================ -->
-<div id="ordersModal" class="orders-modal hidden">
-    <div class="orders-overlay"></div>
-    <div class="orders-content">
-        <!-- Orders Header -->
-        <div class="orders-header">
-            <div class="orders-header-left">
-                <span class="orders-header-icon">📋</span>
-                <div>
-                    <h2 data-lang-key="myOrders">मेरे ऑर्डर</h2>
-                    <p class="orders-subtitle" data-lang-key="ordersSubtitle">आपके सभी ऑर्डर यहाँ हैं</p>
+    <!-- MY ORDERS MODAL -->
+    <!-- ============================================ -->
+    <div id="ordersModal" class="orders-modal hidden" role="dialog" aria-modal="true" aria-labelledby="ordersTitle">
+        <div class="orders-overlay"></div>
+        <div class="orders-content">
+            <div class="orders-header">
+                <div class="orders-header-left">
+                    <span class="orders-header-icon" aria-hidden="true">📋</span>
+                    <div>
+                        <h2 id="ordersTitle" data-lang-key="myOrders">मेरे ऑर्डर</h2>
+                        <p class="orders-subtitle" data-lang-key="ordersSubtitle">आपके सभी ऑर्डर यहाँ हैं</p>
+                    </div>
                 </div>
+                <button id="closeOrders" class="close-btn" aria-label="ऑर्डर बंद करें">
+                    <span aria-hidden="true">✕</span>
+                </button>
             </div>
-            <button id="closeOrders" class="close-btn" aria-label="बंद करें">
-                <span>✕</span>
-            </button>
-        </div>
-        
-        <!-- Order Filters -->
-        <div class="orders-filters">
-            <button class="order-filter-btn active" data-filter="all">
-                <span data-lang-key="allOrders">सभी</span>
-            </button>
-            <button class="order-filter-btn" data-filter="pending">
-                <span>⏳</span> <span data-lang-key="pending">पेंडिंग</span>
-            </button>
-            <button class="order-filter-btn" data-filter="confirmed">
-                <span>✅</span> <span data-lang-key="confirmed">कन्फर्म</span>
-            </button>
-            <button class="order-filter-btn" data-filter="delivered">
-                <span>🚚</span> <span data-lang-key="delivered">डिलीवर्ड</span>
-            </button>
-        </div>
-        
-        <!-- Orders List -->
-        <div id="ordersList" class="orders-list"></div>
-        
-        <!-- Empty State -->
-        <div id="emptyOrders" class="empty-orders hidden">
-            <div class="empty-orders-icon">📭</div>
-            <h3 data-lang-key="noOrders">कोई ऑर्डर नहीं है</h3>
-            <p data-lang-key="noOrdersDesc">अपना पहला ऑर्डर करो! 🛒</p>
-            <button class="start-shopping-btn" data-lang-key="startShopping">
-                🏪 खरीदारी शुरू करें
-            </button>
+            
+            <!-- Order Filters -->
+            <div class="orders-filters" role="tablist" aria-label="ऑर्डर फ़िल्टर">
+                <button class="order-filter-btn active" data-filter="all" role="tab" aria-selected="true">
+                    <span data-lang-key="allOrders">सभी</span>
+                </button>
+                <button class="order-filter-btn" data-filter="pending" role="tab" aria-selected="false">
+                    <span aria-hidden="true">⏳</span> <span data-lang-key="pending">पेंडिंग</span>
+                </button>
+                <button class="order-filter-btn" data-filter="confirmed" role="tab" aria-selected="false">
+                    <span aria-hidden="true">✅</span> <span data-lang-key="confirmed">कन्फर्म</span>
+                </button>
+                <button class="order-filter-btn" data-filter="delivered" role="tab" aria-selected="false">
+                    <span aria-hidden="true">🚚</span> <span data-lang-key="delivered">डिलीवर्ड</span>
+                </button>
+            </div>
+            
+            <!-- Orders List -->
+            <div id="ordersList" class="orders-list" role="list" aria-label="आपके ऑर्डर"></div>
+            
+            <!-- Empty State -->
+            <div id="emptyOrders" class="empty-orders hidden">
+                <div class="empty-orders-icon" aria-hidden="true">📭</div>
+                <h3 data-lang-key="noOrders">कोई ऑर्डर नहीं है</h3>
+                <p data-lang-key="noOrdersDesc">अपना पहला ऑर्डर करो! 🛒</p>
+                <button class="start-shopping-btn" data-lang-key="startShopping">
+                    🏪 खरीदारी शुरू करें
+                </button>
+            </div>
         </div>
     </div>
-</div>
     
     <!-- ============================================ -->
-<!-- CHECKOUT MODAL -->
-<!-- ============================================ -->
-<div id="checkoutModal" class="checkout-modal hidden">
-    <div class="checkout-overlay"></div>
-    <div class="checkout-content">
-        <!-- Checkout Header -->
-        <div class="checkout-header">
-            <div class="checkout-header-left">
-                <span class="checkout-header-icon">📦</span>
-                <div>
-                    <h2 data-lang-key="checkoutTitle">ऑर्डर कन्फर्म करें</h2>
-                    <p class="checkout-subtitle" data-lang-key="checkoutSubtitle">डिलीवरी के लिए जानकारी भरें</p>
+    <!-- CHECKOUT MODAL -->
+    <!-- ============================================ -->
+    <div id="checkoutModal" class="checkout-modal hidden" role="dialog" aria-modal="true" aria-labelledby="checkoutTitle">
+        <div class="checkout-overlay"></div>
+        <div class="checkout-content">
+            <div class="checkout-header">
+                <div class="checkout-header-left">
+                    <span class="checkout-header-icon" aria-hidden="true">📦</span>
+                    <div>
+                        <h2 id="checkoutTitle" data-lang-key="checkoutTitle">ऑर्डर कन्फर्म करें</h2>
+                        <p class="checkout-subtitle" data-lang-key="checkoutSubtitle">डिलीवरी के लिए जानकारी भरें</p>
+                    </div>
                 </div>
-            </div>
-            <button id="closeCheckout" class="close-btn" aria-label="बंद करें">
-                <span>✕</span>
-            </button>
-        </div>
-        
-        <!-- Checkout Form -->
-        <div class="checkout-form">
-            <!-- Order Summary (Mini) -->
-            <div class="checkout-order-summary">
-                <div class="summary-toggle" id="summaryToggle">
-                    <span data-lang-key="orderSummary">📋 ऑर्डर समरी</span>
-                    <span class="summary-items-count" id="checkoutItemCount">0 आइटम</span>
-                    <span class="summary-total" id="checkoutTotal">₹0</span>
-                    <span class="toggle-arrow">▼</span>
-                </div>
-                <div class="summary-detail hidden" id="summaryDetail"></div>
+                <button id="closeCheckout" class="close-btn" aria-label="चेकआउट बंद करें">
+                    <span aria-hidden="true">✕</span>
+                </button>
             </div>
             
-            <!-- Personal Details -->
-            <div class="form-group">
-                <label class="form-label" data-lang-key="fullName">
-                    <span class="label-icon">👤</span> पूरा नाम
-                </label>
-                <input type="text" id="customerName" class="form-input" 
-                       placeholder="अपना पूरा नाम लिखें" autocomplete="name">
-                <span class="input-hint" data-lang-key="nameHint">जैसे: रमेश कुमार</span>
-            </div>
-            
-            <div class="form-group">
-                <label class="form-label" data-lang-key="phoneNumber">
-                    <span class="label-icon">📱</span> मोबाइल नंबर
-                </label>
-                <div class="phone-input-group">
-                    <span class="phone-prefix">+91</span>
-                    <input type="tel" id="customerPhone" class="form-input phone-input" 
-                           placeholder="9876543210" maxlength="10" autocomplete="tel"
-                           inputmode="numeric" pattern="[0-9]{10}">
+            <!-- Checkout Form -->
+            <div class="checkout-form">
+                <div class="checkout-order-summary">
+                    <div class="summary-toggle" id="summaryToggle" role="button" tabindex="0" aria-expanded="false">
+                        <span data-lang-key="orderSummary">📋 ऑर्डर समरी</span>
+                        <span class="summary-items-count" id="checkoutItemCount">0 आइटम</span>
+                        <span class="summary-total" id="checkoutTotal">₹0</span>
+                        <span class="toggle-arrow" aria-hidden="true">▼</span>
+                    </div>
+                    <div class="summary-detail hidden" id="summaryDetail"></div>
                 </div>
-                <span class="input-hint" data-lang-key="phoneHint">10 अंक का मोबाइल नंबर</span>
-                <span class="input-error hidden" id="phoneError" data-lang-key="phoneError">
-                    ⚠️ कृपया सही 10 अंक का नंबर डालें
-                </span>
-            </div>
-            
-            <!-- Location Section -->
-            <div class="form-group">
-                <label class="form-label" data-lang-key="deliveryAddress">
-                    <span class="label-icon">📍</span> डिलीवरी का पता
-                </label>
                 
-                <!-- Live Location -->
-                <div class="location-status" id="locationStatus">
-                    <button type="button" id="getLocationBtn" class="location-btn">
-                        <span class="location-icon">📍</span>
-                        <span data-lang-key="getLocation">लोकेशन लें</span>
-                    </button>
-                    <span class="location-text hidden" id="locationText">
-                        <span class="location-dot"></span> लोकेशन मिल गई!
+                <!-- Personal Details -->
+                <div class="form-group">
+                    <label class="form-label" for="customerName" data-lang-key="fullName">
+                        <span class="label-icon" aria-hidden="true">👤</span> पूरा नाम
+                    </label>
+                    <input type="text" id="customerName" class="form-input" 
+                           placeholder="अपना पूरा नाम लिखें" autocomplete="name" required>
+                    <span class="input-hint" data-lang-key="nameHint">जैसे: रमेश कुमार</span>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label" for="customerPhone" data-lang-key="phoneNumber">
+                        <span class="label-icon" aria-hidden="true">📱</span> मोबाइल नंबर
+                    </label>
+                    <div class="phone-input-group">
+                        <span class="phone-prefix" aria-hidden="true">+91</span>
+                        <input type="tel" id="customerPhone" class="form-input phone-input" 
+                               placeholder="9876543210" maxlength="10" autocomplete="tel"
+                               inputmode="numeric" pattern="[0-9]{10}" required>
+                    </div>
+                    <span class="input-hint" data-lang-key="phoneHint">10 अंक का मोबाइल नंबर</span>
+                    <span class="input-error hidden" id="phoneError" data-lang-key="phoneError" role="alert">
+                        ⚠️ कृपया सही 10 अंक का नंबर डालें
                     </span>
                 </div>
                 
-                <!-- Address Fields -->
-                <input type="text" id="villageCity" class="form-input" 
-                       placeholder="गाँव या शहर का नाम" data-lang-key="villageCity">
-                <input type="text" id="landmark" class="form-input" 
-                       placeholder="आस-पास की जगह (स्कूल, मंदिर, आदि)" data-lang-key="landmark">
-                <input type="text" id="pincode" class="form-input" 
-                       placeholder="पिन कोड (वैकल्पिक)" maxlength="6" inputmode="numeric">
+                <!-- Location Section -->
+                <div class="form-group">
+                    <label class="form-label" data-lang-key="deliveryAddress">
+                        <span class="label-icon" aria-hidden="true">📍</span> डिलीवरी का पता
+                    </label>
+                    
+                    <div class="location-status" id="locationStatus">
+                        <button type="button" id="getLocationBtn" class="location-btn">
+                            <span class="location-icon" aria-hidden="true">📍</span>
+                            <span data-lang-key="getLocation">लोकेशन लें</span>
+                        </button>
+                        <span class="location-text hidden" id="locationText">
+                            <span class="location-dot" aria-hidden="true"></span> लोकेशन मिल गई!
+                        </span>
+                    </div>
+                    
+                    <input type="text" id="villageCity" class="form-input" 
+                           placeholder="गाँव या शहर का नाम" data-lang-key="villageCity" required>
+                    <input type="text" id="landmark" class="form-input" 
+                           placeholder="आस-पास की जगह (स्कूल, मंदिर, आदि)" data-lang-key="landmark">
+                    <input type="text" id="pincode" class="form-input" 
+                           placeholder="पिन कोड (वैकल्पिक)" maxlength="6" inputmode="numeric" pattern="[0-9]{6}">
+                    
+                    <!-- Hidden location fields -->
+                    <input type="hidden" id="latitude">
+                    <input type="hidden" id="longitude">
+                    <input type="hidden" id="locationUrl">
+                </div>
                 
-                <!-- Hidden location fields -->
-                <input type="hidden" id="latitude">
-                <input type="hidden" id="longitude">
-                <input type="hidden" id="locationUrl">
+                <!-- Order Notes -->
+                <div class="form-group">
+                    <label class="form-label" for="orderNotes" data-lang-key="orderNotes">
+                        <span class="label-icon" aria-hidden="true">📝</span> कोई खास निर्देश
+                    </label>
+                    <textarea id="orderNotes" class="form-textarea" rows="2" 
+                              placeholder="जैसे: शाम 5 बजे के बाद डिलीवर करें" 
+                              data-lang-key="notesPlaceholder"></textarea>
+                </div>
+                
+                <!-- Save Info Checkbox -->
+                <div class="form-group save-info-group">
+                    <label class="checkbox-label">
+                        <input type="checkbox" id="saveInfo" checked>
+                        <span class="checkmark" aria-hidden="true"></span>
+                        <span data-lang-key="saveInfo">यह जानकारी सेव करें (अगली बार ऑटो-फिल होगी)</span>
+                    </label>
+                </div>
             </div>
             
-            <!-- Order Notes -->
-            <div class="form-group">
-                <label class="form-label" data-lang-key="orderNotes">
-                    <span class="label-icon">📝</span> कोई खास निर्देश
-                </label>
-                <textarea id="orderNotes" class="form-textarea" rows="2" 
-                          placeholder="जैसे: शाम 5 बजे के बाद डिलीवर करें" 
-                          data-lang-key="notesPlaceholder"></textarea>
+            <!-- Checkout Footer -->
+            <div class="checkout-footer">
+                <button id="confirmOrderBtn" class="confirm-order-btn" data-lang-key="confirmOrder" data-loading-text="ऑर्डर भेज रहे हैं...">
+                    <span class="whatsapp-icon" aria-hidden="true">💬</span>
+                    <span>WhatsApp पर ऑर्डर भेजें</span>
+                </button>
             </div>
-            
-            <!-- Save Info Checkbox -->
-            <div class="form-group save-info-group">
-                <label class="checkbox-label">
-                    <input type="checkbox" id="saveInfo" checked>
-                    <span class="checkmark"></span>
-                    <span data-lang-key="saveInfo">यह जानकारी सेव करें (अगली बार ऑटो-फिल होगी)</span>
-                </label>
-            </div>
-        </div>
-        
-        <!-- Checkout Footer -->
-        <div class="checkout-footer">
-            <button id="confirmOrderBtn" class="confirm-order-btn" data-lang-key="confirmOrder">
-                <span class="whatsapp-icon">💬</span>
-                <span>WhatsApp पर ऑर्डर भेजें</span>
-            </button>
         </div>
     </div>
-</div>
     
     <!-- ============================================ -->
     <!-- JAVASCRIPT FILES -->
@@ -469,11 +491,16 @@
     <script src="js/bottom-nav.js"></script>
     <script src="js/back-to-top.js"></script>
     <script src="js/animations.js"></script>
-    <script src="js/auto-refresh.js"></script>
     <script src="js/app.js"></script>
     <script src="js/orders.js"></script>
-   
-<script src="js/location.js"></script>
-<script src="js/checkout.js"></script>
+    <script src="js/location.js"></script>
+    <script src="js/checkout.js"></script>
+    
+    <!-- Font Loading Script -->
+    <script>
+        document.fonts.ready.then(function() {
+            document.documentElement.classList.add('fonts-loaded');
+        });
+    </script>
 </body>
 </html>
