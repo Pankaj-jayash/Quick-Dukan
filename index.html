@@ -68,13 +68,23 @@
             </div>
         </div>
         
-        <!-- CENTER: Free Delivery -->
-        <div class="header-center">
-            <span class="free-delivery-badge">
-                <span class="truck-icon pulse-animation" aria-hidden="true">🚚</span>
-                <span class="free-delivery-text" data-lang-key="freeDelivery">फ्री डिलीवरी</span>
-            </span>
-        </div>
+     <!-- CENTER: Alternating Badge -->
+<div class="header-center">
+    <span class="center-badge" id="centerBadge">
+        <!-- Free Delivery Content (9 seconds) -->
+        <span class="badge-content delivery-content visible" id="deliveryContent">
+            <span class="badge-icon">🚚</span>
+            <span class="badge-text" data-lang-key="freeDelivery">फ्री डिलीवरी</span>
+        </span>
+        
+        <!-- Trust Shield Content (3 seconds) -->
+        <span class="badge-content trust-content hidden" id="trustContent">
+            <span class="trust-shield-icon">🛡️</span>
+            <span class="trust-check-badge">✓</span>
+            <span class="badge-text" data-lang-key="verifiedTrust">Verified</span>
+        </span>
+    </span>
+</div>
         
         <!-- RIGHT: Language + Theme Toggle -->
         <div class="header-right">
