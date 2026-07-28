@@ -16,7 +16,7 @@
       "name": { "hi": "पेप्सी (2 लीटर)", "en": "Pepsi (2 Litre)" },
       "price": 100,
       "unit": { "hi": "2 लीटर", "en": "2 Litre" },
-      "image": "https://m.media-amazon.com/images/I/61Qk7P8xVYL._SL1500_.jpg",
+      "image": "https://i.ibb.co/PvxLvrM2/IMG-20260728-164045.jpg",
       "discount": 5,
       "mostOrdered": true
     },
@@ -52,7 +52,7 @@
       "name": { "hi": "स्प्राइट (2 Ltr)", "en": "Sprite (2 Ltr)" },
       "price": 100,
       "unit": { "hi": "2 Ltr", "en": "2 Ltr" },
-      "image": "[url=https://ibb.co/b5Qn2fLw][img]https://i.ibb.co/F4mt0PJZ/copilot-image-1785235973592.png[/img][/url]",
+      "image": "https://i.ibb.co/F4mt0PJZ/copilot-image-1785235973592.png",
       "discount": 5,
       "mostOrdered": true
     },
