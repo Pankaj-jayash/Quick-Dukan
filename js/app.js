@@ -317,3 +317,89 @@ window.addEventListener('error', (e) => {
 window.addEventListener('unhandledrejection', (e) => {
     console.error('❌ Unhandled Promise Rejection:', e.reason);
 });
+
+// ============================================
+// ALTERNATING BADGE - Free Delivery (9s) ↔ Trust (3s)
+// ============================================
+(function() {
+    const deliveryContent = document.getElementById('deliveryContent');
+    const trustContent = document.getElementById('trustContent');
+    const deliveryText = deliveryContent?.querySelector('.badge-text');
+    const trustText = trustContent?.querySelector('.badge-text');
+    
+    if (!deliveryContent || !trustContent) return;
+    
+    let showingDelivery = true;
+    let switchTimeout;
+    const DELIVERY_DURATION = 9000;  // 9 seconds
+    const TRUST_DURATION = 3000;      // 3 seconds
+    
+    function switchToTrust() {
+        deliveryContent.classList.remove('visible');
+        deliveryContent.classList.add('hidden');
+        trustContent.classList.remove('hidden');
+        trustContent.classList.add('visible');
+        showingDelivery = false;
+        
+        // Schedule switch back to delivery after 3s
+        switchTimeout = setTimeout(switchToDelivery, TRUST_DURATION);
+    }
+    
+    function switchToDelivery() {
+        trustContent.classList.remove('visible');
+        trustContent.classList.add('hidden');
+        deliveryContent.classList.remove('hidden');
+        deliveryContent.classList.add('visible');
+        showingDelivery = true;
+        
+        // Schedule switch to trust after 9s
+        switchTimeout = setTimeout(switchToTrust, DELIVERY_DURATION);
+    }
+    
+    function startSwitching() {
+        stopSwitching();
+        // Reset to delivery
+        trustContent.classList.add('hidden');
+        trustContent.classList.remove('visible');
+        deliveryContent.classList.add('visible');
+        deliveryContent.classList.remove('hidden');
+        showingDelivery = true;
+        switchTimeout = setTimeout(switchToTrust, DELIVERY_DURATION);
+    }
+    
+    function stopSwitching() {
+        if (switchTimeout) {
+            clearTimeout(switchTimeout);
+            switchTimeout = null;
+        }
+    }
+    
+    // Start
+    startSwitching();
+    
+    // Language change handler
+    document.addEventListener('languageChanged', function(e) {
+        const lang = e.detail?.language || 'hi';
+        
+        if (deliveryText && trustText) {
+            if (lang === 'en') {
+                deliveryText.textContent = 'Free Delivery';
+                trustText.textContent = 'Verified';
+            } else {
+                deliveryText.textContent = 'फ्री डिलीवरी';
+                trustText.textContent = 'Verified';
+            }
+        }
+        
+        startSwitching();
+    });
+    
+    // Pause when tab not visible
+    document.addEventListener('visibilitychange', function() {
+        if (document.hidden) {
+            stopSwitching();
+        } else {
+            startSwitching();
+        }
+    });
+})();
