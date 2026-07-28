@@ -1,19 +1,36 @@
 'use strict';
 
 // ============================================
-// PRODUCTS.JS - Product Cards + Skeleton Loading (FIXED)
+// PRODUCTS.JS - Product Cards + Image Placeholder + Skeleton Loading
 // ============================================
 
 class ProductsManager {
     constructor() {
         this.allProductsGrid = document.getElementById('allProductsGrid');
-        this.skeletonCount = 6; // Number of skeleton cards to show
+        this.skeletonCount = 6;
+
+        // ⭐ हर कैटेगरी का अपना स्टाइल ⭐
+        this.categoryStyles = {
+            'dal':           { emoji: '🫘', gradient: 'linear-gradient(135deg, #FF6B6B, #FF8E8E)' },
+            'chawal-atta':   { emoji: '🍚', gradient: 'linear-gradient(135deg, #4ECDC4, #7EDDD6)' },
+            'tel-ghee':      { emoji: '🫒', gradient: 'linear-gradient(135deg, #FFD93D, #FFE97F)' },
+            'masale':        { emoji: '🌶️', gradient: 'linear-gradient(135deg, #FF8A65, #FFAB91)' },
+            'cold-drinks':   { emoji: '🥤', gradient: 'linear-gradient(135deg, #64B5F6, #90CAF9)' },
+            'chai-kafi':     { emoji: '☕', gradient: 'linear-gradient(135deg, #A1887F, #BCAAA4)' },
+            'dairy':         { emoji: '🥛', gradient: 'linear-gradient(135deg, #90CAF9, #BBDEFB)' },
+            'snacks':        { emoji: '🍪', gradient: 'linear-gradient(135deg, #FFCC80, #FFE0B2)' },
+            'sabji':         { emoji: '🥬', gradient: 'linear-gradient(135deg, #81C784, #A5D6A7)' },
+        };
+
+        this.defaultStyle = { 
+            emoji: '📦', 
+            gradient: 'linear-gradient(135deg, #B39DDB, #D1C4E9)' 
+        };
 
         this.init();
     }
 
     init() {
-        // Show skeletons immediately
         this.showSkeletons();
 
         document.addEventListener('dataLoaded', (e) => {
@@ -67,7 +84,6 @@ class ProductsManager {
     renderAllProducts(products) {
         if (!this.allProductsGrid) return;
         
-        // Clear skeletons
         this.allProductsGrid.innerHTML = '';
 
         if (!products || products.length === 0) {
@@ -75,7 +91,6 @@ class ProductsManager {
             return;
         }
 
-        // Add staggered animation delay
         products.forEach((product, index) => {
             const card = this.createProductCard(product);
             card.style.animationDelay = `${index * 0.05}s`;
@@ -104,7 +119,7 @@ class ProductsManager {
     }
 
     // ============================================
-    // CREATE PRODUCT CARD
+    // ⭐ CREATE PRODUCT CARD - WITH PLACEHOLDER ⭐
     // ============================================
     createProductCard(product) {
         const lang = window.languageManager?.currentLang || 'hi';
@@ -112,7 +127,14 @@ class ProductsManager {
         const unit = product.unit ? (product.unit[lang] || product.unit.hi || product.unit.en || '') : '';
         const price = product.price || 0;
         const discount = product.discount || 0;
-        const image = product.image || 'https://via.placeholder.com/300?text=No+Image';
+        const image = product.image || '';
+        const categoryId = product.categoryId || '';
+        
+        // ⭐ कैटेगरी स्टाइल लो ⭐
+        const style = this.categoryStyles[categoryId] || this.defaultStyle;
+        
+        // ⭐ प्रोडक्ट का पहला अक्षर ⭐
+        const firstLetter = name.trim().charAt(0);
 
         const card = document.createElement('div');
         card.className = 'product-card fade-in';
@@ -120,22 +142,44 @@ class ProductsManager {
         card.setAttribute('data-product-name', JSON.stringify(product.name || {}));
         card.setAttribute('data-product-unit', JSON.stringify(product.unit || {}));
 
+        // ⭐ इमेज सेक्शन — असली इमेज या शानदार प्लेसहोल्डर ⭐
         card.innerHTML = `
-            <div class="product-card-image">
-                <img src="${image}" 
-                     alt="${name}" 
-                     loading="lazy"
-                     onerror="this.src='https://via.placeholder.com/300?text=No+Image'">
+            <div class="product-card-image" style="background: ${style.gradient};">
+                
+                <!-- शाइन इफ़ेक्ट -->
+                <div class="image-shine"></div>
+                
+                <!-- अगर इमेज है तो दिखाओ, नहीं तो प्लेसहोल्डर -->
+                ${image ? `
+                    <img src="${image}" 
+                         alt="${name}" 
+                         loading="lazy"
+                         onerror="this.style.display='none'; this.nextElementSibling.classList.remove('hidden');">
+                    <div class="image-placeholder hidden">
+                ` : `
+                    <div class="image-placeholder">
+                `}
+                        <span class="placeholder-emoji">${style.emoji}</span>
+                        <div class="placeholder-letter">${firstLetter}</div>
+                        <span class="placeholder-name">${name}</span>
+                    </div>
+                ${image ? '' : ''}
+                
+                <!-- प्राइस ओवरले -->
                 <div class="price-overlay">₹${price}</div>
+                
+                <!-- डिस्काउंट बैज -->
+                ${discount > 0 ? `<div class="discount-badge">${discount}% OFF</div>` : ''}
             </div>
+            
             <div class="product-card-info">
                 <div class="product-name-row">
-    <span class="product-name">${name}</span>
-</div>
-<div class="product-discount">
-    ${discount > 0 ? `<span class="discount-text">🔥 ${discount}% OFF</span>` : '<span></span>'}
-    <span class="product-unit">${unit}</span>
-</div>
+                    <span class="product-name">${name}</span>
+                </div>
+                <div class="product-discount">
+                    ${discount > 0 ? `<span class="discount-text">🔥 ${discount}% OFF</span>` : '<span></span>'}
+                    <span class="product-unit">${unit}</span>
+                </div>
                 <div class="product-buttons">
                     <button class="btn-add-cart" data-action="add-to-cart">
                         <i class="fas fa-plus"></i> ${lang === 'hi' ? 'कार्ट' : 'Cart'}
