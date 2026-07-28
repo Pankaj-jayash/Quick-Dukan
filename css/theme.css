@@ -500,4 +500,4 @@ button[data-loading-text].loading::after {
     opacity: 0.3;
     pointer-events: none;
     cursor: not-allowed;
-}
+} 
