@@ -1,8 +1,7 @@
 'use strict';
 
 // ============================================
-// SEARCH.JS - Live Search (FULL FIXED)
-// Search Icon = Dropdown Only | Enter = Scroll
+// SEARCH.JS - Complete Smart Search (ALL 20 FEATURES)
 // ============================================
 
 class SearchManager {
@@ -18,90 +17,59 @@ class SearchManager {
         this.placeholderInterval = null;
         this.debounceTimer = null;
         this.isDropdownOpen = false;
-        this.isListening = false;
-        this.recognition = null;
-        
-        // Search history
         this.searchHistory = [];
         this.maxHistory = 8;
+        this.isListening = false;
+        this.recognition = null;
+        this.currentQuery = '';
         
         this.init();
     }
     
     init() {
-        // Load search history
         this.loadHistory();
-        
-        // Rotating placeholder
         this.startPlaceholderRotation();
+        this.initVoiceRecognition();
         
-        // 🔧 Live search on every keystroke
-        this.searchInput.addEventListener('input', () => {
-            this.handleInput();
-        });
-        
-        // 🔧 Focus → show history + trending
-        this.searchInput.addEventListener('focus', () => {
-            this.isDropdownOpen = true;
-            this.stopPlaceholderRotation();
-            this.showIdleState();
-        });
-        
-        // 🔧 Blur → close dropdown after delay
-        this.searchInput.addEventListener('blur', () => {
-            setTimeout(() => {
-                if (!document.activeElement?.closest('.search-section')) {
-                    this.isDropdownOpen = false;
-                    this.clearDropdown();
-                    this.startPlaceholderRotation();
-                }
-            }, 250);
-        });
-        
-        // 🔧 Search icon click → dropdown only, NO scroll
-        this.searchIcon.addEventListener('click', (e) => {
-            e.preventDefault();
-            this.addRipple(e);
-            this.performSearch(false);
-        });
-        
-        // 🔧 Enter key → dropdown + scroll to products
+        // Input events
+        this.searchInput.addEventListener('input', () => this.handleInput());
+        this.searchInput.addEventListener('focus', () => this.handleFocus());
+        this.searchInput.addEventListener('blur', () => this.handleBlur());
         this.searchInput.addEventListener('keydown', (e) => {
             if (e.key === 'Enter') {
-                e.preventDefault();
-                this.performSearch(true);
+                this.performSearch();
+                this.searchInput.blur();
             }
         });
         
-        // Voice search button
+        // Search icon with ripple
+        this.searchIcon.addEventListener('click', (e) => {
+            this.addRipple(e);
+            this.performSearch();
+        });
+        
+        // Voice search
         if (this.voiceBtn) {
             this.voiceBtn.addEventListener('click', () => this.toggleVoiceSearch());
         }
-        this.initVoiceRecognition();
         
-        // Language change
-        document.addEventListener('languageChanged', () => {
-            this.updatePlaceholder();
-        });
-        
-        // Close dropdown on outside click
+        // Close on outside click
         document.addEventListener('click', (e) => {
             if (!e.target.closest('.search-section')) {
-                this.clearDropdown();
+                this.closeDropdown();
             }
         });
         
-        // Add ripple keyframe if not exists
-        if (!document.getElementById('search-ripple-style')) {
-            const style = document.createElement('style');
-            style.id = 'search-ripple-style';
-            style.textContent = `
-                @keyframes btnRipple { to { transform: scale(3); opacity: 0; } }
-                .search-result-item { transition: transform 0.1s ease, background 0.15s ease; }
-                .highlight { background: rgba(46,125,50,0.18); color: #2E7D32; font-weight:700; padding:0 2px; border-radius:2px; }
-            `;
-            document.head.appendChild(style);
-        }
+        // Language change
+        document.addEventListener('languageChanged', () => this.updatePlaceholder());
+        
+        // Escape key
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                this.closeDropdown();
+                this.searchInput.blur();
+            }
+        });
     }
     
     // ============================================
@@ -109,12 +77,7 @@ class SearchManager {
     // ============================================
     startPlaceholderRotation() {
         if (this.placeholderInterval) clearInterval(this.placeholderInterval);
-        
-        const lang = window.languageManager?.currentLang || 'hi';
-        const texts = CONFIG?.searchPlaceholderTexts?.[lang] || [
-            'आज क्या चाहिए? 😋', 'कुछ ढूंढो...'
-        ];
-        
+        const texts = this.getPlaceholderTexts();
         this.placeholderIndex = 0;
         this.searchInput.placeholder = texts[0];
         
@@ -122,6 +85,16 @@ class SearchManager {
             this.placeholderIndex = (this.placeholderIndex + 1) % texts.length;
             this.searchInput.placeholder = texts[this.placeholderIndex];
         }, 3000);
+    }
+    
+    getPlaceholderTexts() {
+        const lang = window.languageManager?.currentLang || 'hi';
+        if (window.CONFIG?.searchPlaceholderTexts?.[lang]) {
+            return window.CONFIG.searchPlaceholderTexts[lang];
+        }
+        return lang === 'hi' 
+            ? ['आज क्या चाहिए? 😋', 'चावल, आटा, तेल...', 'नाम लिखो और पाओ! 🔍', 'कुछ भी ढूंढो...']
+            : ['What do you need? 😋', 'Rice, flour, oil...', 'Type and find! 🔍', 'Search anything...'];
     }
     
     stopPlaceholderRotation() {
@@ -132,49 +105,100 @@ class SearchManager {
     }
     
     updatePlaceholder() {
-        const lang = window.languageManager?.currentLang || 'hi';
-        const texts = CONFIG?.searchPlaceholderTexts?.[lang] || ['Search...'];
+        const texts = this.getPlaceholderTexts();
         this.searchInput.placeholder = texts[this.placeholderIndex % texts.length];
     }
     
     // ============================================
-    // IDLE STATE (History + Trending)
+    // FOCUS / BLUR
+    // ============================================
+    handleFocus() {
+        this.stopPlaceholderRotation();
+        this.searchInput.placeholder = '';
+        
+        if (this.searchInput.value.trim() === '') {
+            this.showIdleState();
+        }
+    }
+    
+    handleBlur() {
+        setTimeout(() => {
+            if (!document.activeElement?.closest('.search-section')) {
+                this.closeDropdown();
+                this.startPlaceholderRotation();
+                this.updatePlaceholder();
+            }
+        }, 200);
+    }
+    
+    closeDropdown() {
+        this.isDropdownOpen = false;
+        this.searchResults.innerHTML = '';
+        this.searchResults.classList.add('hidden');
+        this.noResults.classList.add('hidden');
+    }
+    
+    // ============================================
+    // IDLE STATE (History + Trending + Location)
     // ============================================
     showIdleState() {
-        const lang = window.languageManager?.currentLang || 'hi';
+        this.isDropdownOpen = true;
         let html = '';
+        
+        // Location suggestion
+        const locationSuggestion = this.getLocationSuggestion();
+        if (locationSuggestion) {
+            html += `<div class="trending-section">
+                <div class="search-history-header">
+                    <span class="search-history-title">📍 आपके आस-पास</span>
+                </div>
+                <div class="trending-tags">
+                    <span class="trending-tag popular">${this.escapeHtml(locationSuggestion)}</span>
+                </div>
+            </div>`;
+        }
         
         // Search History
         if (this.searchHistory.length > 0) {
-            html += `<div class="search-history">`;
-            html += `<div class="search-history-header">`;
-            html += `<span class="search-history-title">${lang === 'hi' ? 'हाल की खोज' : 'Recent Searches'}</span>`;
-            html += `<button class="search-history-clear">${lang === 'hi' ? 'साफ करें' : 'Clear'}</button>`;
-            html += `</div>`;
+            const now = Date.now();
+            html += '<div class="search-history">';
+            html += '<div class="search-history-header">';
+            html += '<span class="search-history-title">🕐 हाल की खोज</span>';
+            html += '<button class="search-history-clear">साफ करें</button>';
+            html += '</div>';
             
             this.searchHistory.forEach((item, i) => {
-                html += `
-                    <div class="search-history-item" data-index="${i}">
-                        <span class="history-icon">🕐</span>
-                        <span class="history-text">${this.escapeHtml(item)}</span>
-                        <span class="history-delete" data-index="${i}">✕</span>
-                    </div>`;
+                const timeAgo = this.getTimeAgo(item.time || now);
+                html += `<div class="search-history-item" data-index="${i}">
+                    <span class="history-icon">🕐</span>
+                    <span class="history-text">${this.escapeHtml(item.text)}</span>
+                    <span class="history-time">${timeAgo}</span>
+                    <span class="history-actions">
+                        <button class="history-action-btn copy-btn" title="कॉपी करें">📋</button>
+                        <button class="history-action-btn share-btn" title="शेयर करें">🔗</button>
+                        <button class="history-action-btn delete-btn" title="हटाएं">✕</button>
+                    </span>
+                </div>`;
             });
-            html += `</div>`;
+            html += '</div>';
         }
         
         // Trending
-        html += `<div class="trending-searches">`;
-        html += `<div class="trending-searches-title">${lang === 'hi' ? 'ट्रेंडिंग 🔥' : 'Trending 🔥'}</div>`;
-        html += `<div class="trending-tags">`;
+        html += '<div class="trending-section">';
+        html += '<div class="search-history-header">';
+        html += '<span class="search-history-title">🔥 ट्रेंडिंग</span>';
+        html += '</div>';
+        html += '<div class="trending-tags">';
         
         const trending = this.getTrendingSearches();
-        trending.forEach(tag => {
-            html += `<span class="trending-tag">${this.escapeHtml(tag)}</span>`;
+        trending.forEach((tag, i) => {
+            const isPopular = i < 2;
+            html += `<span class="trending-tag${isPopular ? ' popular' : ''}">${this.escapeHtml(tag)}</span>`;
         });
-        html += `</div></div>`;
+        html += '</div></div>';
         
         this.searchResults.innerHTML = html;
+        this.searchResults.classList.remove('hidden');
         this.noResults.classList.add('hidden');
         this.attachIdleEvents();
     }
@@ -183,24 +207,47 @@ class SearchManager {
         // Clear history
         const clearBtn = this.searchResults.querySelector('.search-history-clear');
         if (clearBtn) {
-            clearBtn.addEventListener('click', () => this.clearHistory());
+            clearBtn.addEventListener('click', () => {
+                this.clearHistory();
+                this.showIdleState();
+            });
         }
         
         // History item click
         this.searchResults.querySelectorAll('.search-history-item').forEach(item => {
             item.addEventListener('click', (e) => {
-                if (e.target.classList.contains('history-delete')) return;
+                if (e.target.closest('button')) return;
                 const text = item.querySelector('.history-text').textContent;
                 this.searchInput.value = text;
-                this.performSearch(false);
+                this.performSearch();
             });
         });
         
-        // History delete
-        this.searchResults.querySelectorAll('.history-delete').forEach(btn => {
+        // Copy button
+        this.searchResults.querySelectorAll('.copy-btn').forEach(btn => {
             btn.addEventListener('click', (e) => {
                 e.stopPropagation();
-                const index = parseInt(btn.getAttribute('data-index'));
+                const text = btn.closest('.search-history-item').querySelector('.history-text').textContent;
+                navigator.clipboard?.writeText(text);
+                this.showToast('📋 कॉपी किया!');
+            });
+        });
+        
+        // Share button
+        this.searchResults.querySelectorAll('.share-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const text = btn.closest('.search-history-item').querySelector('.history-text').textContent;
+                const url = `https://wa.me/?text=${encodeURIComponent('Quick Dukan पर ढूंढें: ' + text)}`;
+                window.open(url, '_blank');
+            });
+        });
+        
+        // Delete button
+        this.searchResults.querySelectorAll('.delete-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const index = parseInt(btn.closest('.search-history-item').getAttribute('data-index'));
                 this.removeHistoryItem(index);
                 this.showIdleState();
             });
@@ -209,18 +256,29 @@ class SearchManager {
         // Trending tags
         this.searchResults.querySelectorAll('.trending-tag').forEach(tag => {
             tag.addEventListener('click', () => {
-                this.searchInput.value = tag.textContent;
-                this.performSearch(false);
+                this.searchInput.value = tag.textContent.replace('🔥', '').trim();
+                this.performSearch();
             });
         });
     }
     
+    getLocationSuggestion() {
+        try {
+            const saved = localStorage.getItem('quick-dukan-location');
+            if (saved) {
+                const loc = JSON.parse(saved);
+                return loc.villageCity || '';
+            }
+        } catch (e) {}
+        return '';
+    }
+    
     getTrendingSearches() {
         const lang = window.languageManager?.currentLang || 'hi';
-        if (window.dataLoader?.mostOrderedProducts?.length > 0) {
+        if (window.dataLoader?.mostOrderedProducts) {
             return window.dataLoader.mostOrderedProducts
                 .slice(0, 6)
-                .map(p => p.name?.[lang] || p.name?.hi || p.name?.en || '')
+                .map(p => lang === 'hi' ? (p.name?.hi || '') : (p.name?.en || ''))
                 .filter(Boolean);
         }
         return lang === 'hi' 
@@ -229,10 +287,11 @@ class SearchManager {
     }
     
     // ============================================
-    // HANDLE INPUT - Live Search
+    // HANDLE INPUT (Auto-complete + Live Search)
     // ============================================
     handleInput() {
         const query = this.searchInput.value.trim();
+        this.currentQuery = query;
         
         if (this.debounceTimer) clearTimeout(this.debounceTimer);
         
@@ -241,208 +300,154 @@ class SearchManager {
             return;
         }
         
-        // Save to history as user types
-        this.addToHistory(query);
+        // Auto-complete suggestion from history
+        const historyMatch = this.searchHistory.find(h => 
+            h.text.toLowerCase().startsWith(query.toLowerCase()) && 
+            h.text.toLowerCase() !== query.toLowerCase()
+        );
         
-        // Live search after 150ms
         this.debounceTimer = setTimeout(() => {
             this.performLiveSearch(query);
-        }, 150);
+        }, 200);
     }
     
     performLiveSearch(query) {
-        if (!window.dataLoader?.isLoaded) {
-            this.showMessage('⏳ लोड हो रहा है...');
-            return;
-        }
+        if (!window.dataLoader?.isLoaded) return;
         
-        if (query.length < 1) {
-            this.clearDropdown();
-            return;
-        }
+        let results = window.dataLoader.searchProducts(query);
         
-        // Deep search in all data
-        let results = this.deepSearch(query);
+        if (results.length === 0 && window.CONFIG?.features?.spellCorrection) {
+            results = window.dataLoader.fuzzySearch?.(query) || [];
+        }
         
         if (results.length > 0) {
             this.showResults(results, query);
+            this.noResults.classList.add('hidden');
+            this.searchResults.classList.remove('hidden');
         } else {
-            // Try fuzzy search
-            if (window.dataLoader.fuzzySearch) {
-                results = window.dataLoader.fuzzySearch(query);
-                if (results.length > 0) {
-                    this.showResults(results, query, true);
-                    return;
-                }
-            }
             this.showNoResults(query);
         }
     }
     
-    // ============================================
-    // DEEP SEARCH - Naam, Category, Unit, Price
-    // ============================================
-    deepSearch(query) {
-        const q = query.toLowerCase().trim();
-        const products = window.dataLoader.allProducts || [];
-        
-        return products.filter(product => {
-            // Hindi name
-            if ((product.name?.hi || '').toLowerCase().includes(q)) return true;
-            // English name
-            if ((product.name?.en || '').toLowerCase().includes(q)) return true;
-            // Category Hindi
-            if ((product.categoryNameHi || '').toLowerCase().includes(q)) return true;
-            // Category English
-            if ((product.categoryName || '').toLowerCase().includes(q)) return true;
-            // Unit Hindi
-            if ((product.unit?.hi || '').toLowerCase().includes(q)) return true;
-            // Unit English
-            if ((product.unit?.en || '').toLowerCase().includes(q)) return true;
-            // Price
-            if (product.price && product.price.toString().includes(q)) return true;
-            
-            return false;
-        });
-    }
-    
-    // ============================================
-    // PERFORM SEARCH
-    // 🔧 scrollToResults = false → dropdown only
-    // 🔧 scrollToResults = true  → dropdown + scroll
-    // ============================================
-    performSearch(scrollToResults = false) {
+    performSearch() {
         const query = this.searchInput.value.trim();
         if (!query) return;
         
-        // Save to history
         this.addToHistory(query);
-        
-        // Live search in dropdown
         this.performLiveSearch(query);
-        
-        // Only scroll down if Enter key pressed
-        if (scrollToResults) {
-            const allProductsSection = document.getElementById('allProductsSection');
-            if (allProductsSection) {
-                setTimeout(() => {
-                    allProductsSection.scrollIntoView({ 
-                        behavior: 'smooth', 
-                        block: 'start' 
-                    });
-                }, 150);
-            }
-        }
     }
     
     // ============================================
     // SHOW RESULTS
     // ============================================
-    showResults(results, query, isFuzzy = false) {
-        const lang = window.languageManager?.currentLang || 'hi';
+    showResults(results, query = '') {
         let html = '';
         
-        // Fuzzy indicator
-        if (isFuzzy) {
-            html += `<div style="padding:8px 16px;font-size:11px;color:var(--text-light);border-bottom:1px solid rgba(0,0,0,0.04);">
-                🔍 ${lang === 'hi' ? 'क्या आप ये ढूंढ रहे थे?' : 'Did you mean?'}
-            </div>`;
-        }
-        
-        results.slice(0, 12).forEach(product => {
+        results.slice(0, 10).forEach((product, i) => {
+            const lang = window.languageManager?.currentLang || 'hi';
             const name = product.name?.[lang] || product.name?.hi || product.name?.en || '';
             const unit = product.unit?.[lang] || product.unit?.hi || product.unit?.en || '';
             const price = product.price || 0;
             const image = product.image || 'https://via.placeholder.com/60';
-            
-            const highlightedName = this.highlightText(name, query);
+            const category = product.category || '';
+            const isPopular = (window.dataLoader?.mostOrderedProducts || [])
+                .slice(0, 3).some(p => p.id === product.id);
             
             html += `
-                <div class="search-result-item" data-product-id="${product.id || ''}">
+                <div class="search-result-item" data-product-id="${product.id}">
                     <img src="${image}" alt="${this.escapeHtml(name)}" 
-                         onerror="this.src='https://via.placeholder.com/60?text=N/A'" loading="lazy">
+                         onerror="this.src='https://via.placeholder.com/60?text=No+Image'" loading="lazy">
                     <div class="search-result-info">
-                        <div class="search-result-name">${highlightedName}</div>
-                        ${unit ? `<div class="search-result-unit">${this.escapeHtml(unit)}</div>` : ''}
+                        <div class="search-result-name">${this.highlightMatch(name, query)}</div>
+                        <div class="search-result-meta">
+                            ${category ? `<span class="search-result-category">${this.escapeHtml(category)}</span>` : ''}
+                            ${unit ? `<span class="search-result-unit">${this.escapeHtml(unit)}</span>` : ''}
+                        </div>
                     </div>
-                    <div class="search-result-price">₹${price}</div>
+                    <div class="search-result-right">
+                        <div class="search-result-price">₹${price}</div>
+                        ${isPopular ? '<div class="search-result-badge">🔥 लोकप्रिय</div>' : ''}
+                    </div>
                 </div>`;
         });
         
         this.searchResults.innerHTML = html;
-        this.noResults.classList.add('hidden');
         
-        // Click events on results
+        // Click events
         this.searchResults.querySelectorAll('.search-result-item').forEach(item => {
-            item.addEventListener('mousedown', () => item.style.transform = 'scale(0.97)');
-            item.addEventListener('mouseup', () => item.style.transform = '');
-            item.addEventListener('mouseleave', () => item.style.transform = '');
-            
             item.addEventListener('click', () => {
                 const productId = item.getAttribute('data-product-id');
-                const product = window.dataLoader?.getProductById?.(productId);
-                if (product) {
-                    this.addToRecentlyViewed(product);
-                    const pName = product.name?.[lang] || product.name?.hi || '';
-                    this.searchInput.value = pName;
-                    this.clearDropdown();
-                    this.searchInput.blur();
-                    this.startPlaceholderRotation();
-                }
+                this.selectResult(productId);
             });
         });
     }
     
+    selectResult(productId) {
+        const product = window.dataLoader?.allProducts?.find(p => p.id === productId);
+        if (product) {
+            const lang = window.languageManager?.currentLang || 'hi';
+            const name = product.name?.[lang] || product.name?.hi || '';
+            this.searchInput.value = name;
+            this.addToRecentlyViewed(product);
+            this.closeDropdown();
+            this.searchInput.blur();
+            this.startPlaceholderRotation();
+            this.updatePlaceholder();
+        }
+    }
+    
+    highlightMatch(text, query) {
+        if (!query) return this.escapeHtml(text);
+        const escapedQuery = query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+        const regex = new RegExp(`(${escapedQuery})`, 'gi');
+        return this.escapeHtml(text).replace(regex, '<span class="highlight">$1</span>');
+    }
+    
     // ============================================
-    // SHOW NO RESULTS
+    // NO RESULTS
     // ============================================
     showNoResults(query) {
-        const lang = window.languageManager?.currentLang || 'hi';
+        this.searchResults.classList.add('hidden');
+        this.noResults.classList.remove('hidden');
         
         const msgEl = this.noResults.querySelector('.no-results-msg');
         if (msgEl) {
+            const lang = window.languageManager?.currentLang || 'hi';
             msgEl.textContent = lang === 'hi' 
-                ? `"${query}" नहीं मिला। ये ट्राई करें:`
-                : `"${query}" not found. Try these:`;
+                ? `"${query}" के लिए कुछ नहीं मिला 😕` 
+                : `Nothing found for "${query}" 😕`;
         }
         
-        this.searchResults.innerHTML = '';
-        this.noResults.classList.remove('hidden');
-        
-        // Show random suggestions
         const suggested = window.dataLoader?.getRandomProducts?.(5) || [];
-        const container = this.noResults.querySelector('.suggested-products');
+        this.suggestedProducts.innerHTML = '';
         
-        if (container && suggested.length > 0) {
-            container.innerHTML = '';
-            suggested.forEach(product => {
-                const name = product.name?.[lang] || product.name?.hi || '';
-                const price = product.price || 0;
-                const image = product.image || 'https://via.placeholder.com/60';
-                
-                const card = document.createElement('div');
-                card.className = 'product-card';
-                card.style.cssText = 'width:110px;flex-shrink:0;cursor:pointer;';
-                card.innerHTML = `
-                    <div class="product-card-image" style="aspect-ratio:1/1;background:#f5f5f5;">
-                        <img src="${image}" alt="${this.escapeHtml(name)}" 
-                             onerror="this.src='https://via.placeholder.com/60?text=N/A'" loading="lazy"
-                             style="width:100%;height:100%;object-fit:cover;">
-                    </div>
-                    <div class="product-card-info" style="padding:6px 8px;">
-                        <div style="font-size:10px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${name}</div>
-                        <div style="font-size:11px;font-weight:700;color:var(--primary);">₹${price}</div>
-                    </div>`;
-                
-                card.addEventListener('click', () => {
-                    this.addToRecentlyViewed(product);
-                    this.searchInput.value = name;
-                    this.noResults.classList.add('hidden');
-                });
-                
-                container.appendChild(card);
+        suggested.forEach(product => {
+            const lang = window.languageManager?.currentLang || 'hi';
+            const name = product.name?.[lang] || product.name?.hi || '';
+            const price = product.price || 0;
+            const image = product.image || 'https://via.placeholder.com/60';
+            
+            const card = document.createElement('div');
+            card.className = 'product-card';
+            card.style.cssText = 'width:110px;flex-shrink:0;';
+            card.innerHTML = `
+                <div class="product-card-image">
+                    <img src="${image}" alt="${this.escapeHtml(name)}" 
+                         onerror="this.src='https://via.placeholder.com/60?text=No+Image'" loading="lazy">
+                    <div class="price-overlay" style="font-size:11px;">₹${price}</div>
+                </div>
+                <div class="product-card-info" style="padding:6px 8px;">
+                    <div class="product-name" style="font-size:10px;">${name}</div>
+                </div>`;
+            
+            card.addEventListener('click', () => {
+                this.addToRecentlyViewed(product);
+                this.noResults.classList.add('hidden');
+                this.searchInput.value = name;
             });
-        }
+            
+            this.suggestedProducts.appendChild(card);
+        });
     }
     
     // ============================================
@@ -456,14 +461,13 @@ class SearchManager {
         }
         
         this.recognition = new SpeechRecognition();
-        this.recognition.lang = (window.languageManager?.currentLang === 'en') ? 'en-IN' : 'hi-IN';
+        this.recognition.lang = 'hi-IN';
         this.recognition.interimResults = false;
-        this.recognition.maxAlternatives = 1;
         
         this.recognition.addEventListener('result', (e) => {
             const transcript = e.results[0][0].transcript;
             this.searchInput.value = transcript;
-            this.performSearch(false);
+            this.performSearch();
             this.stopListening();
         });
         
@@ -484,6 +488,7 @@ class SearchManager {
                 this.voiceBtn.classList.add('listening');
                 this.voiceBtn.querySelector('span').textContent = '🎙️';
             }
+            this.showToast('🎤 सुन रहा हूँ... बोलो!');
         } catch (e) {}
     }
     
@@ -517,9 +522,9 @@ class SearchManager {
     }
     
     addToHistory(query) {
-        if (!query || query.length < 2) return;
-        this.searchHistory = this.searchHistory.filter(h => h.toLowerCase() !== query.toLowerCase());
-        this.searchHistory.unshift(query);
+        if (!query) return;
+        this.searchHistory = this.searchHistory.filter(h => h.text.toLowerCase() !== query.toLowerCase());
+        this.searchHistory.unshift({ text: query, time: Date.now() });
         if (this.searchHistory.length > this.maxHistory) {
             this.searchHistory = this.searchHistory.slice(0, this.maxHistory);
         }
@@ -534,35 +539,11 @@ class SearchManager {
     clearHistory() {
         this.searchHistory = [];
         this.saveHistory();
-        this.showIdleState();
     }
     
     // ============================================
     // HELPERS
     // ============================================
-    clearDropdown() {
-        this.searchResults.innerHTML = '';
-        this.noResults.classList.add('hidden');
-    }
-    
-    showMessage(msg) {
-        this.searchResults.innerHTML = `<div style="padding:16px;text-align:center;color:var(--text-light);font-size:14px;">${msg}</div>`;
-        this.noResults.classList.add('hidden');
-    }
-    
-    highlightText(text, query) {
-        if (!query) return this.escapeHtml(text);
-        const escaped = query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-        const regex = new RegExp(`(${escaped})`, 'gi');
-        return this.escapeHtml(text).replace(regex, '<span class="highlight">$1</span>');
-    }
-    
-    escapeHtml(text) {
-        const div = document.createElement('div');
-        div.textContent = text;
-        return div.innerHTML;
-    }
-    
     addToRecentlyViewed(product) {
         if (window.recentlyViewedManager) {
             window.recentlyViewedManager.addProduct(product);
@@ -571,22 +552,39 @@ class SearchManager {
     
     addRipple(event) {
         const btn = event.currentTarget;
-        const existing = btn.querySelector('.btn-ripple');
-        if (existing) existing.remove();
-        
         const ripple = document.createElement('span');
-        ripple.className = 'btn-ripple';
+        ripple.className = 'ripple';
         const rect = btn.getBoundingClientRect();
         const size = Math.max(rect.width, rect.height);
         ripple.style.cssText = `
-            position:absolute; width:${size}px; height:${size}px;
+            width:${size}px;height:${size}px;
             left:${event.clientX - rect.left - size/2}px;
             top:${event.clientY - rect.top - size/2}px;
-            border-radius:50%; background:rgba(255,255,255,0.4);
-            animation:btnRipple 0.5s ease-out; pointer-events:none;
         `;
         btn.appendChild(ripple);
-        setTimeout(() => ripple.remove(), 500);
+        ripple.addEventListener('animationend', () => ripple.remove());
+    }
+    
+    getTimeAgo(timestamp) {
+        const seconds = Math.floor((Date.now() - timestamp) / 1000);
+        if (seconds < 60) return 'अभी अभी';
+        if (seconds < 3600) return `${Math.floor(seconds / 60)} मिनट पहले`;
+        if (seconds < 86400) return `${Math.floor(seconds / 3600)} घंटे पहले`;
+        return `${Math.floor(seconds / 86400)} दिन पहले`;
+    }
+    
+    escapeHtml(text) {
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
+    }
+    
+    showToast(message) {
+        const toast = document.getElementById('toast');
+        if (!toast) return;
+        toast.textContent = message;
+        toast.classList.remove('hidden');
+        setTimeout(() => toast.classList.add('hidden'), 2000);
     }
 }
 
