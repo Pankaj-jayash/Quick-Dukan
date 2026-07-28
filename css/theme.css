@@ -63,7 +63,7 @@
     
     /* Layout */
     --header-height: 50px;
-    --search-height: 4px;
+    --search-height: 50px;
     --categories-height: 55px;
     --bottom-nav-height: 60px;
     --card-width: 170px;
@@ -388,6 +388,64 @@ body.dark-mode .section-title::before {
     }
 }
 
+/* ============================================
+   FOOTER - Inside Main Content
+   ============================================ */
+.site-footer {
+    background: var(--bg-secondary);
+    padding: 16px;
+    text-align: center;
+    border-top: 1px solid rgba(0, 0, 0, 0.06);
+    border-radius: var(--radius-md);
+    margin-top: 20px;
+    margin-bottom: 8px;
+}
+
+body.dark-mode .site-footer {
+    background: var(--bg-card);
+    border-top-color: rgba(255, 255, 255, 0.06);
+}
+
+.footer-content {
+    max-width: 500px;
+    margin: 0 auto;
+}
+
+.footer-text {
+    color: var(--text-secondary);
+    font-size: 11px;
+    margin-bottom: 6px;
+}
+
+.footer-links {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.footer-link {
+    color: var(--primary);
+    font-size: 11px;
+    font-weight: 500;
+    text-decoration: none;
+    transition: color 0.15s ease;
+}
+
+.footer-link:hover {
+    color: var(--primary-dark);
+    text-decoration: underline;
+}
+
+.footer-link:active {
+    transform: scale(0.95);
+}
+
+.footer-divider {
+    color: var(--text-light);
+    font-size: 10px;
+}
 
 /* ============================================
    PRODUCT IMAGE FIX - Prevent CLS
