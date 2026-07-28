@@ -6,7 +6,7 @@
 .categories-section {
     background-color: var(--bg-primary);
     z-index: 998;
-    padding: 8px 4px;
+    padding: 0px 4px 8px 4px;
     display: flex;
     align-items: center;
     gap: 0;
@@ -344,7 +344,7 @@ body.dark-mode .category-btn[data-category="all"] {
    ============================================ */
 @media (max-width: 360px) {
     .category-btn {
-        padding: 8px 12px;
+        padding: opx 2px 2px 2px;
         gap: 4px;
         border-radius: 14px;
     }
@@ -364,4 +364,4 @@ body.dark-mode .category-btn[data-category="all"] {
         width: 28px;
         height: 28px;
     }
-} 
+}
