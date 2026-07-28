@@ -87,40 +87,42 @@
         </div>
     </header>
     
-    <!-- ============================================ -->
-    <!-- SECTION 2: SEARCH BAR (FIXED) -->
-    <!-- ============================================ -->
-    <div id="searchSection" class="search-section">
-        <div class="search-container">
-            <input 
-                type="search"
-                id="searchInput" 
-                class="search-input" 
-                data-lang-key="searchPlaceholder"
-                placeholder="आज क्या चाहिए? 😋" 
-                autocomplete="off"
-                aria-label="प्रोडक्ट खोजें"
-                
-    
-            >
-            <button id="voiceSearchBtn" class="voice-search-btn" aria-label="आवाज़ से खोजें" title="बोलकर खोजें">
-                <span aria-hidden="true">🎤</span>
-            </button>
-            <button id="searchIcon" class="search-icon-btn" aria-label="खोजें">
-                <span aria-hidden="true">🔍</span>
-            </button>
-        </div>
-        <!-- Live Search Results -->
-        <div id="searchResults" class="search-results hidden" role="listbox" aria-label="खोज परिणाम"></div>
-        <!-- No Results Found -->
-        <div id="noResults" class="no-results hidden">
+   <!-- ============================================ -->
+<!-- SECTION 2: SEARCH BAR (FIXED) -->
+<!-- ============================================ -->
+<div id="searchSection" class="search-section">
+    <div class="search-container">
+        <input 
+            type="text" 
+            id="searchInput" 
+            class="search-input" 
+            data-lang-key="searchPlaceholder"
+            placeholder="आज क्या चाहिए? 😋" 
+            autocomplete="off"
+        >
+        <!-- Voice Search Button -->
+        <button id="voiceSearchBtn" class="voice-search-btn" aria-label="आवाज़ से खोजें">
+            <span>🎤</span>
+        </button>
+        <!-- Search Button -->
+        <button id="searchIcon" class="search-icon-btn" aria-label="खोजें">
+            <span>🔍</span>
+        </button>
+    </div>
+    <!-- Live Search Results Dropdown -->
+    <div id="searchResults" class="search-results hidden"></div>
+    <!-- No Results Found -->
+    <div id="noResults" class="no-results hidden">
+        <div class="no-results-inner">
+            <span class="no-results-icon">🔍</span>
             <p class="no-results-msg" data-lang-key="noProductMsg">
                 अरे! यह सामान अभी नहीं है। हम जल्दी ऐड करेंगे! 😊
             </p>
+            <p class="no-results-hint">आप ये ट्राई कर सकते हैं:</p>
             <div id="suggestedProducts" class="suggested-products"></div>
         </div>
     </div>
-    
+</div>
     <!-- ============================================ -->
     <!-- SECTION 3: CATEGORIES (FIXED) -->
     <!-- ============================================ -->
@@ -175,12 +177,28 @@
             <div id="allProductsGrid" class="products-grid" role="list" aria-label="सभी प्रोडक्ट"></div>
         </section>
         
+        <!-- ============================================ -->
+    <!-- FOOTER - INSIDE MAIN CONTENT (FIX) -->
+    <!-- ============================================ -->
+    <footer class="site-footer" role="contentinfo">
+        <div class="footer-content">
+            <p class="footer-text">© 2026 Quick Dukan. सर्वाधिकार सुरक्षित।</p>
+            <div class="footer-links">
+                <a href="#" class="footer-link">शर्तें</a>
+                <span class="footer-divider">|</span>
+                <a href="#" class="footer-link">गोपनीयता</a>
+                <span class="footer-divider">|</span>
+                <a href="tel:+919876543210" class="footer-link">📞 संपर्क</a>
+            </div>
+        </div>
+    </footer>
+        
         <!-- Bottom Spacer -->
         <div class="bottom-spacer" aria-hidden="true"></div>
         
     </main>
     
-   
+  
     
     <!-- ============================================ -->
     <!-- SECTION 8: BOTTOM NAVBAR (FIXED) -->
