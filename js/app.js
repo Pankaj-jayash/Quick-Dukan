@@ -316,4 +316,4 @@ window.addEventListener('error', (e) => {
 // Handle unhandled promise rejections
 window.addEventListener('unhandledrejection', (e) => {
     console.error('❌ Unhandled Promise Rejection:', e.reason);
-});
+}); 
