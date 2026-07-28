@@ -1,11 +1,12 @@
 // ============================================
-// LOCATION.JS - Fully Automatic Location
-// No Click Needed | Emotional GPS Message
+// LOCATION.JS - Aggressive Smart Location
+// Live Tracking + Force GPS + Auto Permission
 // ============================================
 
 class LocationManager {
     constructor() {
         this.getLocationBtn = document.getElementById('getLocationBtn');
+        this.locationStatus = document.getElementById('locationStatus');
         this.locationText = document.getElementById('locationText');
         this.latitude = document.getElementById('latitude');
         this.longitude = document.getElementById('longitude');
@@ -15,65 +16,41 @@ class LocationManager {
         
         this.isLoading = false;
         this.retryCount = 0;
-        this.maxRetries = 10;
-        this.watchId = null;
-        this.lastLocation = null;
-        this.gpsPopupShown = false;
-        this.detectionStarted = false;
+        this.maxRetries = 9;            // ✅ Aggressive: 9 retries
+        this.permissionDeniedCount = 0;
+        this.watchId = null;            // ✅ Live tracking ID
+        this.gpsReminderInterval = null;
+        this.lastDetectedLocation = null;
+        
+        // Settings
+        this.MIN_ACCURACY_METERS = 50;   // ✅ Better accuracy
+        this.PERMISSION_RETRY_DELAY = 10000; // 10 sec for permission
+        this.GPS_REMINDER_INTERVAL = 15000;  // 15 sec GPS reminder
         
         if (!this.getLocationBtn) return;
         this.init();
     }
 
     init() {
-        // ✅ Button bhi rakh lo — fallback ke liye
+        // Manual button
         this.getLocationBtn.addEventListener('click', () => {
             this.getLocation(false);
         });
 
-        // ✅ Checkout open hote hi — AUTO START
+        // ✅ Auto-detect on checkout open
         document.addEventListener('checkoutOpened', () => {
             setTimeout(() => {
-                this.autoStart();
-            }, 500);
+                this.startLocationDetection();
+            }, 300);
         });
-        
-        // ✅ Page load pe bhi check — agar checkout visible hai
-        this.observer = new MutationObserver(() => {
-            const checkoutModal = document.getElementById('checkoutModal');
-            if (checkoutModal && !checkoutModal.classList.contains('hidden')) {
-                this.autoStart();
-            }
-        });
-        
-        const checkoutModal = document.getElementById('checkoutModal');
-        if (checkoutModal) {
-            this.observer.observe(checkoutModal, { 
-                attributes: true, 
-                attributeFilter: ['class'] 
-            });
+
+        // ✅ Auto-detect on page load (if checkout visible)
+        if (document.getElementById('checkoutModal')?.classList.contains('visible')) {
+            setTimeout(() => this.startLocationDetection(), 500);
         }
         
-        // ✅ Permission change — auto detect
-        this.watchPermission();
-    }
-
-    // ============================================
-    // AUTO START — No Click Needed
-    // ============================================
-    autoStart() {
-        if (this.detectionStarted) return;
-        
-        console.log('🚀 AUTO START: Location detection...');
-        this.detectionStarted = true;
-        this.retryCount = 0;
-        this.gpsPopupShown = false;
-        
-        // Hide any existing popups
-        this.hideGPSPopup();
-        
-        // Start detection immediately
-        this.getLocation(true);
+        // ✅ Listen for permission changes
+        this.watchPermissionChanges();
     }
 
     // ============================================
@@ -83,93 +60,108 @@ class LocationManager {
         return localStorage.getItem('quickDukanLang') || CONFIG?.defaultLanguage || 'hi';
     }
 
-    t(key) {
+    t(key, replacements = {}) {
         const lang = this.getLang();
         const texts = {
             hi: {
-                // Auto detect messages
-                autoDetecting: '📍 आपकी लोकेशन अपने आप ली जा रही है...',
-                locationFound: '✅ लोकेशन मिल गई! आपका ऑर्डर जल्दी पहुँचेगा!',
-                
-                // GPS OFF — Emotional message
-                gpsOffTitle: '📡 आपका GPS बंद है!',
-                gpsOffMessage: 'आपका सामान आपके घर तक सही-सलामत पहुँचे, इसके लिए हमें आपकी सही लोकेशन चाहिए। कृपया GPS चालू करें। 🙏',
-                gpsOffInstruction: 'फोन की स्क्रीन ऊपर से नीचे खींचें → 📍 Location/GPS पर टैप करें → चालू करें',
-                gpsOnButton: '✅ GPS चालू कर दिया, लोकेशन लें',
-                gpsSkipButton: 'बाद में, खुद भर दूँगा',
-                gpsRetryButton: '🔄 फिर से कोशिश करें',
-                
-                // Permission
-                permissionTitle: '📍 लोकेशन की अनुमति दें',
-                permissionMessage: 'आपके ऑर्डर की डिलीवरी के लिए लोकेशन ज़रूरी है। कृपया "Allow" करें।',
-                permissionButton: '📍 Allow करें',
-                
-                // Status
-                highAccuracy: '🎯 बिल्कुल सटीक लोकेशन',
-                mediumAccuracy: '📍 अच्छी लोकेशन',
-                lowAccuracy: '🌍 लोकेशन ठीक है',
-                liveTracking: '🟢 लाइव लोकेशन चालू',
-                
-                // Manual fallback
-                manualHint: '✍️ अपना गाँव/शहर/इलाका लिखें',
-                fillManually: 'खुद भरें',
+                getting: '📍 आपकी लोकेशन ले रहे हैं...',
+                gotLocation: '✅ सटीक लोकेशन मिल गई!',
+                liveLocation: '🟢 लाइव लोकेशन ट्रैकिंग चालू',
+                failed: '❌ लोकेशन नहीं मिली',
+                permissionDenied: '⚠️ आपने लोकेशन ब्लॉक कर दी है!',
+                permissionPermanent: '🚫 लोकेशन स्थायी रूप से ब्लॉक है। कृपया ब्राउज़र सेटिंग में जाकर अनब्लॉक करें।',
+                gpsOff: '📡 आपका GPS बंद है!',
+                gpsOffDetail: 'कृपया अपने फोन का GPS चालू करें ताकि हम आपकी सही लोकेशन ले सकें।',
+                gpsOnInstruction: '👇 नीचे खींचें → Location/GPS आइकन दबाएं → चालू करें',
+                allowLocation: '📍 कृपया "Allow" दबाएं ताकि हम आपकी लोकेशन ले सकें!',
+                allowLocationDetail: 'हमें आपकी सही डिलीवरी लोकेशन चाहिए।',
+                retryMsg: '🔄 पुनः प्रयास {count}/{max}...',
+                manualHint: '✍️ या खुद अपना गाँव/शहर लिखें',
+                btnGet: '📍 लोकेशन लें',
+                btnGetting: '⏳ ले रहे...',
+                btnGot: '✅ मिल गई!',
+                btnFailed: '⚠️ फिर से',
+                highAccuracy: '🎯 हाई एक्यूरेसी GPS',
+                mediumAccuracy: '📍 मीडियम एक्यूरेसी',
+                lowAccuracy: '🌍 लो एक्यूरेसी — कृपया जाँच लें',
             },
             en: {
-                // Auto detect messages
-                autoDetecting: '📍 Detecting your location automatically...',
-                locationFound: '✅ Location found! Your order will arrive fast!',
-                
-                // GPS OFF — Emotional message
-                gpsOffTitle: '📡 Your GPS is OFF!',
-                gpsOffMessage: 'To deliver your order safely to your doorstep, we need your exact location. Please turn ON GPS. 🙏',
-                gpsOffInstruction: 'Swipe down from top → Tap 📍 Location/GPS → Turn ON',
-                gpsOnButton: "✅ I've turned ON GPS, get my location",
-                gpsSkipButton: 'Skip for now, I\'ll type it',
-                gpsRetryButton: '🔄 Try Again',
-                
-                // Permission
-                permissionTitle: '📍 Allow Location Access',
-                permissionMessage: 'We need your location for fast & accurate delivery. Please tap "Allow".',
-                permissionButton: '📍 Allow Location',
-                
-                // Status
-                highAccuracy: '🎯 Highly Accurate',
-                mediumAccuracy: '📍 Good Accuracy',
-                lowAccuracy: '🌍 Fair Accuracy',
-                liveTracking: '🟢 Live Tracking ON',
-                
-                // Manual fallback
-                manualHint: '✍️ Enter your city/village/area',
-                fillManually: 'Type manually',
+                getting: '📍 Getting your location...',
+                gotLocation: '✅ Exact location found!',
+                liveLocation: '🟢 Live location tracking ON',
+                failed: '❌ Could not get location',
+                permissionDenied: '⚠️ You blocked location!',
+                permissionPermanent: '🚫 Location permanently blocked. Please unblock in browser settings.',
+                gpsOff: '📡 Your GPS is OFF!',
+                gpsOffDetail: 'Please turn ON your phone GPS so we can get your exact location.',
+                gpsOnInstruction: '👇 Swipe down → Press Location/GPS icon → Turn ON',
+                allowLocation: '📍 Please press "Allow" so we can get your location!',
+                allowLocationDetail: 'We need your exact delivery location.',
+                retryMsg: '🔄 Retry {count}/{max}...',
+                manualHint: '✍️ Or type your city/village manually',
+                btnGet: '📍 Get Location',
+                btnGetting: '⏳ Getting...',
+                btnGot: '✅ Got it!',
+                btnFailed: '⚠️ Retry',
+                highAccuracy: '🎯 High Accuracy GPS',
+                mediumAccuracy: '📍 Medium Accuracy',
+                lowAccuracy: '🌍 Low Accuracy — Please verify',
             }
         };
-        return texts[lang]?.[key] || texts['hi'][key] || key;
+        
+        let msg = texts[lang]?.[key] || texts['hi'][key] || key;
+        Object.keys(replacements).forEach(k => {
+            msg = msg.replace(`{${k}}`, replacements[k]);
+        });
+        return msg;
     }
 
     // ============================================
-    // GET LOCATION (Auto)
+    // START DETECTION
     // ============================================
-    getLocation(silent = true) {
+    startLocationDetection() {
+        console.log('📍 Starting auto location detection...');
+        this.retryCount = 0;
+        this.permissionDeniedCount = 0;
+        
+        // Clear any existing watch
+        this.stopLiveTracking();
+        
+        // Start fresh detection
+        this.getLocation(true);
+    }
+
+    // ============================================
+    // GET LOCATION
+    // ============================================
+    getLocation(silent = false) {
+        if (this.isLoading && this.retryCount > 0) {
+            console.log('⏳ Already loading...');
+            return;
+        }
+
         if (!navigator.geolocation) {
-            this.showGPSPopup('gpsOff');
+            this.showGPSOffMessage();
             return;
         }
 
         this.isLoading = true;
         
         if (!silent) {
-            this.showToast(this.t('autoDetecting'), 'info');
+            this.setButtonLoading(true);
+            this.showToast(this.t('getting'), 'info');
         }
 
-        console.log(`📍 Auto-detect attempt ${this.retryCount + 1}/${this.maxRetries}...`);
-
+        console.log(`📍 Requesting position... (attempt ${this.retryCount + 1})`);
+        
+        // ✅ First: Quick check with cached position
         navigator.geolocation.getCurrentPosition(
-            (position) => this.onSuccess(position, silent),
-            (error) => this.onError(error, silent),
+            (position) => this.onLocationSuccess(position, silent),
+            (error) => this.onLocationError(error, silent),
             {
                 enableHighAccuracy: true,
-                timeout: 20000,
-                maximumAge: 0  // Fresh only
+                timeout: 15000,
+                maximumAge: 0 // Fresh only
             }
         );
     }
@@ -177,254 +169,98 @@ class LocationManager {
     // ============================================
     // SUCCESS
     // ============================================
-    onSuccess(position, silent) {
+    onLocationSuccess(position, silent) {
         const lat = position.coords.latitude;
         const lng = position.coords.longitude;
         const accuracy = position.coords.accuracy;
+        const timestamp = position.timestamp;
 
-        console.log('✅ LOCATION FOUND:', {
+        console.log('📍 GOT LOCATION:', {
             lat: lat.toFixed(6),
             lng: lng.toFixed(6),
-            accuracy: `${Math.round(accuracy)}m`
+            accuracy: `${Math.round(accuracy)}m`,
+            age: `${((Date.now() - timestamp) / 1000).toFixed(1)}s`
         });
 
-        // Invalid check
+        // ❌ Invalid
         if (lat === 0 && lng === 0) {
-            this.retry();
+            this.retryLocation('Invalid coordinates');
             return;
         }
 
-        // ✅ Save
+        // ⚠️ Low accuracy — but still use if best available
+        if (accuracy > this.MIN_ACCURACY_METERS && this.retryCount < 3) {
+            console.warn(`⚠️ Low accuracy: ${Math.round(accuracy)}m, retrying for better...`);
+            this.retryLocation('Low accuracy, retrying');
+            return;
+        }
+
+        // ✅ SUCCESS!
         const data = { lat, lng, accuracy, timestamp: Date.now() };
-        this.lastLocation = data;
+        this.lastDetectedLocation = data;
         
-        // Apply to form
-        if (this.latitude) this.latitude.value = lat.toFixed(6);
-        if (this.longitude) this.longitude.value = lng.toFixed(6);
-        if (this.locationUrl) this.locationUrl.value = `https://maps.google.com/?q=${lat},${lng}`;
-        
-        // Update UI
-        if (this.getLocationBtn) {
-            this.getLocationBtn.innerHTML = '✅ ' + this.t('locationFound');
-            this.getLocationBtn.style.background = '#4CAF50';
-            this.getLocationBtn.style.color = '#FFF';
-        }
-        
-        if (this.locationText) {
-            this.locationText.classList.remove('hidden');
-            let accLabel = this.t('highAccuracy');
-            if (accuracy > 30) accLabel = this.t('mediumAccuracy');
-            if (accuracy > 80) accLabel = this.t('lowAccuracy');
-            
-            this.locationText.innerHTML = `
-                <span style="color:#4CAF50">🟢</span> ${this.t('liveTracking')}
-                <br><small>${accLabel} (~${Math.round(accuracy)}m)</small>
-            `;
-        }
-        
-        // Reverse geocode
+        this.applyLocationData(data);
+        this.saveLocation(data);
         this.reverseGeocode(lat, lng);
         
-        // Save to storage
-        this.saveLocation(data);
-        
-        // Start live tracking
+        // ✅ Start live tracking
         this.startLiveTracking();
         
-        // Hide GPS popup
-        this.hideGPSPopup();
+        // ✅ Hide GPS reminder
+        this.hideGPSReminder();
         
         this.isLoading = false;
         this.retryCount = 0;
+        this.permissionDeniedCount = 0;
+        
+        // Accuracy label
+        let accLabel = this.t('highAccuracy');
+        if (accuracy > 20) accLabel = this.t('mediumAccuracy');
+        if (accuracy > 50) accLabel = this.t('lowAccuracy');
         
         if (!silent) {
-            this.showToast(this.t('locationFound'), 'success');
+            this.showToast(`${this.t('gotLocation')} (${accLabel})`, 'success');
         }
     }
 
-    // ============================================
-    // ERROR
-    // ============================================
-    onError(error, silent) {
-        console.error('❌ Location error:', error.message, '(code:', error.code, ')');
-        this.isLoading = false;
-
-        switch (error.code) {
-            case 1: // PERMISSION_DENIED
-                if (this.retryCount < 3) {
-                    // Temporary deny — auto retry
-                    this.retryCount++;
-                    console.log(`🔄 Permission denied — retry ${this.retryCount} in 5s`);
-                    setTimeout(() => this.getLocation(true), 5000);
-                } else if (this.retryCount < 6) {
-                    // Show permission popup
-                    this.showGPSPopup('permission');
-                    this.retryCount++;
-                } else {
-                    // Permanent — show manual fallback
-                    this.showManualFallback();
-                }
-                break;
-                
-            case 2: // POSITION_UNAVAILABLE (GPS OFF)
-            case 3: // TIMEOUT (GPS OFF)
-                if (!this.gpsPopupShown) {
-                    // ✅ Show emotional GPS message
-                    this.showGPSPopup('gpsOff');
-                    this.gpsPopupShown = true;
-                }
-                
-                // Auto retry
-                if (this.retryCount < this.maxRetries) {
-                    this.retryCount++;
-                    const delay = this.retryCount <= 3 ? 3000 :
-                                  this.retryCount <= 6 ? 5000 : 8000;
-                    
-                    console.log(`🔄 Auto retry ${this.retryCount}/${this.maxRetries} in ${delay}ms`);
-                    setTimeout(() => this.getLocation(true), delay);
-                } else {
-                    this.showManualFallback();
-                }
-                break;
-        }
-    }
-
-    retry() {
+    retryLocation(reason) {
+        console.log(`🔄 Retry: ${reason}`);
         this.retryCount++;
+        
         if (this.retryCount < this.maxRetries) {
+            const delay = this.retryCount <= 3 ? 1000 : 
+                          this.retryCount <= 6 ? 2000 : 3000;
+            
             setTimeout(() => {
                 this.isLoading = false;
                 this.getLocation(true);
-            }, 2000);
-        }
-    }
-
-    // ============================================
-    // GPS POPUP — Emotional Message
-    // ============================================
-    showGPSPopup(type) {
-        this.hideGPSPopup();
-        
-        const popup = document.createElement('div');
-        popup.id = 'gpsPopup';
-        popup.className = 'gps-popup-overlay';
-        
-        const isGPSOff = type === 'gpsOff';
-        const isPermission = type === 'permission';
-        
-        popup.innerHTML = `
-            <div class="gps-popup-card">
-                <div class="gps-popup-icon">${isGPSOff ? '📡' : '📍'}</div>
-                
-                <h2 class="gps-popup-title">
-                    ${isGPSOff ? this.t('gpsOffTitle') : this.t('permissionTitle')}
-                </h2>
-                
-                <p class="gps-popup-message">
-                    ${isGPSOff ? this.t('gpsOffMessage') : this.t('permissionMessage')}
-                </p>
-                
-                ${isGPSOff ? `
-                    <div class="gps-instruction-box">
-                        <p>${this.t('gpsOffInstruction')}</p>
-                    </div>
-                    
-                    <div class="gps-waves">
-                        <span>📡</span><span>📡</span><span>📡</span>
-                    </div>
-                ` : ''}
-                
-                <button class="gps-primary-btn" id="gpsPrimaryBtn">
-                    ${isGPSOff ? this.t('gpsOnButton') : this.t('permissionButton')}
-                </button>
-                
-                <button class="gps-retry-btn-auto" id="gpsRetryBtnAuto">
-                    ${this.t('gpsRetryButton')}
-                </button>
-                
-                <button class="gps-skip-btn" id="gpsSkipBtn">
-                    ${this.t('gpsSkipButton')}
-                </button>
-            </div>
-        `;
-        
-        document.body.appendChild(popup);
-        
-        // Animate in
-        requestAnimationFrame(() => {
-            popup.classList.add('visible');
-        });
-        
-        // Button Handlers
-        document.getElementById('gpsPrimaryBtn')?.addEventListener('click', () => {
-            this.hideGPSPopup();
-            this.gpsPopupShown = false;
-            this.retryCount = 0;
-            
-            // Wait for user to turn ON GPS then retry
-            setTimeout(() => {
-                this.showToast(this.t('autoDetecting'), 'info');
-                this.getLocation(true);
-            }, 2000);
-        });
-        
-        document.getElementById('gpsRetryBtnAuto')?.addEventListener('click', () => {
-            this.hideGPSPopup();
-            this.gpsPopupShown = false;
-            this.retryCount = 0;
-            this.showToast(this.t('autoDetecting'), 'info');
-            this.getLocation(true);
-        });
-        
-        document.getElementById('gpsSkipBtn')?.addEventListener('click', () => {
-            this.hideGPSPopup();
-            this.showManualFallback();
-        });
-        
-        // ✅ Auto-dismiss after 60 seconds & retry
-        setTimeout(() => {
-            if (document.getElementById('gpsPopup')) {
-                this.hideGPSPopup();
-                this.getLocation(true);
+            }, delay);
+        } else {
+            // Use last known good location if available
+            if (this.lastDetectedLocation) {
+                console.log('⚠️ Using last known location');
+                this.applyLocationData(this.lastDetectedLocation);
+            } else {
+                this.showManualInput();
             }
-        }, 60000);
-    }
-
-    hideGPSPopup() {
-        const popup = document.getElementById('gpsPopup');
-        if (popup) {
-            popup.classList.remove('visible');
-            setTimeout(() => popup.remove(), 300);
+            this.isLoading = false;
         }
     }
 
-    // ============================================
-    // MANUAL FALLBACK
-    // ============================================
-    showManualFallback() {
-        this.hideGPSPopup();
+    applyLocationData(data) {
+        if (this.latitude) this.latitude.value = data.lat.toFixed(6);
+        if (this.longitude) this.longitude.value = data.lng.toFixed(6);
+        if (this.locationUrl) this.locationUrl.value = 
+            `https://maps.google.com/?q=${data.lat},${data.lng}`;
         
-        if (this.villageCity) {
-            this.villageCity.placeholder = this.t('manualHint');
-            this.villageCity.style.borderColor = '#FF9800';
-            this.villageCity.style.borderWidth = '2px';
-            this.villageCity.focus();
-            
-            setTimeout(() => {
-                this.villageCity.style.borderColor = '';
-                this.villageCity.style.borderWidth = '';
-            }, 5000);
-        }
+        this.setButtonSuccess();
         
         if (this.locationText) {
             this.locationText.classList.remove('hidden');
-            this.locationText.innerHTML = `<span style="color:#FF9800">✍️</span> ${this.t('fillManually')}`;
-        }
-        
-        if (this.getLocationBtn) {
-            this.getLocationBtn.innerHTML = '📍 ' + this.t('gpsRetryButton');
-            this.getLocationBtn.style.background = '';
-            this.getLocationBtn.style.color = '';
+            this.locationText.innerHTML = `
+                <span style="color:#4CAF50">🟢</span> ${this.t('liveLocation')}
+                <br><small>Accuracy: ~${Math.round(data.accuracy)}m</small>
+            `;
         }
     }
 
@@ -436,29 +272,28 @@ class LocationManager {
         
         if (!navigator.geolocation) return;
         
-        console.log('🟢 Live tracking started');
+        console.log('🟢 Starting live location tracking...');
         
         this.watchId = navigator.geolocation.watchPosition(
             (position) => {
+                const lat = position.coords.latitude;
+                const lng = position.coords.longitude;
                 const accuracy = position.coords.accuracy;
                 
-                if (this.lastLocation && accuracy < this.lastLocation.accuracy) {
-                    console.log('📍 Better accuracy found:', Math.round(accuracy), 'm');
+                // Only update if accuracy improved
+                if (this.lastDetectedLocation && 
+                    accuracy < this.lastDetectedLocation.accuracy) {
+                    console.log('📍 Live update — better accuracy:', Math.round(accuracy), 'm');
                     
-                    const data = {
-                        lat: position.coords.latitude,
-                        lng: position.coords.longitude,
-                        accuracy,
-                        timestamp: Date.now()
-                    };
-                    
-                    this.lastLocation = data;
-                    if (this.latitude) this.latitude.value = data.lat.toFixed(6);
-                    if (this.longitude) this.longitude.value = data.lng.toFixed(6);
+                    const data = { lat, lng, accuracy, timestamp: Date.now() };
+                    this.lastDetectedLocation = data;
+                    this.applyLocationData(data);
                     this.saveLocation(data);
                 }
             },
-            () => {},
+            (error) => {
+                console.log('📍 Live tracking error:', error.message);
+            },
             {
                 enableHighAccuracy: true,
                 timeout: 30000,
@@ -471,32 +306,281 @@ class LocationManager {
         if (this.watchId !== null) {
             navigator.geolocation.clearWatch(this.watchId);
             this.watchId = null;
+            console.log('🔴 Live tracking stopped');
         }
     }
 
     // ============================================
-    // PERMISSION WATCH
+    // ERROR HANDLER
     // ============================================
-    async watchPermission() {
+    onLocationError(error, silent) {
+        console.error('📍 Error:', error.message, '(code:', error.code, ')');
+        this.isLoading = false;
+
+        switch (error.code) {
+            case 1: // PERMISSION_DENIED
+                this.handlePermissionDenied(silent);
+                break;
+                
+            case 2: // POSITION_UNAVAILABLE
+                this.handleGPSOff(silent);
+                break;
+                
+            case 3: // TIMEOUT
+                this.handleTimeout(silent);
+                break;
+        }
+    }
+
+    // ============================================
+    // PERMISSION DENIED
+    // ============================================
+    handlePermissionDenied(silent) {
+        this.permissionDeniedCount++;
+        console.log(`🚫 Permission denied (${this.permissionDeniedCount} times)`);
+        
+        if (this.permissionDeniedCount === 1) {
+            // First time — show allow request
+            this.showAllowLocationPopup();
+        } else if (this.permissionDeniedCount <= 5) {
+            // Temporary deny — retry after delay
+            this.showToast(this.t('permissionDenied'), 'warning');
+            
+            setTimeout(() => {
+                console.log('🔄 Retrying after permission deny...');
+                this.retryCount++;
+                this.getLocation(true);
+            }, this.PERMISSION_RETRY_DELAY);
+        } else {
+            // Permanent block
+            this.showPermanentBlockMessage();
+            this.showManualInput();
+            this.setButtonFailed();
+        }
+    }
+
+    // ============================================
+    // GPS OFF
+    // ============================================
+    handleGPSOff(silent) {
+        console.log('📡 GPS appears to be OFF');
+        
+        // Show animated GPS reminder
+        this.showGPSOffMessage();
+        
+        // Retry
+        if (this.retryCount < this.maxRetries) {
+            this.retryCount++;
+            const delay = [2000, 3000, 5000, 8000, 10000][this.retryCount - 1] || 10000;
+            
+            console.log(`🔄 Retry after GPS check (${this.retryCount}/${this.maxRetries}) in ${delay}ms`);
+            
+            setTimeout(() => {
+                this.getLocation(true);
+            }, delay);
+        } else {
+            this.showManualInput();
+            this.setButtonFailed();
+        }
+    }
+
+    handleTimeout(silent) {
+        console.log('⏱️ Location request timed out');
+        
+        if (this.retryCount < this.maxRetries) {
+            this.retryCount++;
+            const delay = [1000, 2000, 3000, 5000, 8000][this.retryCount - 1] || 5000;
+            
+            setTimeout(() => {
+                this.getLocation(true);
+            }, delay);
+        } else {
+            this.showManualInput();
+            this.setButtonFailed();
+        }
+    }
+
+    // ============================================
+    // PERMISSION WATCHER
+    // ============================================
+    async watchPermissionChanges() {
         if (!navigator.permissions) return;
         
         try {
-            const perm = await navigator.permissions.query({ name: 'geolocation' });
+            const permission = await navigator.permissions.query({ name: 'geolocation' });
             
-            perm.addEventListener('change', () => {
-                console.log('📍 Permission changed:', perm.state);
+            permission.addEventListener('change', () => {
+                console.log('📍 Permission state changed:', permission.state);
                 
-                if (perm.state === 'granted') {
-                    // ✅ User allowed — auto detect immediately!
-                    console.log('✅ Permission GRANTED — auto detecting...');
-                    this.hideGPSPopup();
-                    this.gpsPopupShown = false;
+                if (permission.state === 'granted') {
+                    // ✅ User allowed! Get location immediately
+                    console.log('✅ Permission GRANTED — getting location!');
+                    this.hideGPSReminder();
+                    this.hideAllowPopup();
+                    this.permissionDeniedCount = 0;
                     this.retryCount = 0;
-                    this.detectionStarted = false;
-                    setTimeout(() => this.autoStart(), 500);
+                    setTimeout(() => this.getLocation(true), 500);
+                } else if (permission.state === 'denied') {
+                    this.permissionDeniedCount = 99; // Permanent
+                    this.handlePermissionDenied(true);
                 }
             });
-        } catch (e) {}
+        } catch (e) {
+            console.log('Permission API not supported');
+        }
+    }
+
+    // ============================================
+    // UI POPUPS
+    // ============================================
+
+    // 📡 GPS OFF Message
+    showGPSOffMessage() {
+        // Remove existing
+        this.hideGPSReminder();
+        
+        const reminder = document.createElement('div');
+        reminder.id = 'gpsReminder';
+        reminder.className = 'gps-reminder-popup';
+        reminder.innerHTML = `
+            <div class="gps-reminder-content">
+                <div class="gps-reminder-icon">📡</div>
+                <h3>${this.t('gpsOff')}</h3>
+                <p>${this.t('gpsOffDetail')}</p>
+                <p class="gps-instruction">${this.t('gpsOnInstruction')}</p>
+                <div class="gps-animation">
+                    <span>📡</span>
+                    <span>📡</span>
+                    <span>📡</span>
+                </div>
+                <button class="gps-retry-btn" id="gpsRetryBtn">
+                    🔄 ${this.t('btnGet')}
+                </button>
+                <button class="gps-skip-btn" id="gpsSkipBtn">
+                    ${this.t('manualHint')}
+                </button>
+            </div>
+        `;
+        
+        document.body.appendChild(reminder);
+        
+        // Animate in
+        setTimeout(() => reminder.classList.add('visible'), 100);
+        
+        // Button handlers
+        document.getElementById('gpsRetryBtn')?.addEventListener('click', () => {
+            this.hideGPSReminder();
+            this.retryCount = 0;
+            this.getLocation(false);
+        });
+        
+        document.getElementById('gpsSkipBtn')?.addEventListener('click', () => {
+            this.hideGPSReminder();
+            this.showManualInput();
+        });
+        
+        // Auto-remove after 30 seconds
+        setTimeout(() => this.hideGPSReminder(), 30000);
+    }
+
+    hideGPSReminder() {
+        const reminder = document.getElementById('gpsReminder');
+        if (reminder) {
+            reminder.classList.remove('visible');
+            setTimeout(() => reminder.remove(), 300);
+        }
+    }
+
+    // 📍 Allow Location Popup
+    showAllowLocationPopup() {
+        this.hideAllowPopup();
+        
+        const popup = document.createElement('div');
+        popup.id = 'allowLocationPopup';
+        popup.className = 'allow-location-popup';
+        popup.innerHTML = `
+            <div class="allow-location-content">
+                <div class="allow-location-icon">📍</div>
+                <h3>${this.t('allowLocation')}</h3>
+                <p>${this.t('allowLocationDetail')}</p>
+                <div class="allow-animation">
+                    <span class="pulse-dot"></span>
+                </div>
+                <button class="allow-retry-btn" id="allowRetryBtn">
+                    🔄 ${this.t('btnGet')}
+                </button>
+            </div>
+        `;
+        
+        document.body.appendChild(popup);
+        setTimeout(() => popup.classList.add('visible'), 100);
+        
+        document.getElementById('allowRetryBtn')?.addEventListener('click', () => {
+            this.hideAllowPopup();
+            this.retryCount = 0;
+            this.getLocation(false);
+        });
+    }
+
+    hideAllowPopup() {
+        const popup = document.getElementById('allowLocationPopup');
+        if (popup) {
+            popup.classList.remove('visible');
+            setTimeout(() => popup.remove(), 300);
+        }
+    }
+
+    // 🚫 Permanent Block
+    showPermanentBlockMessage() {
+        this.showToast(this.t('permissionPermanent'), 'error');
+        this.showManualInput();
+    }
+
+    // ============================================
+    // UI HELPERS
+    // ============================================
+    setButtonLoading(loading) {
+        if (!this.getLocationBtn) return;
+        if (loading) {
+            this.getLocationBtn.classList.add('loading');
+            this.getLocationBtn.innerHTML = `⏳ ${this.t('btnGetting')}`;
+            this.getLocationBtn.style.background = '#FF9800';
+            this.getLocationBtn.style.color = '#FFF';
+        }
+    }
+
+    setButtonSuccess() {
+        if (!this.getLocationBtn) return;
+        this.getLocationBtn.classList.remove('loading');
+        this.getLocationBtn.innerHTML = `✅ ${this.t('btnGot')}`;
+        this.getLocationBtn.style.background = '#4CAF50';
+        this.getLocationBtn.style.color = '#FFF';
+        
+        setTimeout(() => {
+            if (this.getLocationBtn) {
+                this.getLocationBtn.style.background = '';
+                this.getLocationBtn.style.color = '';
+            }
+        }, 5000);
+    }
+
+    setButtonFailed() {
+        if (!this.getLocationBtn) return;
+        this.getLocationBtn.classList.remove('loading');
+        this.getLocationBtn.innerHTML = `⚠️ ${this.t('btnFailed')}`;
+        this.getLocationBtn.style.background = '#FF5722';
+        this.getLocationBtn.style.color = '#FFF';
+    }
+
+    showManualInput() {
+        if (this.villageCity) {
+            this.villageCity.placeholder = this.t('manualHint');
+            this.villageCity.style.borderColor = '#FF9800';
+            this.villageCity.focus();
+            setTimeout(() => {
+                this.villageCity.style.borderColor = '';
+            }, 3000);
+        }
     }
 
     // ============================================
@@ -505,39 +589,55 @@ class LocationManager {
     async reverseGeocode(lat, lng) {
         try {
             const lang = this.getLang();
-            const res = await fetch(
+            const response = await fetch(
                 `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&addressdetails=1&accept-language=${lang}`,
                 { headers: { 'User-Agent': 'QuickDukan/1.0' } }
             );
-            
-            if (!res.ok) return;
-            const data = await res.json();
+
+            if (!response.ok) return;
+            const data = await response.json();
             if (!data?.address) return;
 
             const addr = data.address;
-            const city = addr.village || addr.town || addr.city || addr.county || addr.state_district || '';
-            
-            if (city && this.villageCity && !this.villageCity.value) {
-                this.villageCity.value = city;
+            const locationName = 
+                addr.village || addr.town || addr.city || 
+                addr.county || addr.state_district || '';
+
+            if (locationName && this.villageCity && !this.villageCity.value) {
+                this.villageCity.value = locationName;
+                this.villageCity.classList.add('auto-filled');
                 this.villageCity.style.background = '#E8F5E9';
-                this.villageCity.style.transition = 'background 0.3s';
-                setTimeout(() => this.villageCity.style.background = '', 2000);
+                setTimeout(() => {
+                    this.villageCity.style.background = '';
+                }, 2000);
             }
-            
+
             const landmark = addr.road || addr.neighbourhood || addr.suburb || '';
             if (landmark && this.landmark && !this.landmark.value) {
                 this.landmark.value = landmark;
             }
-        } catch (e) {}
+        } catch (e) {
+            console.log('📍 Reverse geocode failed');
+        }
     }
 
     // ============================================
     // STORAGE
     // ============================================
-    saveLocation(data) {
+    saveLocation(location) {
         try {
-            localStorage.setItem('quick-dukan-location', JSON.stringify(data));
+            localStorage.setItem('quick-dukan-location', JSON.stringify(location));
         } catch (e) {}
+    }
+
+    getSavedLocation() {
+        try {
+            const data = localStorage.getItem('quick-dukan-location');
+            if (!data) return null;
+            return JSON.parse(data);
+        } catch (e) {
+            return null;
+        }
     }
 
     // ============================================
@@ -546,16 +646,21 @@ class LocationManager {
     showToast(msg, type = 'info') {
         const toast = document.getElementById('toast');
         if (!toast) return;
-        
-        const colors = { success: '#4CAF50', error: '#F44336', warning: '#FF9800', info: '#2196F3' };
-        
+
+        const colors = {
+            success: '#4CAF50',
+            error: '#F44336',
+            warning: '#FF9800',
+            info: '#2196F3'
+        };
+
         toast.textContent = msg;
         toast.style.background = colors[type] || colors.info;
         toast.classList.remove('hidden');
         toast.style.animation = 'none';
         toast.offsetHeight;
         toast.style.animation = 'slideUp 0.3s ease';
-        
+
         clearTimeout(this.toastTimeout);
         this.toastTimeout = setTimeout(() => {
             toast.style.animation = 'fadeOut 0.3s ease forwards';
@@ -568,8 +673,8 @@ class LocationManager {
     // ============================================
     destroy() {
         this.stopLiveTracking();
-        this.hideGPSPopup();
-        this.observer?.disconnect();
+        this.hideGPSReminder();
+        this.hideAllowPopup();
         clearTimeout(this.toastTimeout);
     }
 }
@@ -581,6 +686,9 @@ document.addEventListener('DOMContentLoaded', () => {
     window.locationManager = new LocationManager();
 });
 
+// Cleanup on page unload
 window.addEventListener('beforeunload', () => {
-    window.locationManager?.destroy();
+    if (window.locationManager) {
+        window.locationManager.destroy();
+    }
 });
