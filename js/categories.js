@@ -501,4 +501,4 @@ class CategoriesManager {
 // Initialize on DOM ready
 document.addEventListener('DOMContentLoaded', () => {
     window.categoriesManager = new CategoriesManager();
-});
+}); 
