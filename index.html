@@ -3,56 +3,24 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-
-    <!-- ⭐ PWA Theme Color - Green Theme ⭐ -->
     <meta name="theme-color" content="#2E7D32">
     <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="Quick Dukan">
-
-    <!-- Cache Control -->
-    <meta http-equiv="Cache-Control" content="public, max-age=3600, must-revalidate">
-    <meta http-equiv="Pragma" content="cache">
-    <meta http-equiv="Expires" content="0">
-
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <title>Quick Dukan - आपकी विश्वसनीय किराना दुकान</title>
-
-    <!-- ⭐ PWA Manifest ⭐ -->
-    <link rel="manifest" href="/quick-dukan/manifest.json">
-
-    <!-- ⭐ PWA Icons - Green Theme ⭐ -->
-    <link rel="icon" href="data:image/svg+xml,
-<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'>
-  <defs>
-    <linearGradient id='g' x1='0%25' y1='0%25' x2='100%25' y2='100%25'>
-      <stop offset='0%25' style='stop-color:%234CAF50'/>
-      <stop offset='100%25' style='stop-color:%232E7D32'/>
-    </linearGradient>
-  </defs>
-  <rect width='100' height='100' rx='22' fill='url(%23g)'/>
-  <text x='50' y='55' text-anchor='middle' font-size='38'>🛒</text>
-  <text x='50' y='80' text-anchor='middle' font-family='Arial,sans-serif' font-weight='900' font-size='16' fill='white'>QD</text>
-</svg>">
-
-    <link rel="apple-touch-icon" href="data:image/svg+xml,
-<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 180 180'>
-  <defs>
-    <linearGradient id='g2' x1='0%25' y1='0%25' x2='100%25' y2='100%25'>
-      <stop offset='0%25' style='stop-color:%234CAF50'/>
-      <stop offset='100%25' style='stop-color:%232E7D32'/>
-    </linearGradient>
-  </defs>
-  <rect width='180' height='180' rx='40' fill='url(%23g2)'/>
-  <circle cx='90' cy='70' r='38' fill='white' opacity='0.15'/>
-  <text x='90' y='85' text-anchor='middle' font-size='55'>🛒</text>
-  <text x='90' y='135' text-anchor='middle' font-family='Arial,sans-serif' font-weight='900' font-size='30' fill='white'>QD</text>
-</svg>">
-
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🛒</text></svg>">
+    
+    <!-- ============ PWA MANIFEST & ICONS ============ -->
+    <link rel="manifest" href="/manifest.json">
+    <meta name="apple-mobile-web-app-title" content="Quick Dukan">
+    <link rel="apple-touch-icon" href="/photos/icons/icon-192.png">
+    
     <!-- Font Preconnect for Performance -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&family=Noto+Sans+Devanagari:wght@400;500;700&display=swap" rel="stylesheet">
-
+    
     <!-- ============ CSS FILES ============ -->
     <link rel="stylesheet" href="css/theme.css">
     <link rel="stylesheet" href="css/animations.css">
@@ -69,12 +37,11 @@
     <link rel="stylesheet" href="css/orders.css">
     <link rel="stylesheet" href="css/checkout.css">
     <link rel="stylesheet" href="css/cart.css">
-    <link rel="stylesheet" href="css/pwa.css">
-    <link rel="stylesheet" href="css/offline-notification.css">
-
+    <link rel="stylesheet" href="css/pwa-install.css">
+    
     <!-- Font Awesome Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-
+    
     <!-- Inline Critical CSS for Instant Font Rendering -->
     <style>
         body {
@@ -86,14 +53,14 @@
     </style>
 </head>
 <body>
-
+    
     <!-- Noscript Warning -->
     <noscript>
         <div style="background: #C62828; color: white; padding: 12px; text-align: center; font-family: sans-serif;">
             ⚠️ कृपया JavaScript चालू करें! हमारी साइट ठीक से काम करने के लिए JS की ज़रूरत है।
         </div>
     </noscript>
-
+    
     <!-- ============================================ -->
     <!-- SECTION 1: TOP HEADER (FIXED) -->
     <!-- ============================================ -->
@@ -106,25 +73,25 @@
                 <span class="dukan-text">Dukan</span>
             </div>
         </div>
-
-        <!-- CENTER: Alternating Badge -->
-        <div class="header-center">
-            <span class="center-badge" id="centerBadge">
-                <!-- Free Delivery Content (9 seconds) -->
-                <span class="badge-content delivery-content visible" id="deliveryContent">
-                    <span class="badge-icon">🚚</span>
-                    <span class="badge-text" data-lang-key="freeDelivery">फ्री डिलीवरी</span>
-                </span>
-
-                <!-- Trust Shield Content (3 seconds) -->
-                <span class="badge-content trust-content hidden" id="trustContent">
-                    <span class="trust-shield-icon">🛡️</span>
-                    <span class="trust-check-badge">✓</span>
-                    <span class="badge-text" data-lang-key="verifiedTrust">Verified</span>
-                </span>
-            </span>
-        </div>
-
+        
+     <!-- CENTER: Alternating Badge -->
+<div class="header-center">
+    <span class="center-badge" id="centerBadge">
+        <!-- Free Delivery Content (9 seconds) -->
+        <span class="badge-content delivery-content visible" id="deliveryContent">
+            <span class="badge-icon">🚚</span>
+            <span class="badge-text" data-lang-key="freeDelivery">फ्री डिलीवरी</span>
+        </span>
+        
+        <!-- Trust Shield Content (3 seconds) -->
+        <span class="badge-content trust-content hidden" id="trustContent">
+            <span class="trust-shield-icon">🛡️</span>
+            <span class="trust-check-badge">✓</span>
+            <span class="badge-text" data-lang-key="verifiedTrust">Verified</span>
+        </span>
+    </span>
+</div>
+        
         <!-- RIGHT: Language + Theme Toggle -->
         <div class="header-right">
             <button id="langToggle" class="toggle-btn lang-toggle" aria-label="भाषा बदलें">
@@ -135,48 +102,47 @@
             </button>
         </div>
     </header>
-
-    <!-- ============================================ -->
-    <!-- SECTION 2: SEARCH BAR (FIXED) -->
-    <!-- ============================================ -->
-    <div id="searchSection" class="search-section">
-        <div class="search-container">
-            <input 
-                type="text" 
-                id="searchInput" 
-                class="search-input" 
-                data-lang-key="searchPlaceholder"
-                placeholder="आज क्या चाहिए? 😋" 
-                autocomplete="off"
-            >
-            <!-- Clear (×) Button - type karne pe show hoga -->
-            <button id="clearSearchBtn" class="clear-search-btn hidden" aria-label="साफ करें">
-                <span>✕</span>
-            </button>
-            <!-- Voice Search Button -->
-            <button id="voiceSearchBtn" class="voice-search-btn" aria-label="आवाज़ से खोजें">
-                <span>🎤</span>
-            </button>
-            <!-- Search Button -->
-            <button id="searchIcon" class="search-icon-btn" aria-label="खोजें">
-                <span>🔍</span>
-            </button>
-        </div>
-        <!-- Live Search Results Dropdown -->
-        <div id="searchResults" class="search-results hidden"></div>
-        <!-- No Results Found -->
-        <div id="noResults" class="no-results hidden">
-            <div class="no-results-inner">
-                <span class="no-results-icon">🔍</span>
-                <p class="no-results-msg" data-lang-key="noProductMsg">
-                    अरे! यह सामान अभी नहीं है। हम जल्दी ऐड करेंगे! 😊
-                </p>
-                <p class="no-results-hint">आप ये ट्राई कर सकते हैं:</p>
-                <div id="suggestedProducts" class="suggested-products"></div>
-            </div>
+    
+  <!-- ============================================ -->
+<!-- SECTION 2: SEARCH BAR (FIXED) -->
+<!-- ============================================ -->
+<div id="searchSection" class="search-section">
+    <div class="search-container">
+        <input 
+            type="text" 
+            id="searchInput" 
+            class="search-input" 
+            data-lang-key="searchPlaceholder"
+            placeholder="आज क्या चाहिए? 😋" 
+            autocomplete="off"
+        >
+        <!-- Clear (×) Button - type karne pe show hoga -->
+        <button id="clearSearchBtn" class="clear-search-btn hidden" aria-label="साफ करें">
+            <span>✕</span>
+        </button>
+        <!-- Voice Search Button -->
+        <button id="voiceSearchBtn" class="voice-search-btn" aria-label="आवाज़ से खोजें">
+            <span>🎤</span>
+        </button>
+        <!-- Search Button -->
+        <button id="searchIcon" class="search-icon-btn" aria-label="खोजें">
+            <span>🔍</span>
+        </button>
+    </div>
+    <!-- Live Search Results Dropdown -->
+    <div id="searchResults" class="search-results hidden"></div>
+    <!-- No Results Found -->
+    <div id="noResults" class="no-results hidden">
+        <div class="no-results-inner">
+            <span class="no-results-icon">🔍</span>
+            <p class="no-results-msg" data-lang-key="noProductMsg">
+                अरे! यह सामान अभी नहीं है। हम जल्दी ऐड करेंगे! 😊
+            </p>
+            <p class="no-results-hint">आप ये ट्राई कर सकते हैं:</p>
+            <div id="suggestedProducts" class="suggested-products"></div>
         </div>
     </div>
-
+</div>
     <!-- ============================================ -->
     <!-- SECTION 3: CATEGORIES (FIXED) -->
     <!-- ============================================ -->
@@ -185,7 +151,7 @@
         <button class="scroll-arrow scroll-left disabled" id="scrollLeft" aria-label="बाएँ स्क्रॉल करें" aria-disabled="true">
             <span class="arrow-icon" aria-hidden="true">◀</span>
         </button>
-
+        
         <!-- Categories Scroll Container -->
         <div class="categories-scroll" id="categoriesScroll" role="tablist" aria-label="प्रोडक्ट कैटेगरी">
             <!-- All Category Button -->
@@ -195,63 +161,65 @@
             </button>
             <!-- More categories load dynamically -->
         </div>
-
+        
         <!-- Scroll Right Arrow -->
         <button class="scroll-arrow scroll-right" id="scrollRight" aria-label="दाएँ स्क्रॉल करें">
             <span class="arrow-icon" aria-hidden="true">▶</span>
         </button>
     </div>
-
+    
     <!-- ============================================ -->
     <!-- MAIN CONTENT AREA (SCROLLABLE) -->
     <!-- ============================================ -->
     <main id="mainContent" class="main-content">
-
+        
         <!-- SECTION 5: Category Products -->
         <section id="categoryProductsSection" class="category-products-section hidden" aria-labelledby="categoryProductsTitle">
             <h2 id="categoryProductsTitle" class="section-title"></h2>
             <div id="categoryProductsGrid" class="products-grid"></div>
         </section>
-
+        
         <!-- SECTION 6: Recently Viewed -->
         <section id="recentlyViewedSection" class="recently-viewed-section hidden" aria-labelledby="recentlyViewedTitle">
             <h2 id="recentlyViewedTitle" class="section-title" data-lang-key="recentlyViewed">🕐 हाल ही में देखा</h2>
             <div id="recentlyViewedScroll" class="horizontal-scroll" role="list" aria-label="हाल ही में देखे गए प्रोडक्ट"></div>
         </section>
-
+        
         <!-- SECTION 7: Most Orders -->
         <section id="mostOrdersSection" class="most-orders-section" aria-labelledby="mostOrdersTitle">
             <h2 id="mostOrdersTitle" class="section-title" data-lang-key="mostOrders">🔥 सबसे ज़्यादा मँगाया जाने वाला</h2>
             <div id="mostOrdersScroll" class="horizontal-scroll" role="list" aria-label="सबसे ज़्यादा ऑर्डर किए जाने वाले प्रोडक्ट"></div>
         </section>
-
+        
         <!-- SECTION 4: All Products -->
         <section id="allProductsSection" class="all-products-section" aria-labelledby="allProductsTitle">
             <h2 id="allProductsTitle" class="section-title" data-lang-key="allProducts">📦 सभी प्रोडक्ट</h2>
             <div id="allProductsGrid" class="products-grid" role="list" aria-label="सभी प्रोडक्ट"></div>
         </section>
-
+        
         <!-- ============================================ -->
-        <!-- FOOTER - INSIDE MAIN CONTENT -->
-        <!-- ============================================ -->
-        <footer class="site-footer" role="contentinfo">
-            <div class="footer-content">
-                <p class="footer-text">© 2026 Quick Dukan. सर्वाधिकार सुरक्षित।</p>
-                <div class="footer-links">
-                    <a href="#" class="footer-link">शर्तें</a>
-                    <span class="footer-divider">|</span>
-                    <a href="#" class="footer-link">गोपनीयता</a>
-                    <span class="footer-divider">|</span>
-                    <a href="tel:+919719312956" class="footer-link">📞 संपर्क</a>
-                </div>
+    <!-- FOOTER - INSIDE MAIN CONTENT (FIX) -->
+    <!-- ============================================ -->
+    <footer class="site-footer" role="contentinfo">
+        <div class="footer-content">
+            <p class="footer-text">© 2026 Quick Dukan. सर्वाधिकार सुरक्षित।</p>
+            <div class="footer-links">
+                <a href="#" class="footer-link">शर्तें</a>
+                <span class="footer-divider">|</span>
+                <a href="#" class="footer-link">गोपनीयता</a>
+                <span class="footer-divider">|</span>
+                <a href="tel:+919876543210" class="footer-link">📞 संपर्क</a>
             </div>
-        </footer>
-
+        </div>
+    </footer>
+        
         <!-- Bottom Spacer -->
         <div class="bottom-spacer" aria-hidden="true"></div>
-
+        
     </main>
-
+    
+  
+    
     <!-- ============================================ -->
     <!-- SECTION 8: BOTTOM NAVBAR (FIXED) -->
     <!-- ============================================ -->
@@ -261,33 +229,33 @@
             <span class="nav-icon" aria-hidden="true">🏠</span>
             <span class="nav-label" data-lang-key="home">होम</span>
         </button>
-
+        
         <!-- Search Button -->
         <button class="nav-btn" data-nav="search" aria-label="खोजें">
             <span class="nav-icon" aria-hidden="true">🔍</span>
             <span class="nav-label" data-lang-key="search">खोजें</span>
         </button>
-
+        
         <!-- Cart Button -->
         <button class="nav-btn" data-nav="cart" aria-label="कार्ट">
             <span class="nav-icon" aria-hidden="true">🛒</span>
             <span class="nav-label" data-lang-key="cart">कार्ट</span>
             <span id="cartBadge" class="cart-badge hidden" aria-hidden="true">0</span>
         </button>
-
+        
         <!-- My Orders Button -->
         <button class="nav-btn" data-nav="orders" aria-label="मेरे ऑर्डर">
             <span class="nav-icon" aria-hidden="true">📋</span>
             <span class="nav-label" data-lang-key="myOrders">ऑर्डर</span>
         </button>
-
+        
         <!-- Back to Top Button -->
         <button id="backToTopBtn" class="nav-btn back-to-top hidden" data-nav="top" aria-label="ऊपर जाएँ">
             <span class="nav-icon" aria-hidden="true">⬆️</span>
             <span class="nav-label" data-lang-key="top">ऊपर</span>
         </button>
     </nav>
-
+    
     <!-- ============================================ -->
     <!-- CART MODAL -->
     <!-- ============================================ -->
@@ -307,7 +275,7 @@
                     <span aria-hidden="true">✕</span>
                 </button>
             </div>
-
+            
             <!-- Progress Bar -->
             <div class="cart-progress">
                 <div class="progress-bar" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="500">
@@ -317,11 +285,11 @@
                     🚚 फ्री डिलीवरी के लिए सिर्फ ₹500 और जोड़ें!
                 </p>
             </div>
-
+            
             <!-- Cart Items -->
             <div class="cart-items-wrapper">
                 <div id="cartItems" class="cart-items" role="list" aria-label="कार्ट में मौजूद आइटम"></div>
-
+                
                 <!-- Empty Cart State -->
                 <div id="emptyCart" class="empty-cart">
                     <div class="empty-cart-animation" aria-hidden="true">
@@ -337,7 +305,7 @@
                     </button>
                 </div>
             </div>
-
+            
             <!-- Cart Summary -->
             <div id="cartSummary" class="cart-summary hidden">
                 <div class="summary-row">
@@ -357,7 +325,7 @@
                     <span id="totalPrice" class="total-price">₹0</span>
                 </div>
             </div>
-
+            
             <!-- Checkout Footer -->
             <div class="cart-footer">
                 <button id="clearCartBtn" class="clear-cart-btn" data-lang-key="clearCart">
@@ -371,7 +339,12 @@
             </div>
         </div>
     </div>
-
+    
+    <!-- ============================================ -->
+    <!-- TOAST NOTIFICATION -->
+    <!-- ============================================ -->
+    <div id="toast" class="toast hidden" role="alert" aria-live="polite"></div>
+    
     <!-- ============================================ -->
     <!-- MY ORDERS MODAL -->
     <!-- ============================================ -->
@@ -390,7 +363,7 @@
                     <span aria-hidden="true">✕</span>
                 </button>
             </div>
-
+            
             <!-- Order Filters -->
             <div class="orders-filters" role="tablist" aria-label="ऑर्डर फ़िल्टर">
                 <button class="order-filter-btn active" data-filter="all" role="tab" aria-selected="true">
@@ -406,10 +379,10 @@
                     <span aria-hidden="true">🚚</span> <span data-lang-key="delivered">डिलीवर्ड</span>
                 </button>
             </div>
-
+            
             <!-- Orders List -->
             <div id="ordersList" class="orders-list" role="list" aria-label="आपके ऑर्डर"></div>
-
+            
             <!-- Empty State -->
             <div id="emptyOrders" class="empty-orders hidden">
                 <div class="empty-orders-icon" aria-hidden="true">📭</div>
@@ -421,7 +394,7 @@
             </div>
         </div>
     </div>
-
+    
     <!-- ============================================ -->
     <!-- CHECKOUT MODAL -->
     <!-- ============================================ -->
@@ -440,7 +413,7 @@
                     <span aria-hidden="true">✕</span>
                 </button>
             </div>
-
+            
             <!-- Checkout Form -->
             <div class="checkout-form">
                 <div class="checkout-order-summary">
@@ -452,7 +425,7 @@
                     </div>
                     <div class="summary-detail hidden" id="summaryDetail"></div>
                 </div>
-
+                
                 <!-- Personal Details -->
                 <div class="form-group">
                     <label class="form-label" for="customerName" data-lang-key="fullName">
@@ -462,7 +435,7 @@
                            placeholder="अपना पूरा नाम लिखें" autocomplete="name" required>
                     <span class="input-hint" data-lang-key="nameHint">जैसे: रमेश कुमार</span>
                 </div>
-
+                
                 <div class="form-group">
                     <label class="form-label" for="customerPhone" data-lang-key="phoneNumber">
                         <span class="label-icon" aria-hidden="true">📱</span> मोबाइल नंबर
@@ -478,13 +451,13 @@
                         ⚠️ कृपया सही 10 अंक का नंबर डालें
                     </span>
                 </div>
-
+                
                 <!-- Location Section -->
                 <div class="form-group">
                     <label class="form-label" data-lang-key="deliveryAddress">
                         <span class="label-icon" aria-hidden="true">📍</span> डिलीवरी का पता
                     </label>
-
+                    
                     <div class="location-status" id="locationStatus">
                         <button type="button" id="getLocationBtn" class="location-btn">
                             <span class="location-icon" aria-hidden="true">📍</span>
@@ -494,20 +467,20 @@
                             <span class="location-dot" aria-hidden="true"></span> लोकेशन मिल गई!
                         </span>
                     </div>
-
+                    
                     <input type="text" id="villageCity" class="form-input" 
                            placeholder="गाँव या शहर का नाम" data-lang-key="villageCity" required>
                     <input type="text" id="landmark" class="form-input" 
                            placeholder="आस-पास की जगह (स्कूल, मंदिर, आदि)" data-lang-key="landmark">
                     <input type="text" id="pincode" class="form-input" 
                            placeholder="पिन कोड (वैकल्पिक)" maxlength="6" inputmode="numeric" pattern="[0-9]{6}">
-
+                    
                     <!-- Hidden location fields -->
                     <input type="hidden" id="latitude">
                     <input type="hidden" id="longitude">
                     <input type="hidden" id="locationUrl">
                 </div>
-
+                
                 <!-- Order Notes -->
                 <div class="form-group">
                     <label class="form-label" for="orderNotes" data-lang-key="orderNotes">
@@ -517,7 +490,7 @@
                               placeholder="जैसे: शाम 5 बजे के बाद डिलीवर करें" 
                               data-lang-key="notesPlaceholder"></textarea>
                 </div>
-
+                
                 <!-- Save Info Checkbox -->
                 <div class="form-group save-info-group">
                     <label class="checkbox-label">
@@ -527,7 +500,7 @@
                     </label>
                 </div>
             </div>
-
+            
             <!-- Checkout Footer -->
             <div class="checkout-footer">
                 <button id="confirmOrderBtn" class="confirm-order-btn" data-lang-key="confirmOrder" data-loading-text="ऑर्डर भेज रहे हैं...">
@@ -537,14 +510,9 @@
             </div>
         </div>
     </div>
-
+    
     <!-- ============================================ -->
-    <!-- TOAST NOTIFICATION -->
-    <!-- ============================================ -->
-    <div id="toast" class="toast hidden" role="alert" aria-live="polite"></div>
-
-    <!-- ============================================ -->
-    <!-- JAVASCRIPT FILES - Fixed Order -->
+    <!-- JAVASCRIPT FILES -->
     <!-- ============================================ -->
     <script src="js/config.js"></script>
     <script src="js/whatsapp.js"></script>
@@ -561,14 +529,15 @@
     <script src="js/bottom-nav.js"></script>
     <script src="js/back-to-top.js"></script>
     <script src="js/animations.js"></script>
+    <script src="js/app.js"></script>
     <script src="js/orders.js"></script>
     <script src="js/location.js"></script>
     <script src="js/checkout.js"></script>
-    <!-- ⭐ PWA + Offline - Correct Order ⭐ -->
-    <script src="js/offline-notification.js"></script>
-    <script src="js/pwa.js"></script>
-    <script src="js/app.js"></script>
-
+    
+    <!-- ============ PWA SCRIPTS ============ -->
+    <script src="js/pwa-register.js"></script>
+    <script src="js/pwa-install.js"></script>
+    
     <!-- Font Loading Script -->
     <script>
         document.fonts.ready.then(function() {
