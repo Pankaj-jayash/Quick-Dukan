@@ -20,8 +20,10 @@ class ProductsManager {
             'dairy':         { emoji: '🥛', gradient: 'linear-gradient(135deg, #90CAF9, #BBDEFB)' },
             'snacks':        { emoji: '🍪', gradient: 'linear-gradient(135deg, #FFCC80, #FFE0B2)' },
             'sabji':         { emoji: '🥬', gradient: 'linear-gradient(135deg, #81C784, #A5D6A7)' },
-        };
-
+        
+'snacks':        { emoji: '🌯', gradient: 'linear-gradient(135deg, #FFCC80, #FFE0B2)' },
+'namak-masale':  { emoji: '🧂', gradient: 'linear-gradient(135deg, #B0BEC5, #CFD8DC)' },
+};
         this.defaultStyle = { 
             emoji: '📦', 
             gradient: 'linear-gradient(135deg, #B39DDB, #D1C4E9)' 
