@@ -34,6 +34,9 @@ class PWAManager {
         // Setup push notifications
         this.setupPushNotifications();
 
+        // ⭐ Check browser support for PWA install
+        this.checkBrowserSupport();
+
         // Hide splash after everything loads
         this.waitAndHideSplash();
     }
@@ -54,7 +57,7 @@ class PWAManager {
                 // Check for updates
                 registration.addEventListener('updatefound', () => {
                     const newWorker = registration.installing;
-                    
+
                     newWorker.addEventListener('statechange', () => {
                         if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
                             // New update available
@@ -80,7 +83,7 @@ class PWAManager {
     // ============================================
     showUpdatePrompt() {
         const lang = window.languageManager?.currentLang || 'hi';
-        
+
         const banner = document.createElement('div');
         banner.className = 'update-banner';
         banner.innerHTML = `
@@ -92,9 +95,9 @@ class PWAManager {
                 </button>
             </div>
         `;
-        
+
         document.body.appendChild(banner);
-        
+
         document.getElementById('updateNowBtn').addEventListener('click', () => {
             banner.remove();
             this.updateApp();
@@ -122,7 +125,7 @@ class PWAManager {
             this.isOnline = true;
             this.hideOfflineNotification();
             this.showOnlineToast();
-            
+
             // Refresh data after 2 seconds
             setTimeout(() => this.performRefresh(), 2000);
         });
@@ -285,6 +288,55 @@ class PWAManager {
     }
 
     // ============================================
+    // ⭐ BROWSER SUPPORT CHECK - Chrome Prompt
+    // ============================================
+    checkBrowserSupport() {
+        const ua = navigator.userAgent || '';
+        const isUnsupported = 
+            ua.includes('UCBrowser') ||
+            ua.includes('UCWEB') ||
+            (ua.includes('Firefox') && !ua.includes('Seamonkey')) ||
+            ua.includes('OPR/') ||
+            ua.includes('Opera Mini');
+
+        if (isUnsupported && !localStorage.getItem('chrome-prompt-shown')) {
+            setTimeout(() => this.showChromePrompt(), 5000);
+        }
+    }
+
+    showChromePrompt() {
+        const lang = window.languageManager?.currentLang || 'hi';
+
+        const banner = document.createElement('div');
+        banner.className = 'chrome-prompt-banner';
+        banner.id = 'chromePromptBanner';
+        banner.innerHTML = `
+            <div class="chrome-prompt-content">
+                <span class="chrome-icon">⚠️</span>
+                <div class="chrome-text">
+                    <strong>${lang === 'hi' ? 'बेहतर अनुभव के लिए!' : 'For Better Experience!'}</strong>
+                    <span>${lang === 'hi' 
+                        ? 'Quick Dukan ऐप इंस्टॉल करने के लिए Chrome ब्राउज़र use करें 🚀' 
+                        : 'Use Chrome browser to install Quick Dukan app 🚀'}</span>
+                </div>
+                <button class="chrome-ok-btn" id="chromeOkBtn">${lang === 'hi' ? 'ठीक है' : 'OK'}</button>
+            </div>
+        `;
+
+        document.body.appendChild(banner);
+        localStorage.setItem('chrome-prompt-shown', 'true');
+
+        document.getElementById('chromeOkBtn').addEventListener('click', () => {
+            banner.remove();
+        });
+
+        // Auto dismiss after 12 seconds
+        setTimeout(() => {
+            if (banner.parentNode) banner.remove();
+        }, 12000);
+    }
+
+    // ============================================
     // PUSH NOTIFICATIONS
     // ============================================
     setupPushNotifications() {
@@ -344,7 +396,7 @@ class PWAManager {
             if (permission === 'granted') {
                 console.log('🔔 Notification permission granted');
                 this.showToast('🔔 नोटिफिकेशन चालू हो गए!');
-                
+
                 // Send welcome notification
                 if ('serviceWorker' in navigator && navigator.serviceWorker.ready) {
                     navigator.serviceWorker.ready.then((registration) => {
