@@ -395,3 +395,77 @@ body.dark-mode .notif-later-btn {
     .notification-prompt { width: calc(100% - 20px); bottom: 70px; }
     .notification-prompt-content { padding: 10px 12px; gap: 6px; }
 }
+/* ============================================
+   CHROME PROMPT BANNER
+   ============================================ */
+.chrome-prompt-banner {
+    position: fixed;
+    bottom: 80px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: calc(100% - 32px);
+    max-width: 440px;
+    z-index: 5001;
+    animation: bannerSlideUp 0.5s ease;
+}
+
+.chrome-prompt-content {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: #FFF3E0;
+    padding: 14px 16px;
+    border-radius: 16px;
+    border: 1px solid #FFE0B2;
+    box-shadow: 0 8px 30px rgba(255, 152, 0, 0.15);
+}
+
+.chrome-icon {
+    font-size: 28px;
+    flex-shrink: 0;
+}
+
+.chrome-text {
+    flex: 1;
+    min-width: 0;
+}
+
+.chrome-text strong {
+    display: block;
+    font-size: 13px;
+    color: #E65100;
+    margin-bottom: 2px;
+}
+
+.chrome-text span {
+    font-size: 11px;
+    color: #BF360C;
+    line-height: 1.4;
+}
+
+.chrome-ok-btn {
+    padding: 8px 16px;
+    background: #E65100;
+    color: white;
+    border: none;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 700;
+    cursor: pointer;
+    white-space: nowrap;
+    flex-shrink: 0;
+}
+
+/* Dark mode */
+body.dark-mode .chrome-prompt-content {
+    background: #3E2723;
+    border-color: #5D4037;
+}
+
+body.dark-mode .chrome-text strong {
+    color: #FFCC80;
+}
+
+body.dark-mode .chrome-text span {
+    color: #FFE0B2;
+}
