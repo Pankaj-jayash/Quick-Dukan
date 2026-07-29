@@ -2,7 +2,7 @@
 
 // ============================================
 // CATEGORIES.JS - Categories With Auto-Scroll
-// Push/Pull Animation + Smart Behavior (FIXED)
+// Push/Pull Animation + Smart Sorting (FIXED)
 // ============================================
 
 class CategoriesManager {
@@ -12,79 +12,117 @@ class CategoriesManager {
         this.scrollLeft = document.getElementById('scrollLeft');
         this.scrollRight = document.getElementById('scrollRight');
         this.activeCategory = 'all';
-        
+
+        // ⭐ SMART SORTING ⭐
+        this.clickCounts = {};
+        this.sortStorageKey = 'quick-dukan-category-clicks';
+        this.originalCategories = []; // index.json का असली ऑर्डर याद रखें
+
         // Auto-scroll settings
         this.autoScrollInterval = null;
-        this.autoScrollDelay = 6000;        // 6 sec after page load
-        this.resumeScrollDelay = 5000;      // 5 sec after deselect
-        this.scrollSpeed = 1.5;             // pixels per frame
+        this.autoScrollDelay = 6000;
+        this.resumeScrollDelay = 5000;
+        this.scrollSpeed = 1.5;
         this.isAutoScrolling = false;
         this.isUserInteracting = false;
         this.resumeTimeout = null;
         this.animationFrameId = null;
-        
+
         // Push/Pull tracking
         this.lastPushedButton = null;
         this.pushPullInterval = null;
-        this.pushPullDelay = 1200;          // Har 1.2 sec me push/pull
+        this.pushPullDelay = 1200;
+
+        // ⭐ लोड क्लिक काउंट ⭐
+        this.loadClickCounts();
 
         this.init();
     }
 
+    // ============================================
+    // ⭐ CLICK COUNTS (Smart Sorting) ⭐
+    // ============================================
+    loadClickCounts() {
+        try {
+            const saved = localStorage.getItem(this.sortStorageKey);
+            this.clickCounts = saved ? JSON.parse(saved) : {};
+        } catch (e) {
+            this.clickCounts = {};
+        }
+    }
+
+    saveClickCounts() {
+        try {
+            localStorage.setItem(this.sortStorageKey, JSON.stringify(this.clickCounts));
+        } catch (e) {
+            // ignore
+        }
+    }
+
+    recordClick(categoryId) {
+        if (categoryId === 'all') return;
+        this.clickCounts[categoryId] = (this.clickCounts[categoryId] || 0) + 1;
+        this.saveClickCounts();
+    }
+
+    // ज़्यादा क्लिक = पहले
+    sortCategories(categories) {
+        return [...categories].sort((a, b) => {
+            const countA = this.clickCounts[a.id] || 0;
+            const countB = this.clickCounts[b.id] || 0;
+            return countB - countA; // descending
+        });
+    }
+
     init() {
-        // Wait for data to load
         document.addEventListener('dataLoaded', (e) => {
+            // ⭐ असली ऑर्डर सेव करो ⭐
+            this.originalCategories = [...e.detail.categories];
             this.renderCategories(e.detail.categories);
-            // Start auto-scroll 6 sec after data loads
             this.scheduleAutoScrollStart();
         });
 
-        // Scroll buttons
         this.scrollLeft.addEventListener('click', () => {
             this.stopAutoScroll();
             this.scroll(-250);
         });
-        
+
         this.scrollRight.addEventListener('click', () => {
             this.stopAutoScroll();
             this.scroll(250);
         });
 
-        // Detect manual scroll by user
         this.categoriesScroll.addEventListener('scroll', () => {
             this.updateScrollButtons();
         });
 
-        // Touch/mouse interaction detection
         this.categoriesScroll.addEventListener('touchstart', () => {
             this.isUserInteracting = true;
             this.stopAutoScroll();
         });
-        
+
         this.categoriesScroll.addEventListener('touchend', () => {
             this.isUserInteracting = false;
             this.scheduleResumeScroll();
         });
-        
+
         this.categoriesScroll.addEventListener('mousedown', () => {
             this.isUserInteracting = true;
             this.stopAutoScroll();
         });
-        
+
         this.categoriesScroll.addEventListener('mouseup', () => {
             this.isUserInteracting = false;
             this.scheduleResumeScroll();
         });
-        
+
         this.categoriesScroll.addEventListener('mouseleave', () => {
             this.isUserInteracting = false;
             this.scheduleResumeScroll();
         });
 
-        // Initial state
         this.updateScrollButtons();
 
-        // Listen for language changes
         document.addEventListener('languageChanged', (e) => {
             this.updateLanguage(e.detail.language);
         });
@@ -95,9 +133,7 @@ class CategoriesManager {
     // ============================================
     scheduleAutoScrollStart() {
         if (this.resumeTimeout) clearTimeout(this.resumeTimeout);
-        
         console.log(`Auto-scroll will start in ${this.autoScrollDelay / 1000} seconds`);
-        
         setTimeout(() => {
             if (!this.isUserInteracting && this.activeCategory === 'all') {
                 this.startAutoScroll();
@@ -108,17 +144,12 @@ class CategoriesManager {
     startAutoScroll() {
         if (this.isAutoScrolling) return;
         if (this.categoriesScroll.scrollWidth <= this.categoriesScroll.clientWidth) return;
-        
         this.isAutoScrolling = true;
         this.categoriesSection.classList.add('auto-scrolling');
-        
         console.log('Auto-scroll started');
-        
         const scroll = () => {
             if (!this.isAutoScrolling) return;
-            
             this.categoriesScroll.scrollLeft += this.scrollSpeed;
-            
             if (this.categoriesScroll.scrollLeft + this.categoriesScroll.clientWidth >= 
                 this.categoriesScroll.scrollWidth - 5) {
                 this.stopAutoScroll();
@@ -132,11 +163,9 @@ class CategoriesManager {
                 }, 1500);
                 return;
             }
-            
             this.updateScrollButtons();
             this.animationFrameId = requestAnimationFrame(scroll);
         };
-        
         this.animationFrameId = requestAnimationFrame(scroll);
         this.startPushPullAnimations();
     }
@@ -144,22 +173,18 @@ class CategoriesManager {
     stopAutoScroll() {
         this.isAutoScrolling = false;
         this.categoriesSection.classList.remove('auto-scrolling');
-        
         if (this.animationFrameId) {
             cancelAnimationFrame(this.animationFrameId);
             this.animationFrameId = null;
         }
-        
         this.stopPushPullAnimations();
         this.clearAllAnimations();
     }
 
     scheduleResumeScroll() {
         if (this.resumeTimeout) clearTimeout(this.resumeTimeout);
-        
         if (this.activeCategory !== 'all') return;
         if (this.isAutoScrolling) return;
-        
         this.resumeTimeout = setTimeout(() => {
             if (!this.isUserInteracting && this.activeCategory === 'all') {
                 this.startAutoScroll();
@@ -172,7 +197,6 @@ class CategoriesManager {
     // ============================================
     startPushPullAnimations() {
         this.stopPushPullAnimations();
-        
         this.pushPullInterval = setInterval(() => {
             if (!this.isAutoScrolling) return;
             this.animateRandomButton();
@@ -190,27 +214,20 @@ class CategoriesManager {
         const buttons = Array.from(
             this.categoriesScroll.querySelectorAll('.category-btn:not(.active)')
         );
-        
         if (buttons.length === 0) return;
-        
         this.clearAllAnimations();
-        
         const pushIndex = Math.floor(Math.random() * buttons.length);
         const pushBtn = buttons[pushIndex];
-        
         let pullBtn = buttons[pushIndex + 1];
         if (!pullBtn && pushIndex > 0) {
             pullBtn = buttons[pushIndex - 1];
         }
-        
         pushBtn.classList.add('pushing');
         pushBtn.classList.add('highlight-push');
-        
         setTimeout(() => {
             pushBtn.classList.remove('pushing');
             pushBtn.classList.remove('highlight-push');
         }, 600);
-        
         if (pullBtn) {
             setTimeout(() => {
                 pullBtn.classList.add('pulling');
@@ -219,7 +236,6 @@ class CategoriesManager {
                 }, 600);
             }, 200);
         }
-        
         this.lastPushedButton = pushBtn;
     }
 
@@ -231,7 +247,7 @@ class CategoriesManager {
     }
 
     // ============================================
-    // RENDER CATEGORIES
+    // ⭐ RENDER CATEGORIES (Smart Sorted) ⭐
     // ============================================
     renderCategories(categories) {
         const allBtn = this.categoriesScroll.querySelector('[data-category="all"]');
@@ -253,7 +269,10 @@ class CategoriesManager {
             this.categoriesScroll.appendChild(btn);
         }
 
-        categories.forEach((cat, index) => {
+        // ⭐ SMART SORT — ज़्यादा क्लिक वाली पहले ⭐
+        const sortedCategories = this.sortCategories(categories);
+
+        sortedCategories.forEach((cat, index) => {
             const btn = this.createCategoryButton(cat, index);
             this.categoriesScroll.appendChild(btn);
         });
@@ -299,10 +318,13 @@ class CategoriesManager {
     }
 
     // ============================================
-    // 🔧 SELECT CATEGORY - FIXED
+    // SELECT CATEGORY (FIXED)
     // ============================================
     selectCategory(btn, event) {
         const categoryId = btn.getAttribute('data-category');
+
+        // ⭐ क्लिक रिकॉर्ड ⭐
+        this.recordClick(categoryId);
 
         // If selecting same category, deselect it (toggle)
         if (this.activeCategory === categoryId && categoryId !== 'all') {
@@ -310,84 +332,67 @@ class CategoriesManager {
             return;
         }
 
-        // If "all" is already selected and clicking "all" again
         if (this.activeCategory === 'all' && categoryId === 'all') {
             return;
         }
 
-        // Remove active from all
         this.categoriesScroll.querySelectorAll('.category-btn').forEach(b => {
             b.classList.remove('active');
             this.resetButtonStyle(b);
         });
 
-        // Add active to selected
         btn.classList.add('active');
         this.activeCategory = categoryId;
-
         this.applyActiveStyle(btn);
 
-        // Ripple effect
         if (event) {
             this.addRippleEffect(btn, event);
         }
 
-        // 🔧 FIX: Only scroll if NOT "all"
         if (categoryId !== 'all') {
-            // Scroll to the selected category button
             btn.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
-            // Stop auto-scroll
             this.stopAutoScroll();
-            // Add hinting animation to other buttons
             this.showHintingOnOthers(btn);
         } else {
-            // 🔧 FIX: "All" selected → DON'T scroll, stay at current position
             this.clearAllAnimations();
             this.updateScrollButtons();
             this.scheduleResumeScroll();
         }
 
-        // Dispatch event
+        // ⭐ 10 क्लिक पर री-सॉर्ट ⭐
+        const totalClicks = Object.values(this.clickCounts).reduce((sum, c) => sum + c, 0);
+        if (totalClicks > 0 && totalClicks % 10 === 0 && this.originalCategories.length > 0) {
+            this.renderCategories(this.originalCategories);
+        }
+
         document.dispatchEvent(new CustomEvent('categoryChanged', {
             detail: { categoryId: this.activeCategory }
         }));
     }
 
-    // ============================================
-    // 🔧 DESELECT ALL - FIXED
-    // ============================================
     deselectAll() {
         const allBtn = this.categoriesScroll.querySelector('[data-category="all"]');
         if (!allBtn) return;
 
-        // 🔧 FIX: Save current scroll position
         const currentScrollLeft = this.categoriesScroll.scrollLeft;
 
-        // Remove active from all buttons
         this.categoriesScroll.querySelectorAll('.category-btn').forEach(b => {
             b.classList.remove('active');
             this.resetButtonStyle(b);
         });
 
-        // Add active to "All"
         allBtn.classList.add('active');
         this.activeCategory = 'all';
-
         this.applyActiveStyle(allBtn);
 
-        // 🔧 FIX: Restore scroll position — DON'T jump to start
         requestAnimationFrame(() => {
             this.categoriesScroll.scrollLeft = currentScrollLeft;
             this.updateScrollButtons();
         });
 
-        // Clear hinting
         this.clearAllAnimations();
-
-        // Resume auto-scroll after 5 seconds
         this.scheduleResumeScroll();
 
-        // Dispatch event
         document.dispatchEvent(new CustomEvent('categoryChanged', {
             detail: { categoryId: 'all' }
         }));
@@ -400,7 +405,6 @@ class CategoriesManager {
                 btn.classList.add('hinting');
             }, index * 80);
         });
-        
         setTimeout(() => {
             buttons.forEach(btn => btn.classList.remove('hinting'));
         }, 3000);
@@ -408,7 +412,6 @@ class CategoriesManager {
 
     applyActiveStyle(btn) {
         const categoryId = btn.getAttribute('data-category');
-
         if (categoryId === 'all') {
             btn.style.background = 'linear-gradient(135deg, #5a32a3, #6c4fb8)';
             btn.style.color = 'white';
@@ -422,7 +425,6 @@ class CategoriesManager {
 
     resetButtonStyle(btn) {
         const categoryId = btn.getAttribute('data-category');
-
         if (categoryId === 'all') {
             btn.style.background = 'linear-gradient(135deg, #667eea, #764ba2)';
             btn.style.color = 'white';
@@ -439,24 +441,19 @@ class CategoriesManager {
     addRippleEffect(btn, event) {
         const existingRipples = btn.querySelectorAll('.ripple-span');
         existingRipples.forEach(r => r.remove());
-
         const ripple = document.createElement('span');
         ripple.className = 'ripple-span';
-
         const rect = btn.getBoundingClientRect();
         const size = Math.max(rect.width, rect.height);
         const x = event.clientX - rect.left - size / 2;
         const y = event.clientY - rect.top - size / 2;
-
         ripple.style.cssText = `
             width: ${size}px;
             height: ${size}px;
             left: ${x}px;
             top: ${y}px;
         `;
-
         btn.appendChild(ripple);
-
         ripple.addEventListener('animationend', () => {
             ripple.remove();
         });
@@ -471,13 +468,11 @@ class CategoriesManager {
 
     updateScrollButtons() {
         const { scrollLeft, scrollWidth, clientWidth } = this.categoriesScroll;
-
         if (scrollLeft <= 3) {
             this.scrollLeft.classList.add('disabled');
         } else {
             this.scrollLeft.classList.remove('disabled');
         }
-
         if (scrollLeft + clientWidth >= scrollWidth - 3) {
             this.scrollRight.classList.add('disabled');
         } else {
