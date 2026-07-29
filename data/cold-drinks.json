@@ -8,14 +8,12 @@
     "en": "Limca (2 Litre)" 
   },
       "price": 85,
-      "unit": { 
-      "hi": "2 लीटर", 
-    "en": "2 Litre" 
+      "unit": { "hi": "2 लीटर", "en": "2 Litre" 
   },
   "image":"https://i.ibb.co/sdT8xzmb/IMG-20260729-113828.jpg",
   "discount": 15,
   "mostOrdered": true
-}
+},
 
 {
       "id": "cold-000",
