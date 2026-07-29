@@ -23,6 +23,7 @@ class SearchManager {
         this.isListening = false;
         this.recognition = null;
         this.currentQuery = '';
+        this.keepDropdownOpen = false; // ✅ NEW: Dropdown stick karne ke liye flag
 
         this.init();
     }
@@ -59,11 +60,20 @@ class SearchManager {
             this.voiceBtn.addEventListener('click', () => this.toggleVoiceSearch());
         }
 
-        // Close on outside click
-        document.addEventListener('click', (e) => {
-            if (!e.target.closest('.search-section')) {
-                this.closeDropdown();
+        // ✅ Close on outside click - but dropdown content pe click ko ignore karo
+        document.addEventListener('mousedown', (e) => {
+            // Agar search section ke andar click hai toh close mat karo
+            if (e.target.closest('.search-section')) {
+                return;
             }
+            // Agar search results ya no-results dropdown pe click hai toh close mat karo
+            if (e.target.closest('.search-results') || e.target.closest('.no-results')) {
+                return;
+            }
+            // Bahar click hai toh close karo
+            this.closeDropdown();
+            this.startPlaceholderRotation();
+            this.updatePlaceholder();
         });
 
         // Language change
@@ -74,6 +84,8 @@ class SearchManager {
             if (e.key === 'Escape') {
                 this.closeDropdown();
                 this.searchInput.blur();
+                this.startPlaceholderRotation();
+                this.updatePlaceholder();
             }
         });
     }
@@ -160,21 +172,42 @@ class SearchManager {
 
         if (this.searchInput.value.trim() === '') {
             this.showIdleState();
+        } else {
+            // Agar pehle se kuch likha hai toh live search dikhao
+            this.performLiveSearch(this.searchInput.value.trim());
         }
     }
 
+    // ✅ FIXED: Blur handler - keepOpen flag check karega
     handleBlur() {
         setTimeout(() => {
+            // ✅ Agar dropdown ko stick rakhna hai toh close mat karo
+            if (this.keepDropdownOpen) {
+                this.keepDropdownOpen = false;
+                // Wapas input pe focus karo
+                this.searchInput.focus();
+                return;
+            }
+
+            // Check if mouse is over dropdown
+            const resultsHovered = this.searchResults.matches(':hover') || 
+                                   this.noResults.matches(':hover');
+            
+            if (resultsHovered) {
+                return; // Dropdown open rakhna hai
+            }
+
             if (!document.activeElement?.closest('.search-section')) {
                 this.closeDropdown();
                 this.startPlaceholderRotation();
                 this.updatePlaceholder();
             }
-        }, 200);
+        }, 250);
     }
 
     closeDropdown() {
         this.isDropdownOpen = false;
+        this.keepDropdownOpen = false;
         this.searchResults.innerHTML = '';
         this.searchResults.classList.add('hidden');
         this.noResults.classList.add('hidden');
@@ -245,7 +278,7 @@ class SearchManager {
     }
 
     // ============================================
-    // ✅ FIXED: IDLE EVENTS - Suggestion click pe live result
+    // ✅ FIXED: IDLE EVENTS - mousedown se blur rokta hai
     // ============================================
     attachIdleEvents() {
         // Clear history
@@ -257,10 +290,15 @@ class SearchManager {
             });
         }
 
-        // ✅ History item click - LIVE SEARCH RESULT DIKHAO
+        // ✅ History item - MOUSEDOWN (blur se pehle fire hoga)
         this.searchResults.querySelectorAll('.search-history-item').forEach(item => {
-            item.addEventListener('click', (e) => {
+            item.addEventListener('mousedown', (e) => {
                 if (e.target.closest('.history-delete')) return;
+                
+                // 🔥 Blur ko rokne ke liye flag set karo
+                this.keepDropdownOpen = true;
+                e.preventDefault();
+                
                 const query = item.getAttribute('data-query') || item.querySelector('.history-text').textContent;
                 
                 // Input mein value set karo
@@ -272,7 +310,7 @@ class SearchManager {
                 // History mein add karo
                 this.addToHistory(query);
                 
-                // 🔥 Turant live search result dikhao
+                // 🔥 Live search result dikhao
                 this.performLiveSearch(query);
             });
         });
@@ -287,10 +325,14 @@ class SearchManager {
             });
         });
 
-        // ✅ Trending tags - LIVE SEARCH RESULT DIKHAO
+        // ✅ Trending tags - MOUSEDOWN (blur se pehle fire hoga)
         this.searchResults.querySelectorAll('.trending-tag').forEach(tag => {
-            tag.addEventListener('click', (e) => {
+            tag.addEventListener('mousedown', (e) => {
+                // 🔥 Blur ko rokne ke liye flag set karo
+                this.keepDropdownOpen = true;
+                e.preventDefault();
                 e.stopPropagation();
+                
                 const query = tag.getAttribute('data-tag') || tag.textContent.replace('🔥', '').trim();
                 
                 // Input mein value set karo
@@ -302,7 +344,7 @@ class SearchManager {
                 // History mein add karo
                 this.addToHistory(query);
                 
-                // 🔥 Turant live search result dikhao
+                // 🔥 Live search result dikhao
                 this.performLiveSearch(query);
             });
         });
