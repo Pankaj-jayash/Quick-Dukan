@@ -595,3 +595,374 @@ body.dark-mode .no-results-icon {
     .search-icon-btn { width: 30px; height: 30px; }
     .search-icon-btn span { font-size: 14px; }
 }
+/* ============================================
+   CLEAR (×) BUTTON
+   ============================================ */
+.clear-search-btn {
+    position: absolute;
+    right: 90px;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: rgba(0, 0, 0, 0.15);
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    font-weight: 700;
+    cursor: pointer;
+    border: none;
+    z-index: 3;
+    transition: all 0.2s ease;
+    opacity: 1;
+    transform: scale(1);
+}
+
+.clear-search-btn.hidden {
+    opacity: 0;
+    transform: scale(0);
+    pointer-events: none;
+}
+
+.clear-search-btn:hover {
+    background: rgba(198, 40, 40, 0.8);
+    transform: scale(1.15);
+}
+
+.clear-search-btn:active {
+    transform: scale(0.85);
+}
+
+/* ============================================
+   SEARCH HISTORY - HORIZONTAL SCROLL (Ek Row)
+   ============================================ */
+.search-history {
+    padding: 8px 0;
+}
+
+.search-history-scroll {
+    display: flex;
+    flex-direction: row;
+    gap: 8px;
+    overflow-x: auto;
+    overflow-y: hidden;
+    padding: 6px 16px;
+    scroll-snap-type: x mandatory;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(0,0,0,0.15) transparent;
+}
+
+.search-history-scroll::-webkit-scrollbar {
+    height: 4px;
+}
+
+.search-history-scroll::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.search-history-scroll::-webkit-scrollbar-thumb {
+    background: rgba(0,0,0,0.15);
+    border-radius: 10px;
+}
+
+.search-history-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 14px;
+    background: rgba(0, 0, 0, 0.04);
+    border-radius: 20px;
+    cursor: pointer;
+    font-size: 13px;
+    color: var(--text-primary);
+    white-space: nowrap;
+    flex-shrink: 0;
+    scroll-snap-align: start;
+    transition: all 0.15s ease;
+    border: 1px solid rgba(0,0,0,0.06);
+    position: relative;
+}
+
+.search-history-item:hover {
+    background: rgba(46, 125, 50, 0.1);
+    border-color: var(--primary);
+    transform: translateY(-1px);
+}
+
+.search-history-item:active {
+    transform: scale(0.95);
+    background: rgba(46, 125, 50, 0.15);
+}
+
+.search-history-item .history-icon {
+    font-size: 12px;
+    flex-shrink: 0;
+    opacity: 0.6;
+}
+
+.search-history-item .history-text {
+    font-weight: 500;
+    max-width: 120px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.search-history-item .history-time {
+    font-size: 10px;
+    color: var(--text-light);
+    flex-shrink: 0;
+}
+
+.search-history-item .history-delete {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    border: none;
+    background: rgba(0,0,0,0.08);
+    cursor: pointer;
+    font-size: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-light);
+    flex-shrink: 0;
+    transition: all 0.15s ease;
+}
+
+.search-history-item .history-delete:hover {
+    background: #C62828;
+    color: white;
+}
+
+/* ============================================
+   SEARCH RESULT ITEMS - Add to Cart & Buy Buttons
+   ============================================ */
+.search-result-actions {
+    display: flex;
+    gap: 6px;
+    margin-top: 4px;
+}
+
+.search-result-btn {
+    padding: 5px 12px;
+    border-radius: 16px;
+    font-size: 11px;
+    font-weight: 700;
+    cursor: pointer;
+    border: none;
+    transition: all 0.15s ease;
+    white-space: nowrap;
+}
+
+.search-result-btn.cart-btn {
+    background: #FFF3E0;
+    color: #E65100;
+    border: 1px solid rgba(230, 81, 0, 0.2);
+}
+
+.search-result-btn.cart-btn:hover {
+    background: #FFE0B2;
+    transform: translateY(-1px);
+}
+
+.search-result-btn.buy-btn {
+    background: var(--primary);
+    color: white;
+    border: 1px solid var(--primary);
+}
+
+.search-result-btn.buy-btn:hover {
+    background: var(--primary-dark);
+    transform: translateY(-1px);
+    box-shadow: 0 2px 8px rgba(46, 125, 50, 0.3);
+}
+
+.search-result-btn:active {
+    transform: scale(0.9);
+}
+
+/* Added to cart flash */
+.search-result-btn.cart-btn.added {
+    background: #4CAF50;
+    color: white;
+    border-color: #4CAF50;
+    animation: addedPop 0.4s ease;
+}
+
+@keyframes addedPop {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.2); }
+    100% { transform: scale(1); }
+}
+
+/* ============================================
+   RECENTLY VIEWED ADD ANIMATION
+   ============================================ */
+@keyframes recentViewFlyIn {
+    0% {
+        opacity: 0;
+        transform: translateY(-30px) scale(0.8) rotate(-5deg);
+    }
+    60% {
+        transform: translateY(5px) scale(1.05) rotate(2deg);
+    }
+    100% {
+        opacity: 1;
+        transform: translateY(0) scale(1) rotate(0);
+    }
+}
+
+.recent-view-animate {
+    animation: recentViewFlyIn 0.5s cubic-bezier(0.68, -0.55, 0.27, 1.55) forwards;
+}
+
+/* Dark mode adjustments */
+body.dark-mode .clear-search-btn {
+    background: rgba(255, 255, 255, 0.2);
+    color: #fff;
+}
+
+body.dark-mode .clear-search-btn:hover {
+    background: rgba(198, 40, 40, 0.7);
+}
+
+body.dark-mode .search-history-item {
+    background: rgba(255, 255, 255, 0.06);
+    border-color: rgba(255,255,255,0.08);
+}
+
+body.dark-mode .search-history-item:hover {
+    background: rgba(76, 175, 80, 0.15);
+}
+
+body.dark-mode .search-result-btn.cart-btn {
+    background: rgba(255, 152, 0, 0.15);
+    color: #FFB74D;
+    border-color: rgba(255, 152, 0, 0.3);
+}
+
+body.dark-mode .search-history-scroll::-webkit-scrollbar-thumb {
+    background: rgba(255,255,255,0.2);
+}
+
+/* Adjust clear button position for voice button */
+@media (max-width: 480px) {
+    .clear-search-btn {
+        right: 80px;
+        width: 24px;
+        height: 24px;
+        font-size: 10px;
+    }
+}
+
+@media (max-width: 360px) {
+    .clear-search-btn {
+        right: 72px;
+        width: 22px;
+        height: 22px;
+        font-size: 9px;
+    }
+}
+/* ============================================
+   SHINING GLOW EFFECT - Recently Viewed Product
+   ============================================ */
+@keyframes shineGlow {
+    0% {
+        box-shadow: 0 0 5px rgba(255, 215, 0, 0.4), 0 0 10px rgba(255, 215, 0, 0.2);
+        filter: brightness(1);
+    }
+    25% {
+        box-shadow: 0 0 25px rgba(255, 215, 0, 0.9), 0 0 45px rgba(255, 215, 0, 0.5), 0 0 65px rgba(255, 152, 0, 0.3);
+        filter: brightness(1.15);
+    }
+    50% {
+        box-shadow: 0 0 10px rgba(255, 215, 0, 0.5), 0 0 20px rgba(255, 215, 0, 0.3);
+        filter: brightness(1.05);
+    }
+    75% {
+        box-shadow: 0 0 30px rgba(255, 215, 0, 1), 0 0 55px rgba(255, 215, 0, 0.6), 0 0 75px rgba(255, 152, 0, 0.4);
+        filter: brightness(1.2);
+    }
+    100% {
+        box-shadow: 0 0 5px rgba(255, 215, 0, 0.3), 0 0 10px rgba(255, 215, 0, 0.1);
+        filter: brightness(1);
+    }
+}
+
+@keyframes shimmerSweep {
+    0% {
+        background-position: -200% center;
+    }
+    100% {
+        background-position: 200% center;
+    }
+}
+
+.recent-item-shine {
+    animation: shineGlow 1.2s ease-in-out 2;
+    position: relative;
+    overflow: hidden;
+    z-index: 5;
+    border-radius: 12px;
+}
+
+.recent-item-shine::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(
+        90deg,
+        transparent 0%,
+        rgba(255, 255, 255, 0.2) 20%,
+        rgba(255, 215, 0, 0.35) 50%,
+        rgba(255, 255, 255, 0.2) 80%,
+        transparent 100%
+    );
+    background-size: 200% 100%;
+    animation: shimmerSweep 1.5s ease-in-out 1;
+    pointer-events: none;
+    z-index: 2;
+    border-radius: 12px;
+}
+
+/* Sparkle particles */
+@keyframes sparkleFloat {
+    0% {
+        opacity: 1;
+        transform: translate(0, 0) scale(1);
+    }
+    100% {
+        opacity: 0;
+        transform: translate(var(--sx), var(--sy)) scale(0);
+    }
+}
+
+.recent-item-shine .sparkle {
+    position: absolute;
+    border-radius: 50%;
+    pointer-events: none;
+    z-index: 3;
+    animation: sparkleFloat 0.8s ease-out forwards;
+    box-shadow: 0 0 4px currentColor, 0 0 8px currentColor;
+}
+
+/* Dark mode */
+body.dark-mode .recent-item-shine {
+    animation: shineGlow 1.2s ease-in-out 2;
+}
+
+body.dark-mode .recent-item-shine::after {
+    background: linear-gradient(
+        90deg,
+        transparent 0%,
+        rgba(255, 255, 255, 0.1) 20%,
+        rgba(255, 215, 0, 0.25) 50%,
+        rgba(255, 255, 255, 0.1) 80%,
+        transparent 100%
+    );
+}
