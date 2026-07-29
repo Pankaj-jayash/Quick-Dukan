@@ -17,7 +17,7 @@
 
 {
       "id": "cold-000",
-      "name": { "hi": "थम्स-अप (750ml)",
+      "name": { "hi": "थम्स-अप (1 लीटर)",
       "en": "Thums Up (1 Ltr)" },
       "price": 45,
       "unit": { "hi": "1 लीटर", "en": "1 Ltr" },
@@ -28,10 +28,10 @@
 
 {
       "id": "cold-001",
-      "name": { "hi": "पेप्सी (750ml)",
-      "en": "Pepsi (750ml)" },
-      "price": 45,
-      "unit": { "hi": "750 ml", "en": "750 ml" },
+      "name": { "hi": "पेप्सी (1 लीटर)",
+      "en": "Pepsi (1 Ltr)" },
+      "price": 50,
+      "unit": { "hi": "1 लीटर", "en": "1 Ltr" },
       "image": "https://m.media-amazon.com/images/I/71lLqGv0aTL._SL1500_.jpg",
       "discount": 0,
       "mostOrdered": true
