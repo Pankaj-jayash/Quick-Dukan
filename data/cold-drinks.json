@@ -50,10 +50,10 @@
     {
       "id": "cold-009",
       "name": { "hi": "स्प्राइट (2 Ltr)", "en": "Sprite (2 Ltr)" },
-      "price": 100,
+      "price": 85,
       "unit": { "hi": "2 Ltr", "en": "2 Ltr" },
       "image": "https://i.ibb.co/F4mt0PJZ/copilot-image-1785235973592.png",
-      "discount": 5,
+      "discount": 15,
       "mostOrdered": true
     },
     {
