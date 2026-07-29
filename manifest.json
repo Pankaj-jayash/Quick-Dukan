@@ -2,25 +2,44 @@
     "name": "Quick Dukan - आपकी किराना दुकान",
     "short_name": "Quick Dukan",
     "description": "घर बैठे किराना ऑर्डर करें - फ्री डिलीवरी",
-    "start_url": "/",
-    "scope": "/",
+    "start_url": "/quick-dukan/",
+    "scope": "/quick-dukan/",
     "display": "standalone",
     "orientation": "portrait",
-    "background_color": "#FFF8E7",
-    "theme_color": "#E67E22",
+    "background_color": "#E8F5E9",
+    "theme_color": "#2E7D32",
     "lang": "hi",
     "icons": [
         {
-            "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'><defs><linearGradient id='g' x1='0%25' y1='0%25' x2='100%25' y2='100%25'><stop offset='0%25' style='stop-color:%23FF8C00'/><stop offset='50%25' style='stop-color:%23FFA726'/><stop offset='100%25' style='stop-color:%23E67E22'/></linearGradient></defs><rect width='192' height='192' rx='42' fill='url(%23g)'/><circle cx='96' cy='75' r='40' fill='white' opacity='0.2'/><text x='96' y='90' text-anchor='middle' font-size='50'>🛒</text><text x='96' y='140' text-anchor='middle' font-family='Arial,sans-serif' font-weight='900' font-size='28' fill='white'>QD</text></svg>",
+            "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'><defs><linearGradient id='g' x1='0%25' y1='0%25' x2='100%25' y2='100%25'><stop offset='0%25' style='stop-color:%234CAF50'/><stop offset='50%25' style='stop-color:%232E7D32'/><stop offset='100%25' style='stop-color:%231B5E20'/></linearGradient></defs><rect width='192' height='192' rx='42' fill='url(%23g)'/><circle cx='96' cy='75' r='40' fill='white' opacity='0.2'/><text x='96' y='90' text-anchor='middle' font-size='50'>🛒</text><text x='96' y='140' text-anchor='middle' font-family='Arial,sans-serif' font-weight='900' font-size='28' fill='white'>QD</text></svg>",
             "sizes": "192x192",
             "type": "image/svg+xml",
             "purpose": "any"
         },
         {
-            "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'><defs><linearGradient id='g' x1='0%25' y1='0%25' x2='100%25' y2='100%25'><stop offset='0%25' style='stop-color:%23FF8C00'/><stop offset='50%25' style='stop-color:%23FFA726'/><stop offset='100%25' style='stop-color:%23E67E22'/></linearGradient></defs><rect width='512' height='512' rx='112' fill='url(%23g)'/><circle cx='256' cy='200' r='110' fill='white' opacity='0.15'/><text x='256' y='240' text-anchor='middle' font-size='140'>🛒</text><text x='256' y='370' text-anchor='middle' font-family='Arial,sans-serif' font-weight='900' font-size='75' fill='white'>Quick Dukan</text><text x='256' y='430' text-anchor='middle' font-family='Arial,sans-serif' font-weight='500' font-size='30' fill='%23FFE0B2'>फ्री डिलीवरी 🚚</text></svg>",
+            "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'><defs><linearGradient id='g' x1='0%25' y1='0%25' x2='100%25' y2='100%25'><stop offset='0%25' style='stop-color:%234CAF50'/><stop offset='50%25' style='stop-color:%232E7D32'/><stop offset='100%25' style='stop-color:%231B5E20'/></linearGradient></defs><rect width='512' height='512' rx='112' fill='url(%23g)'/><circle cx='256' cy='200' r='110' fill='white' opacity='0.15'/><text x='256' y='240' text-anchor='middle' font-size='140'>🛒</text><text x='256' y='370' text-anchor='middle' font-family='Arial,sans-serif' font-weight='900' font-size='75' fill='white'>Quick Dukan</text><text x='256' y='430' text-anchor='middle' font-family='Arial,sans-serif' font-weight='500' font-size='30' fill='%23C8E6C9'>फ्री डिलीवरी 🚚</text></svg>",
             "sizes": "512x512",
             "type": "image/svg+xml",
             "purpose": "any maskable"
         }
-    ]
+    ],
+    "shortcuts": [
+        {
+            "name": "खोजें",
+            "short_name": "खोजें",
+            "description": "प्रोडक्ट खोजें",
+            "url": "/quick-dukan/?search=true",
+            "icons": [{"src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 96 96'><rect width='96' height='96' rx='20' fill='%232E7D32'/><text x='48' y='60' text-anchor='middle' font-size='40'>🔍</text></svg>","sizes": "96x96"}]
+        },
+        {
+            "name": "कार्ट",
+            "short_name": "कार्ट",
+            "description": "अपना कार्ट देखें",
+            "url": "/quick-dukan/?cart=true",
+            "icons": [{"src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 96 96'><rect width='96' height='96' rx='20' fill='%232E7D32'/><text x='48' y='60' text-anchor='middle' font-size='40'>🛒</text></svg>","sizes":"96x96"}]
+        }
+    ],
+    "categories": ["shopping", "grocery", "food"],
+    "screenshots": [],
+    "prefer_related_applications": false
 }
