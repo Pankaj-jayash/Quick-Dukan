@@ -1,7 +1,20 @@
 {
   "category": "cold-drinks",
   "products": [
-    {
+    
+    
+{
+      "id": "cold-000",
+      "name": { "hi": "थम्स-अप (750ml)",
+      "en": "Thums Up (1 Ltr)" },
+      "price": 45,
+      "unit": { "hi": "1 Ltr", "en": "1 Ltr" },
+      "image": "https://i.ibb.co/hx2rPMfp/IMG-20260729-105755.jpg",
+      "discount": 0,
+      "mostOrdered": true
+    },
+
+{
       "id": "cold-001",
       "name": { "hi": "पेप्सी (750ml)",
       "en": "Pepsi (750ml)" },
