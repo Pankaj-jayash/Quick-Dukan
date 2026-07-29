@@ -1,5 +1,5 @@
 // ============================================
-// PWA.JS - Splash Screen + Install + Auto Refresh
+// PWA.JS - Service Worker + Install + Online/Offline
 // ============================================
 
 class PWAManager {
@@ -7,24 +7,158 @@ class PWAManager {
         this.deferredPrompt = null;
         this.refreshTimer = null;
         this.isRefreshing = false;
-        
+        this.isOnline = navigator.onLine;
+        this.offlineNotifier = null;
+
         this.init();
     }
 
     init() {
         console.log('📱 PWA Manager Initialized');
-        
-        // Show splash screen immediately
+
+        // Register Service Worker
+        this.registerServiceWorker();
+
+        // Show splash screen
         this.showSplashScreen();
-        
+
         // Setup install prompt
         this.setupInstallPrompt();
-        
+
+        // Setup online/offline detection
+        this.setupNetworkDetection();
+
         // Setup auto refresh
         this.setupAutoRefresh();
-        
+
+        // Setup push notifications
+        this.setupPushNotifications();
+
         // Hide splash after everything loads
         this.waitAndHideSplash();
+    }
+
+    // ============================================
+    // SERVICE WORKER REGISTRATION
+    // ============================================
+    registerServiceWorker() {
+        if (!('serviceWorker' in navigator)) {
+            console.warn('⚠️ Service Worker not supported');
+            return;
+        }
+
+        navigator.serviceWorker.register('/quick-dukan/pwa-server.js')
+            .then((registration) => {
+                console.log('✅ Service Worker Registered:', registration.scope);
+
+                // Check for updates
+                registration.addEventListener('updatefound', () => {
+                    const newWorker = registration.installing;
+                    
+                    newWorker.addEventListener('statechange', () => {
+                        if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                            // New update available
+                            this.showUpdatePrompt();
+                        }
+                    });
+                });
+            })
+            .catch((error) => {
+                console.error('❌ Service Worker Registration Failed:', error);
+            });
+
+        // Listen for messages from service worker
+        navigator.serviceWorker.addEventListener('message', (event) => {
+            if (event.data?.type === 'VERSION') {
+                console.log('📦 SW Version:', event.data.version);
+            }
+        });
+    }
+
+    // ============================================
+    // UPDATE PROMPT
+    // ============================================
+    showUpdatePrompt() {
+        const lang = window.languageManager?.currentLang || 'hi';
+        
+        const banner = document.createElement('div');
+        banner.className = 'update-banner';
+        banner.innerHTML = `
+            <div class="update-banner-content">
+                <span class="update-icon">🔄</span>
+                <span>${lang === 'hi' ? 'नया वर्जन उपलब्ध है!' : 'New version available!'}</span>
+                <button class="update-btn" id="updateNowBtn">
+                    ${lang === 'hi' ? 'अभी अपडेट करें' : 'Update Now'}
+                </button>
+            </div>
+        `;
+        
+        document.body.appendChild(banner);
+        
+        document.getElementById('updateNowBtn').addEventListener('click', () => {
+            banner.remove();
+            this.updateApp();
+        });
+
+        // Auto dismiss after 20 seconds
+        setTimeout(() => {
+            if (banner.parentNode) banner.remove();
+        }, 20000);
+    }
+
+    updateApp() {
+        if (navigator.serviceWorker.controller) {
+            navigator.serviceWorker.controller.postMessage({ type: 'SKIP_WAITING' });
+        }
+        window.location.reload();
+    }
+
+    // ============================================
+    // NETWORK DETECTION
+    // ============================================
+    setupNetworkDetection() {
+        window.addEventListener('online', () => {
+            console.log('🌐 Back Online!');
+            this.isOnline = true;
+            this.hideOfflineNotification();
+            this.showOnlineToast();
+            
+            // Refresh data after 2 seconds
+            setTimeout(() => this.performRefresh(), 2000);
+        });
+
+        window.addEventListener('offline', () => {
+            console.log('📴 Offline Detected!');
+            this.isOnline = false;
+            this.showOfflineNotification();
+        });
+
+        // Initial check
+        if (!this.isOnline) {
+            this.showOfflineNotification();
+        }
+    }
+
+    // ============================================
+    // OFFLINE NOTIFICATION (Using OfflineNotification class)
+    // ============================================
+    showOfflineNotification() {
+        if (window.offlineNotifier) {
+            window.offlineNotifier.show();
+        } else {
+            // Fallback
+            this.showToast('📴 आप ऑफ़लाइन हैं! लेकिन ऐप फिर भी चलेगा 💪');
+        }
+    }
+
+    hideOfflineNotification() {
+        if (window.offlineNotifier) {
+            window.offlineNotifier.hide();
+        }
+    }
+
+    showOnlineToast() {
+        this.showToast('🌐 आप वापस ऑनलाइन आ गए! 🎉');
     }
 
     // ============================================
@@ -66,7 +200,6 @@ class PWAManager {
     }
 
     waitAndHideSplash() {
-        // Hide when data is loaded or after timeout
         const checkData = setInterval(() => {
             if (window.dataLoader && window.dataLoader.isLoaded) {
                 clearInterval(checkData);
@@ -74,7 +207,6 @@ class PWAManager {
             }
         }, 100);
 
-        // Fallback: hide after 5 seconds anyway
         setTimeout(() => {
             clearInterval(checkData);
             this.hideSplashScreen();
@@ -90,7 +222,6 @@ class PWAManager {
             this.deferredPrompt = e;
             console.log('📲 PWA Install Ready');
 
-            // Show banner after 8 seconds
             setTimeout(() => this.showInstallBanner(), 8000);
         });
 
@@ -101,20 +232,14 @@ class PWAManager {
             this.showToast('🎉 Quick Dukan ऐप इंस्टॉल हो गया!');
         });
 
-        // Check if already installed
         if (window.matchMedia('(display-mode: standalone)').matches) {
             console.log('📱 Already running as PWA');
         }
     }
 
     showInstallBanner() {
-        // Don't show if not available
         if (!this.deferredPrompt) return;
-        
-        // Don't show if already shown
         if (localStorage.getItem('pwa-banner-shown')) return;
-        
-        // Don't show if already installed
         if (localStorage.getItem('pwa-installed')) return;
 
         const lang = window.languageManager?.currentLang || 'hi';
@@ -138,7 +263,6 @@ class PWAManager {
 
         document.body.appendChild(banner);
 
-        // Install button
         document.getElementById('installBtn').addEventListener('click', async () => {
             if (this.deferredPrompt) {
                 this.deferredPrompt.prompt();
@@ -150,40 +274,109 @@ class PWAManager {
             localStorage.setItem('pwa-banner-shown', 'true');
         });
 
-        // Close button
         document.getElementById('closeBanner').addEventListener('click', () => {
             banner.remove();
             localStorage.setItem('pwa-banner-shown', 'true');
         });
 
-        // Auto remove after 35 seconds
         setTimeout(() => {
             if (banner.parentNode) banner.remove();
         }, 35000);
     }
 
     // ============================================
+    // PUSH NOTIFICATIONS
+    // ============================================
+    setupPushNotifications() {
+        if (!('Notification' in window)) {
+            console.log('📵 Push notifications not supported');
+            return;
+        }
+
+        // Request permission after 15 seconds
+        setTimeout(() => {
+            if (Notification.permission === 'default') {
+                this.showNotificationPrompt();
+            }
+        }, 15000);
+    }
+
+    showNotificationPrompt() {
+        if (localStorage.getItem('notification-prompt-shown')) return;
+        if (Notification.permission !== 'default') return;
+
+        const lang = window.languageManager?.currentLang || 'hi';
+
+        const banner = document.createElement('div');
+        banner.className = 'notification-prompt';
+        banner.innerHTML = `
+            <div class="notification-prompt-content">
+                <span class="notif-icon">🔔</span>
+                <div class="notif-text">
+                    <strong>${lang === 'hi' ? 'नोटिफिकेशन चालू करें?' : 'Enable Notifications?'}</strong>
+                    <span>${lang === 'hi' ? 'नए ऑफर्स और अपडेट सबसे पहले पाएं!' : 'Get new offers and updates first!'}</span>
+                </div>
+                <button class="notif-enable-btn" id="enableNotifBtn">
+                    ${lang === 'hi' ? 'हाँ, चालू करें' : 'Yes, Enable'}
+                </button>
+                <button class="notif-later-btn" id="notifLaterBtn">
+                    ${lang === 'hi' ? 'बाद में' : 'Later'}
+                </button>
+            </div>
+        `;
+
+        document.body.appendChild(banner);
+
+        document.getElementById('enableNotifBtn').addEventListener('click', () => {
+            this.requestNotificationPermission();
+            banner.remove();
+            localStorage.setItem('notification-prompt-shown', 'true');
+        });
+
+        document.getElementById('notifLaterBtn').addEventListener('click', () => {
+            banner.remove();
+            localStorage.setItem('notification-prompt-shown', 'true');
+        });
+    }
+
+    requestNotificationPermission() {
+        Notification.requestPermission().then((permission) => {
+            if (permission === 'granted') {
+                console.log('🔔 Notification permission granted');
+                this.showToast('🔔 नोटिफिकेशन चालू हो गए!');
+                
+                // Send welcome notification
+                if ('serviceWorker' in navigator && navigator.serviceWorker.ready) {
+                    navigator.serviceWorker.ready.then((registration) => {
+                        registration.showNotification('Quick Dukan 🛒', {
+                            body: 'स्वागत है! नए ऑफर्स की जानकारी सबसे पहले आपको मिलेगी 🎉',
+                            icon: 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><rect width="100" height="100" rx="20" fill="%232E7D32"/><text x="50" y="65" text-anchor="middle" font-size="40">🛒</text></svg>',
+                            tag: 'welcome',
+                            vibrate: [200, 100, 200]
+                        });
+                    });
+                }
+            }
+        });
+    }
+
+    // ============================================
     // AUTO REFRESH
     // ============================================
     setupAutoRefresh() {
-        // Refresh every 30 minutes
         this.refreshTimer = setInterval(() => {
             this.performRefresh();
         }, 30 * 60 * 1000);
 
-        // Refresh when coming back online
         window.addEventListener('online', () => {
-            console.log('🌐 Back online — refreshing in 2s...');
             setTimeout(() => this.performRefresh(), 2000);
         });
 
-        // Refresh when tab becomes visible
         document.addEventListener('visibilitychange', () => {
             if (document.visibilityState === 'visible') {
                 const lastRefresh = localStorage.getItem('quick-dukan-last-refresh');
                 const now = Date.now();
                 if (!lastRefresh || (now - parseInt(lastRefresh)) > 10 * 60 * 1000) {
-                    console.log('👁️ Tab visible — checking refresh...');
                     this.performRefresh();
                 }
             }
@@ -199,7 +392,6 @@ class PWAManager {
         console.log('🔄 Refreshing data...');
 
         try {
-            // Reload data from server
             if (window.dataLoader) {
                 window.dataLoader.allProducts = [];
                 window.dataLoader.productsByCategory = {};
@@ -207,7 +399,6 @@ class PWAManager {
                 await window.dataLoader.loadAllData();
             }
 
-            // Refresh UI components
             if (window.productsManager) {
                 window.productsManager.refreshAllProducts();
             }
@@ -231,7 +422,6 @@ class PWAManager {
     }
 
     forceRefresh() {
-        console.log('🔄 Force refresh requested');
         return this.performRefresh();
     }
 
@@ -255,12 +445,11 @@ class PWAManager {
     }
 }
 
-// Initialize on DOM ready
+// Initialize
 document.addEventListener('DOMContentLoaded', () => {
     window.pwaManager = new PWAManager();
 });
 
-// Expose force refresh globally
 window.forceRefresh = () => {
     if (window.pwaManager) {
         window.pwaManager.forceRefresh();
