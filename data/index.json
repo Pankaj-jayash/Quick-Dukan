@@ -14,6 +14,36 @@
     "color": "#1E88E5",
     "bgColor": "#E3F2FD"
 },
+      {
+    "id": "snacks",
+    "name": "Namkeen & Biscuit",
+    "nameHi": "नमकीन और बिस्किट",
+    "nameEn": "Namkeen & Biscuit",
+    "file": "snacks.json",
+    "icon": "🌯",
+    "color": "#FF9800",
+    "bgColor": "#FFF8E1"
+},
+{
+    "id": "namak-masale",
+    "name": "Salt & Pepper",
+    "nameHi": "नमक और मिर्च",
+    "nameEn": "Salt & Pepper",
+    "file": "namak-masale.json",
+    "icon": "🧂",
+    "color": "#78909C",
+    "bgColor": "#ECEFF1"
+},
+       {
+            "id": "tel-ghee",
+            "name": "Oil & Ghee",
+            "nameHi": "तेल और घी",
+            "nameEn": "Oil & Ghee",
+            "file": "tel-ghee.json",
+            "icon": "🍯",
+            "color": "#FFD93D",
+            "bgColor": "#FFFDE7"
+        },
         {
             "id": "dal",
             "name": "Dal",
@@ -34,16 +64,7 @@
             "color": "#4ECDC4",
             "bgColor": "#F0FFFE"
         },
-        {
-            "id": "tel-ghee",
-            "name": "Oil & Ghee",
-            "nameHi": "तेल और घी",
-            "nameEn": "Oil & Ghee",
-            "file": "tel-ghee.json",
-            "icon": "🍯",
-            "color": "#FFD93D",
-            "bgColor": "#FFFDE7"
-        },
+      
         {
             "id": "masale",
             "name": "Spices",
