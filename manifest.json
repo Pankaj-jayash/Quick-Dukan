@@ -2,7 +2,7 @@
   "name": "Quick Dukan - आपकी विश्वसनीय किराना दुकान",
   "short_name": "Quick Dukan",
   "description": "Quick Dukan - आपकी विश्वसनीय किराना दुकान। फ्री डिलीवरी, बेस्ट प्राइस।",
-  "start_url": "/",
+  "start_url": "/Quick-Dukan/",
   "display": "standalone",
   "background_color": "#ffffff",
   "theme_color": "#2E7D32",
