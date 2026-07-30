@@ -1,0 +1,26 @@
+{
+    "name": "Quick Dukan - किराना दुकान",
+    "short_name": "Quick Dukan",
+    "description": "आपकी विश्वसनीय किराना दुकान - घर बैठे ऑर्डर करें, फ्री डिलीवरी",
+    "start_url": "./",
+    "scope": "./",
+    "display": "standalone",
+    "orientation": "portrait",
+    "background_color": "#FFF8E7",
+    "theme_color": "#E67E22",
+    "lang": "hi",
+    "icons": [
+        {
+            "src": "icon-192.png",
+            "sizes": "192x192",
+            "type": "image/png",
+            "purpose": "any"
+        },
+        {
+            "src": "icon-512.png",
+            "sizes": "512x512",
+            "type": "image/png",
+            "purpose": "any maskable"
+        }
+    ]
+}
