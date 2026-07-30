@@ -1,61 +1,54 @@
-// ============================================
-//  SERVICE WORKER - Network First, Auto Update
-//  Quick Dukan - Kirana Store
-// ============================================
-
 const CACHE_NAME = 'quick-dukan-v1';
 
-// Install - Skip waiting to activate immediately
 self.addEventListener('install', function(event) {
     self.skipWaiting();
     event.waitUntil(
         caches.open(CACHE_NAME).then(function(cache) {
             return cache.addAll([
-                '/',
-                '/index.html',
-                '/css/theme.css',
-                '/css/animations.css',
-                '/css/layout.css',
-                '/css/header.css',
-                '/css/search.css',
-                '/css/categories.css',
-                '/css/product-card.css',
-                '/css/category-products.css',
-                '/css/recently-viewed.css',
-                '/css/most-orders.css',
-                '/css/bottom-nav.css',
-                '/css/dark-mode.css',
-                '/css/orders.css',
-                '/css/checkout.css',
-                '/css/cart.css',
-                '/css/pwa-install.css',
-                '/js/config.js',
-                '/js/whatsapp.js',
-                '/js/theme.js',
-                '/js/language.js',
-                '/js/data-loader.js',
-                '/js/search.js',
-                '/js/categories.js',
-                '/js/products.js',
-                '/js/category-products.js',
-                '/js/recently-viewed.js',
-                '/js/most-orders.js',
-                '/js/cart.js',
-                '/js/bottom-nav.js',
-                '/js/back-to-top.js',
-                '/js/animations.js',
-                '/js/app.js',
-                '/js/orders.js',
-                '/js/location.js',
-                '/js/checkout.js',
-                '/js/pwa-register.js',
-                '/js/pwa-install.js'
+                '/Quick-Dukan/',
+                '/Quick-Dukan/index.html',
+                '/Quick-Dukan/css/theme.css',
+                '/Quick-Dukan/css/animations.css',
+                '/Quick-Dukan/css/layout.css',
+                '/Quick-Dukan/css/header.css',
+                '/Quick-Dukan/css/search.css',
+                '/Quick-Dukan/css/categories.css',
+                '/Quick-Dukan/css/product-card.css',
+                '/Quick-Dukan/css/category-products.css',
+                '/Quick-Dukan/css/recently-viewed.css',
+                '/Quick-Dukan/css/most-orders.css',
+                '/Quick-Dukan/css/bottom-nav.css',
+                '/Quick-Dukan/css/dark-mode.css',
+                '/Quick-Dukan/css/orders.css',
+                '/Quick-Dukan/css/checkout.css',
+                '/Quick-Dukan/css/cart.css',
+                '/Quick-Dukan/css/pwa-install.css',
+                '/Quick-Dukan/js/config.js',
+                '/Quick-Dukan/js/whatsapp.js',
+                '/Quick-Dukan/js/theme.js',
+                '/Quick-Dukan/js/language.js',
+                '/Quick-Dukan/js/data-loader.js',
+                '/Quick-Dukan/js/search.js',
+                '/Quick-Dukan/js/categories.js',
+                '/Quick-Dukan/js/products.js',
+                '/Quick-Dukan/js/category-products.js',
+                '/Quick-Dukan/js/recently-viewed.js',
+                '/Quick-Dukan/js/most-orders.js',
+                '/Quick-Dukan/js/cart.js',
+                '/Quick-Dukan/js/bottom-nav.js',
+                '/Quick-Dukan/js/back-to-top.js',
+                '/Quick-Dukan/js/animations.js',
+                '/Quick-Dukan/js/app.js',
+                '/Quick-Dukan/js/orders.js',
+                '/Quick-Dukan/js/location.js',
+                '/Quick-Dukan/js/checkout.js',
+                '/Quick-Dukan/js/pwa-register.js',
+                '/Quick-Dukan/js/pwa-install.js'
             ]);
         })
     );
 });
 
-// Activate - Delete old cache
 self.addEventListener('activate', function(event) {
     event.waitUntil(
         caches.keys().then(function(cacheNames) {
@@ -70,9 +63,7 @@ self.addEventListener('activate', function(event) {
     );
 });
 
-// Fetch - Network first, then cache
 self.addEventListener('fetch', function(event) {
-    // Skip Google Fonts & external CDN requests
     if (event.request.url.includes('fonts.googleapis.com') || 
         event.request.url.includes('cdnjs.cloudflare.com')) {
         return;
@@ -81,7 +72,6 @@ self.addEventListener('fetch', function(event) {
     event.respondWith(
         fetch(event.request)
             .then(function(response) {
-                // Update cache with new version
                 const responseClone = response.clone();
                 caches.open(CACHE_NAME).then(function(cache) {
                     cache.put(event.request, responseClone);
@@ -89,7 +79,6 @@ self.addEventListener('fetch', function(event) {
                 return response;
             })
             .catch(function() {
-                // Offline - serve from cache
                 return caches.match(event.request);
             })
     );
