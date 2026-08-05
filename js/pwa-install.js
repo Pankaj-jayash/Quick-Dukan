@@ -165,16 +165,26 @@ class PWAInstallManager {
         document.getElementById('pwaMiniClose').addEventListener('click', () => this.hideMiniPopup());
     }
     
-    hideMiniPopup() {
-        if (!this.miniPopup) return;
-        this.miniPopup.classList.remove('show');
-        setTimeout(() => {
-            if (this.miniPopup) {
-                this.miniPopup.remove();
-                this.miniPopup = null;
+   hideMiniPopup() {
+    if (!this.miniPopup) return;
+    this.miniPopup.classList.remove('show');
+    setTimeout(() => {
+        if (this.miniPopup) {
+            this.miniPopup.remove();
+            this.miniPopup = null;
+        }
+    }, 400);
+    
+    // 🔁 REPEAT: Mini bar 2 minute baad firse dikhega
+    if (!this.installCompleted && !this.isAppInstalled()) {
+        clearTimeout(this.miniTimer);
+        this.miniTimer = setTimeout(() => {
+            if (!this.installCompleted && !this.isAppInstalled()) {
+                this.showMiniPopup();
             }
-        }, 400);
+        }, 120000); // ⬅️ 2 minute baad repeat (change as needed)
     }
+}
     
     hideAllPopups() {
         this.hideFullPopup();
