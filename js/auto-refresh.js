@@ -48,7 +48,7 @@ class AutoRefreshManager {
     
     registerServiceWorker() {
         if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.register('/js/service-worker.js')
+            navigator.serviceWorker.register('/Quick-Dukan/js/service-worker.js')
                 .then(registration => {
                     console.log('📦 Service Worker Registered:', registration.scope);
                     
@@ -115,7 +115,7 @@ class AutoRefreshManager {
         if ('caches' in window) {
             caches.keys().then(names => {
                 names.forEach(name => {
-                    if (name !== 'quick-dukan-v1') {
+                    if (name !== 'quick-dukan-v1' && name !== 'quick-dukan-v2') {
                         caches.delete(name);
                     }
                 });
