@@ -9,7 +9,7 @@
     <title>Quick Dukan - आपकी विश्वसनीय किराना दुकान</title>
     
     <!-- PWA Manifest -->
-<link rel="manifest" href="/Quick-Dukan/manifest.json">
+<link rel="manifest" href="manifest.json">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Quick Dukan">
@@ -598,5 +598,19 @@
         setTimeout(hideSplash, 5000);
     })();
     </script>
+    <!-- Service Worker Registration (For PWA Install) -->
+<script>
+    if ('serviceWorker' in navigator) {
+        window.addEventListener('load', function() {
+            navigator.serviceWorker.register('/Quick-Dukan/service-worker.js')
+                .then(function(registration) {
+                    console.log('✅ Service Worker registered with scope:', registration.scope);
+                })
+                .catch(function(error) {
+                    console.log('❌ Service Worker registration failed:', error);
+                });
+        });
+    }
+</script>
 </body>
 </html>
