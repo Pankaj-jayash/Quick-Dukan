@@ -1,108 +1,143 @@
 // ============================================
-// SERVICE-WORKER.JS - Auto Refresh & Cache
+// SERVICE-WORKER.JS - PWA Cache & Offline (v2)
 // ============================================
 
-const CACHE_NAME = 'quick-dukan-v1';
-const REFRESH_INTERVAL = 30 * 60 * 1000; // 30 minutes
+const CACHE_NAME = 'quick-dukan-v2';
+const DATA_CACHE = 'quick-dukan-data-v2';
 
-// Files to cache
+// Static files to cache (GitHub Pages paths)
 const STATIC_CACHE = [
-    '/',
-    '/index.html',
-    '/css/theme.css',
-    '/css/animations.css',
-    '/css/layout.css',
-    '/css/header.css',
-    '/css/search.css',
-    '/css/categories.css',
-    '/css/product-card.css',
-    '/css/category-products.css',
-    '/css/recently-viewed.css',
-    '/css/most-orders.css',
-    '/css/bottom-nav.css',
-    '/css/cart.css',
-    '/css/checkout.css',
-    '/css/orders.css',
-    '/css/dark-mode.css',
-    '/js/config.js',
-    '/js/whatsapp.js',
-    '/js/theme.js',
-    '/js/language.js',
-    '/js/data-loader.js',
-    '/js/search.js',
-    '/js/categories.js',
-    '/js/products.js',
-    '/js/category-products.js',
-    '/js/recently-viewed.js',
-    '/js/most-orders.js',
-    '/js/cart.js',
-    '/js/orders.js',
-    '/js/checkout.js',
-    '/js/location.js',
-    '/js/bottom-nav.js',
-    '/js/back-to-top.js',
-    '/js/animations.js',
-    '/js/app.js',
-    '/data/index.json',
+    '/Quick-Dukan/',
+    '/Quick-Dukan/index.html',
+    '/Quick-Dukan/manifest.json',
+    '/Quick-Dukan/css/theme.css',
+    '/Quick-Dukan/css/animations.css',
+    '/Quick-Dukan/css/layout.css',
+    '/Quick-Dukan/css/header.css',
+    '/Quick-Dukan/css/search.css',
+    '/Quick-Dukan/css/categories.css',
+    '/Quick-Dukan/css/product-card.css',
+    '/Quick-Dukan/css/category-products.css',
+    '/Quick-Dukan/css/recently-viewed.css',
+    '/Quick-Dukan/css/most-orders.css',
+    '/Quick-Dukan/css/bottom-nav.css',
+    '/Quick-Dukan/css/cart.css',
+    '/Quick-Dukan/css/checkout.css',
+    '/Quick-Dukan/css/orders.css',
+    '/Quick-Dukan/css/dark-mode.css',
+    '/Quick-Dukan/css/pwa-install.css',
+    '/Quick-Dukan/js/config.js',
+    '/Quick-Dukan/js/whatsapp.js',
+    '/Quick-Dukan/js/theme.js',
+    '/Quick-Dukan/js/language.js',
+    '/Quick-Dukan/js/data-loader.js',
+    '/Quick-Dukan/js/search.js',
+    '/Quick-Dukan/js/categories.js',
+    '/Quick-Dukan/js/products.js',
+    '/Quick-Dukan/js/category-products.js',
+    '/Quick-Dukan/js/recently-viewed.js',
+    '/Quick-Dukan/js/most-orders.js',
+    '/Quick-Dukan/js/cart.js',
+    '/Quick-Dukan/js/orders.js',
+    '/Quick-Dukan/js/checkout.js',
+    '/Quick-Dukan/js/location.js',
+    '/Quick-Dukan/js/bottom-nav.js',
+    '/Quick-Dukan/js/back-to-top.js',
+    '/Quick-Dukan/js/animations.js',
+    '/Quick-Dukan/js/app.js',
+    '/Quick-Dukan/js/auto-refresh.js',
+    '/Quick-Dukan/js/pwa-install.js',
+    '/Quick-Dukan/js/service-worker.js',
+    '/Quick-Dukan/icons/icon-72.png',
+    '/Quick-Dukan/icons/icon-96.png',
+    '/Quick-Dukan/icons/icon-128.png',
+    '/Quick-Dukan/icons/icon-144.png',
+    '/Quick-Dukan/icons/icon-152.png',
+    '/Quick-Dukan/icons/icon-192.png',
+    '/Quick-Dukan/icons/icon-384.png',
+    '/Quick-Dukan/icons/icon-512.png',
 ];
 
-// Install Service Worker
+// Install
 self.addEventListener('install', (event) => {
-    console.log('🔧 Service Worker Installed');
+    console.log('🔧 Service Worker v2 Installed');
     event.waitUntil(
         caches.open(CACHE_NAME)
-            .then(cache => {
-                console.log('📦 Caching files...');
-                return cache.addAll(STATIC_CACHE);
-            })
-            .then(() => self.skipWaiting())
+        .then(cache => {
+            console.log('📦 Caching', STATIC_CACHE.length, 'files...');
+            return Promise.allSettled(
+                STATIC_CACHE.map(url =>
+                    cache.add(url).catch(err => {
+                        console.warn('Failed to cache:', url, err);
+                    })
+                )
+            );
+        })
+        .then(() => self.skipWaiting())
     );
 });
 
 // Activate - Clean old caches
 self.addEventListener('activate', (event) => {
-    console.log('✅ Service Worker Activated');
+    console.log('✅ Service Worker v2 Activated');
     event.waitUntil(
         caches.keys().then(cacheNames => {
             return Promise.all(
-                cacheNames.map(cache => {
-                    if (cache !== CACHE_NAME) {
-                        console.log('🗑️ Deleting old cache:', cache);
-                        return caches.delete(cache);
-                    }
+                cacheNames
+                .filter(cache => cache !== CACHE_NAME && cache !== DATA_CACHE)
+                .map(cache => {
+                    console.log('🗑️ Deleting old cache:', cache);
+                    return caches.delete(cache);
                 })
             );
         }).then(() => self.clients.claim())
     );
 });
 
-// Fetch - Network First, then Cache
+// Fetch - Cache First for static, Network First for data
 self.addEventListener('fetch', (event) => {
-    // Skip non-GET requests
-    if (event.request.method !== 'GET') return;
+    const { request } = event;
+    const url = new URL(request.url);
     
-    event.respondWith(
-        fetch(event.request)
+    if (request.method !== 'GET') return;
+    if (url.protocol === 'chrome-extension:') return;
+    
+    // Data files - Network First
+    if (url.pathname.includes('/data/')) {
+        event.respondWith(
+            fetch(request)
             .then(response => {
-                // Cache the fresh response
-                const responseClone = response.clone();
-                caches.open(CACHE_NAME).then(cache => {
-                    cache.put(event.request, responseClone);
-                });
+                const clone = response.clone();
+                caches.open(DATA_CACHE).then(cache => cache.put(request, clone));
                 return response;
             })
-            .catch(() => {
-                // Offline fallback - return cached version
-                return caches.match(event.request);
-            })
+            .catch(() => caches.match(request))
+        );
+        return;
+    }
+    
+    // Static assets - Cache First with background update
+    event.respondWith(
+        caches.match(request).then(cached => {
+            const fetchPromise = fetch(request)
+                .then(response => {
+                    if (response && response.status === 200) {
+                        caches.open(CACHE_NAME).then(cache => cache.put(request, response.clone()));
+                    }
+                    return response;
+                })
+                .catch(() => null);
+            
+            return cached || fetchPromise;
+        })
     );
 });
 
-// Listen for refresh message
+// Message listener
 self.addEventListener('message', (event) => {
     if (event.data === 'SKIP_WAITING') {
         self.skipWaiting();
     }
 });
 
-console.log('🔄 Service Worker Ready - Auto Refresh Active');
+console.log('🔄 Service Worker v2 Ready');
