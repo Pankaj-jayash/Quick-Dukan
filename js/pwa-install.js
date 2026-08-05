@@ -22,13 +22,9 @@ class PWAInstallManager {
         
         // Listen for install prompt
         window.addEventListener('beforeinstallprompt', (e) => {
-            // ✅ FIX: Prevent default and save the event
             e.preventDefault();
             this.deferredPrompt = e;
-            console.log('📥 Install prompt captured - Ready to install!');
-            
-            // ✅ FIX: Show popup immediately when prompt is available
-            this.showFullPopup();
+            console.log('📥 Install prompt captured');
         });
         
         // App installed successfully
@@ -55,14 +51,14 @@ class PWAInstallManager {
     schedulePopups() {
         // Wait 3 seconds after splash, then show full popup
         setTimeout(() => {
-            if (!this.installCompleted && !this.isAppInstalled() && !this.fullPopup) {
+            if (!this.installCompleted && !this.isAppInstalled()) {
                 this.showFullPopup();
             }
         }, 3500);
         
         // Schedule mini popup after 1 minute
         this.miniTimer = setTimeout(() => {
-            if (!this.installCompleted && !this.isAppInstalled() && !this.miniPopup) {
+            if (!this.installCompleted && !this.isAppInstalled()) {
                 this.showMiniPopup();
             }
         }, 60000);
@@ -96,7 +92,7 @@ class PWAInstallManager {
                     </div>
                     <div class="pwa-full-feature">
                         <span>📱</span>
-                        <span> ऐप जैसा</span>
+                        <span>ऐप जैसा</span>
                     </div>
                     <div class="pwa-full-feature">
                         <span>🚀</span>
@@ -187,60 +183,38 @@ class PWAInstallManager {
     }
     
     // ==========================================
-    // ✅ FIXED: INSTALL APP - Better handling
+    // INSTALL APP
     // ==========================================
     async installApp() {
-        // ✅ Check if prompt is available
-        if (this.deferredPrompt) {
-            try {
-                // Show the browser install prompt
-                await this.deferredPrompt.prompt();
-                const result = await this.deferredPrompt.userChoice;
-                
-                if (result.outcome === 'accepted') {
-                    console.log('✅ User accepted install');
-                    const btn = document.getElementById('pwaFullInstallBtn') || document.getElementById('pwaMiniInstallBtn');
-                    if (btn) {
-                        btn.textContent = '✅ इंस्टॉल हो रहा है...';
-                        btn.disabled = true;
-                    }
-                    this.hideAllPopups();
-                } else {
-                    console.log('❌ User declined');
+        if (!this.deferredPrompt) {
+            this.showManualInstructions();
+            return;
+        }
+        
+        try {
+            this.deferredPrompt.prompt();
+            const result = await this.deferredPrompt.userChoice;
+            
+            if (result.outcome === 'accepted') {
+                console.log('✅ User accepted install');
+                const btn = document.getElementById('pwaFullInstallBtn') || document.getElementById('pwaMiniInstallBtn');
+                if (btn) {
+                    btn.textContent = '✅ इंस्टॉल हो रहा है...';
+                    btn.disabled = true;
                 }
-                
-                // Clear the saved prompt
-                this.deferredPrompt = null;
-                
-            } catch (error) {
-                console.error('Install failed:', error);
-                this.showManualInstructions();
+            } else {
+                console.log('❌ User declined');
             }
-        } else {
-            // ✅ If no prompt available, show browser-specific instructions
+            
+            this.deferredPrompt = null;
+        } catch (error) {
+            console.error('Install failed:', error);
             this.showManualInstructions();
         }
     }
     
     showManualInstructions() {
-        // ✅ Better manual instructions with browser detection
-        const isChrome = /Chrome/.test(navigator.userAgent) && /Google Inc/.test(navigator.vendor);
-        const isSafari = /Safari/.test(navigator.userAgent) && /Apple Computer/.test(navigator.vendor);
-        const isFirefox = /Firefox/.test(navigator.userAgent);
-        
-        let message = '';
-        
-        if (isChrome) {
-            message = '📱 Chrome में इंस्टॉल करें:\n\n1. एड्रेस बार में दाईं ओर 📥 आइकॉन पर टैप करें\n2. "Install" पर टैप करें\n\nया\n\n1. ⋮ मेनू खोलें\n2. "Install Quick Dukan" चुनें';
-        } else if (isSafari) {
-            message = '📱 Safari में इंस्टॉल करें:\n\n1. नीचे Share बटन 📤 पर टैप करें\n2. "Add to Home Screen" चुनें\n3. "Add" पर टैप करें';
-        } else if (isFirefox) {
-            message = '📱 Firefox में इंस्टॉल करें:\n\n1. एड्रेस बार में 🏠 आइकॉन पर टैप करें\n2. "Install" पर टैप करें';
-        } else {
-            message = '📱 मैन्युअली इंस्टॉल करें:\n\n1. ब्राउज़र मेनू खोलें\n2. "Add to Home Screen" या "Install App" चुनें\n3. कन्फर्म करें';
-        }
-        
-        alert(message);
+        alert('📱 मैन्युअली इंस्टॉल करें:\n\n1. ब्राउज़र मेनू (⋮) खोलें\n2. "Add to Home Screen" चुनें\n3. "Add" पर टैप करें');
     }
     
     showToast(message) {
@@ -252,11 +226,7 @@ class PWAInstallManager {
     }
 }
 
-// ✅ FIX: Initialize immediately when DOM is ready
-if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', () => {
-        window.pwaInstallManager = new PWAInstallManager();
-    });
-} else {
+// Initialize
+document.addEventListener('DOMContentLoaded', () => {
     window.pwaInstallManager = new PWAInstallManager();
-}
+});
