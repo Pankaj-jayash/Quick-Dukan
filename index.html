@@ -8,6 +8,13 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <title>Quick Dukan - आपकी विश्वसनीय किराना दुकान</title>
     
+    <!-- PWA Manifest -->
+<link rel="manifest" href="manifest.json">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Quick Dukan">
+<link rel="apple-touch-icon" href="/Quick-Dukan/icons/icon-192.png">
+    
     <!-- Favicon -->
     <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🛒</text></svg>">
     
@@ -18,6 +25,7 @@
     
     <!-- ============ CSS FILES ============ -->
     <link rel="stylesheet" href="css/theme.css">
+    <link rel="stylesheet" href="css/pwa-install.css">
     <link rel="stylesheet" href="css/animations.css">
     <link rel="stylesheet" href="css/layout.css">
     <link rel="stylesheet" href="css/header.css">
@@ -32,6 +40,9 @@
     <link rel="stylesheet" href="css/orders.css">
     <link rel="stylesheet" href="css/checkout.css">
     <link rel="stylesheet" href="css/cart.css">
+    <link rel="stylesheet" href="css/splash-screen.css">
+    <link rel="stylesheet" href="css/pull-to-refresh.css">
+<link rel="stylesheet" href="css/barcode-scanner.css">
     
     <!-- Font Awesome Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
@@ -54,6 +65,24 @@
             ⚠️ कृपया JavaScript चालू करें! हमारी साइट ठीक से काम करने के लिए JS की ज़रूरत है।
         </div>
     </noscript>
+    <!-- ============================================ -->
+<!-- SPLASH SCREEN -->
+<!-- ============================================ -->
+<div id="splashScreen" aria-hidden="true">
+    <div class="splash-bg">
+        <div class="splash-circle"></div>
+        <div class="splash-circle"></div>
+        <div class="splash-circle"></div>
+    </div>
+    <div class="splash-logo">🛒</div>
+    <div class="splash-brand">Quick Dukan</div>
+    <div class="splash-tagline">आपकी विश्वसनीय किराना दुकान</div>
+    <div class="splash-loader">
+        <div class="splash-dot"></div>
+        <div class="splash-dot"></div>
+        <div class="splash-dot"></div>
+    </div>
+</div>
     
     <!-- ============================================ -->
     <!-- SECTION 1: TOP HEADER (FIXED) -->
@@ -505,7 +534,7 @@
         </div>
     </div>
     
-    <!-- ============================================ -->
+     <!-- ============================================ -->
     <!-- JAVASCRIPT FILES -->
     <!-- ============================================ -->
     <script src="js/config.js"></script>
@@ -524,8 +553,12 @@
     <script src="js/back-to-top.js"></script>
     <script src="js/animations.js"></script>
     <script src="js/app.js"></script>
+    <script src="js/auto-refresh.js"></script>
+    <script src="js/pwa-install.js"></script>
     <script src="js/orders.js"></script>
     <script src="js/location.js"></script>
+    <script src="js/pull-to-refresh.js"></script>
+<script src="js/barcode-scanner.js"></script>  
     <script src="js/checkout.js"></script>
     
     <!-- Font Loading Script -->
@@ -533,6 +566,37 @@
         document.fonts.ready.then(function() {
             document.documentElement.classList.add('fonts-loaded');
         });
+    </script>
+    
+    <!-- Splash Screen Handler -->
+    <script>
+    (function() {
+        var splash = document.getElementById('splashScreen');
+        if (!splash) return;
+        
+        function hideSplash() {
+            if (splash && !splash.classList.contains('hide')) {
+                splash.classList.add('hide');
+                setTimeout(function() {
+                    if (splash && splash.parentNode) {
+                        splash.parentNode.removeChild(splash);
+                    }
+                }, 700);
+            }
+        }
+        
+        // Hide when everything is loaded
+        if (document.readyState === 'complete') {
+            setTimeout(hideSplash, 2000);
+        } else {
+            window.addEventListener('load', function() {
+                setTimeout(hideSplash, 2000);
+            });
+        }
+        
+        // Safety: Force hide after 5 seconds
+        setTimeout(hideSplash, 5000);
+    })();
     </script>
 </body>
 </html>
