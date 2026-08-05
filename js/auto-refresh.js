@@ -48,7 +48,8 @@ class AutoRefreshManager {
     
     registerServiceWorker() {
         if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.register('/Quick-Dukan/js/service-worker.js')
+            // ✅ FIXED: Service worker root path
+            navigator.serviceWorker.register('/Quick-Dukan/service-worker.js')
                 .then(registration => {
                     console.log('📦 Service Worker Registered:', registration.scope);
                     
