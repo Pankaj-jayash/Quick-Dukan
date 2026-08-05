@@ -54,13 +54,63 @@
       "type": "image/png",
       "purpose": "any maskable"
     },
+ {
+   "purpose": "any maskable",
+   "sizes": "512x512",
+   "src": "icons/icon-512.png",
+   "type": "image/png"
+ }
+  ],
+  "screenshots": [
     {
-      "src": "icons/icon-512.png",
-      "sizes": "512x512",
+      "src": "screenshots/home.png",
+      "sizes": "1080x1920",
       "type": "image/png",
-      "purpose": "any maskable"
+      "form_factor": "narrow",
+      "label": "Quick Dukan Home Screen"
     }
   ],
-  "screenshots": [],
-  "shortcuts": []
+  "related_applications": [],
+  "prefer_related_applications": false,
+  "iarc_rating_id": "",
+  "shortcuts": [
+    {
+      "name": "सर्च करें",
+      "short_name": "Search",
+      "description": "प्रोडक्ट सर्च करें",
+      "url": "/Quick-Dukan/?action=search",
+      "icons": [
+        {
+          "src": "icons/search-icon.png",
+          "sizes": "96x96"
+        }
+      ]
+    },
+    {
+      "name": "कार्ट देखें",
+      "short_name": "Cart",
+      "description": "अपना कार्ट देखें",
+      "url": "/Quick-Dukan/?action=cart",
+      "icons": [
+        {
+          "src": "icons/cart-icon.png",
+          "sizes": "96x96"
+        }
+      ]
+    },
+    {
+      "name": "मेरे ऑर्डर",
+      "short_name": "Orders",
+      "description": "अपने ऑर्डर देखें",
+      "url": "/Quick-Dukan/?action=orders",
+      "icons": [
+        {
+          "src": "icons/orders-icon.png",
+          "sizes": "96x96"
+        }
+      ]
+    }
+  ]
 }
+
+ 
