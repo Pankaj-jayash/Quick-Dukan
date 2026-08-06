@@ -114,22 +114,7 @@ class CartManager {
             }
         });
         
-        // Swipe down to close (mobile)
-        let touchStartY = 0;
-        const cartContent = this.cartModal.querySelector('.cart-content');
-        if (cartContent) {
-            cartContent.addEventListener('touchstart', (e) => {
-                touchStartY = e.touches[0].clientY;
-            }, { passive: true });
-            
-            cartContent.addEventListener('touchmove', (e) => {
-                const touchY = e.touches[0].clientY;
-                const diff = touchY - touchStartY;
-                if (cartContent.scrollTop <= 0 && diff > 80) {
-                    this.closeCart();
-                }
-            }, { passive: true });
-        }
+     
     }
     
     loadCart() {
