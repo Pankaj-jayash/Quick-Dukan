@@ -20,7 +20,7 @@
     "nameHi": "नमकीन और बिस्किट",
     "nameEn": "Namkeen & Biscuit",
     "file": "snacks.json",
-    "icon": "🌯",
+    "icon": "🍪",
     "color": "#FF9800",
     "bgColor": "#FFF8E1"
 },
@@ -94,16 +94,6 @@
             "icon": "🥛",
             "color": "#2196F3",
             "bgColor": "#E3F2FD"
-        },
-        {
-            "id": "snacks",
-            "name": "Snacks",
-            "nameHi": "नमकीन और स्नैक्स",
-            "nameEn": "Snacks",
-            "file": "snacks.json",
-            "icon": "🍪",
-            "color": "#FF9800",
-            "bgColor": "#FFF8E1"
         },
         {
             "id": "sabji",
