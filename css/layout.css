@@ -96,7 +96,7 @@ body {
     transform: translateX(-50%) translateY(40px);
     
     /* Glassmorphism */
-    background: rgba(46, 125, 50, 0.25);
+    background: rgba(46, 125, 50, 0.35);
     backdrop-filter: blur(16px);
     -webkit-backdrop-filter: blur(16px);
     border: 1px solid rgba(255, 255, 255, 0.3);
