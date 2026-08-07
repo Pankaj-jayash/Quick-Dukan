@@ -1,6 +1,6 @@
 // ============================================
 // BOTTOM-NAV.JS - Bottom Navigation Logic
-// With Smart Scroll Behavior (Fixed)
+// With Smart Scroll Behavior + Floating Cart Bubble
 // ============================================
 
 class BottomNavManager {
@@ -55,6 +55,9 @@ class BottomNavManager {
         
         // Initial state
         this.ensureCorrectInitialState();
+        
+        // Start watching for cart changes to sync with floating bubble
+        this.watchCartForBubble();
     }
     
     ensureCorrectInitialState() {
@@ -74,6 +77,9 @@ class BottomNavManager {
         }
         
         this.lastScrollTop = 0;
+        
+        // Sync floating bubble
+        this.notifyFloatingBubble();
     }
     
     handleNavClick(target, btn) {
@@ -155,7 +161,7 @@ class BottomNavManager {
     }
     
     // ============================================
-    // NAVBAR
+    // NAVBAR - with Floating Bubble Integration
     // ============================================
     showNavbar() {
         if (this.isNavHidden && this.bottomNav) {
@@ -167,6 +173,9 @@ class BottomNavManager {
             if (this.backToTopBtn && this.isBackToTopVisible) {
                 this.backToTopBtn.classList.remove('navbar-hidden');
             }
+            // 🫧 Navbar aaya - Floating Bubble ko hide karo
+            // Items navbar ke cart mein "guss" gaye
+            this.notifyFloatingBubble();
         }
     }
     
@@ -180,7 +189,152 @@ class BottomNavManager {
             if (this.backToTopBtn && this.isBackToTopVisible) {
                 this.backToTopBtn.classList.add('navbar-hidden');
             }
+            // 🫧 Navbar gaya - Floating Bubble ko show karo (agar cart mein items hain)
+            this.notifyFloatingBubble();
         }
+    }
+    
+    // ============================================
+    // FLOATING CART BUBBLE INTEGRATION
+    // ============================================
+    
+    /**
+     * Cart changes ko watch karo - jab bhi cart update ho,
+     * floating bubble ko refresh karo
+     */
+    watchCartForBubble() {
+        // Poll for cartManager availability
+        const checkInterval = setInterval(() => {
+            if (window.cartManager) {
+                clearInterval(checkInterval);
+                this.bindCartEvents();
+            }
+        }, 300);
+        
+        // Timeout after 8 seconds
+        setTimeout(() => clearInterval(checkInterval), 8000);
+    }
+    
+    /**
+     * Cart manager ke methods ko wrap karo taaki
+     * har add/remove/clear pe bubble update ho
+     */
+    bindCartEvents() {
+        const cart = window.cartManager;
+        if (!cart) return;
+        
+        // Store original methods
+        const originalAddItem = cart.addItem;
+        const originalRemoveItem = cart.removeItem;
+        const originalClearCart = cart.clearCart;
+        const originalUpdateQuantity = cart.updateQuantity;
+        
+        // Wrap addItem
+        if (typeof originalAddItem === 'function') {
+            cart.addItem = (...args) => {
+                const result = originalAddItem.apply(cart, args);
+                this.onCartChanged();
+                return result;
+            };
+        }
+        
+        // Wrap removeItem
+        if (typeof originalRemoveItem === 'function') {
+            cart.removeItem = (...args) => {
+                const result = originalRemoveItem.apply(cart, args);
+                this.onCartChanged();
+                return result;
+            };
+        }
+        
+        // Wrap clearCart
+        if (typeof originalClearCart === 'function') {
+            cart.clearCart = (...args) => {
+                const result = originalClearCart.apply(cart, args);
+                this.onCartChanged();
+                return result;
+            };
+        }
+        
+        // Wrap updateQuantity
+        if (typeof originalUpdateQuantity === 'function') {
+            cart.updateQuantity = (...args) => {
+                const result = originalUpdateQuantity.apply(cart, args);
+                this.onCartChanged();
+                return result;
+            };
+        }
+        
+        // Also start polling as backup
+        this.startCartPolling();
+        
+        console.log('🫧 Floating Bubble - Cart events bound');
+    }
+    
+    /**
+     * Backup polling for cart changes
+     */
+    startCartPolling() {
+        let lastItemCount = -1;
+        let lastTotal = -1;
+        
+        this.cartPollInterval = setInterval(() => {
+            const cart = window.cartManager;
+            if (!cart) return;
+            
+            let currentItems = 0;
+            let currentTotal = 0;
+            
+            // Different cart managers might have different structures
+            if (Array.isArray(cart.items)) {
+                currentItems = cart.items.length;
+                currentTotal = cart.items.reduce((sum, item) => {
+                    const price = item.product?.price || item.price || 0;
+                    const qty = item.quantity || 1;
+                    return sum + (price * qty);
+                }, 0);
+            } else if (typeof cart.getItems === 'function') {
+                const items = cart.getItems();
+                currentItems = items.length;
+                currentTotal = cart.getTotal?.() || 0;
+            } else if (typeof cart.getTotalItems === 'function') {
+                currentItems = cart.getTotalItems();
+                currentTotal = cart.getTotal?.() || 0;
+            }
+            
+            if (currentItems !== lastItemCount || currentTotal !== lastTotal) {
+                lastItemCount = currentItems;
+                lastTotal = currentTotal;
+                this.onCartChanged();
+            }
+        }, 600);
+    }
+    
+    /**
+     * Called whenever cart changes
+     */
+    onCartChanged() {
+        // Thoda delay do taaki cart manager update ho jaye
+        if (this.cartChangeTimer) clearTimeout(this.cartChangeTimer);
+        this.cartChangeTimer = setTimeout(() => {
+            this.notifyFloatingBubble();
+        }, 150);
+    }
+    
+    /**
+     * Floating bubble ko current state ke hisaab se update karo
+     */
+    notifyFloatingBubble() {
+        if (!window.floatingCartBubble) return;
+        
+        const bubble = window.floatingCartBubble;
+        
+        // Update navbar hidden state
+        bubble.isNavHidden = this.isNavHidden;
+        
+        // Refresh bubble content and visibility
+        bubble.updateBubble();
+        bubble.checkVisibility();
     }
     
     // ============================================
@@ -188,11 +342,8 @@ class BottomNavManager {
     // ============================================
     showBackToTop() {
         if (!this.isBackToTopVisible && this.backToTopBtn) {
-            // Remove hidden first
             this.backToTopBtn.classList.remove('hidden');
-            // Force reflow
             void this.backToTopBtn.offsetWidth;
-            // Add visible
             this.backToTopBtn.classList.add('visible');
             this.isBackToTopVisible = true;
             
@@ -213,44 +364,25 @@ class BottomNavManager {
     }
     
     // ============================================
-    // SCROLL TO TOP - FULLY FIXED
+    // SCROLL TO TOP
     // ============================================
     scrollToTop() {
-        // IMMEDIATELY hide back-to-top button
         this.hideBackToTop();
-        
-        // Set flag to block scroll events
         this.isScrollingToTop = true;
-        
-        // Show navbar
         this.showNavbar();
-        
-        // Set home active
         this.setActiveByTarget('home');
         
-        // Scroll to top
         if (this.mainContent) {
-            this.mainContent.scrollTo({
-                top: 0,
-                behavior: 'smooth'
-            });
-        }
-        
-        // Reset main content bottom spacing
-        if (this.mainContent) {
+            this.mainContent.scrollTo({ top: 0, behavior: 'smooth' });
             this.mainContent.style.bottom = 'var(--bottom-nav-height)';
         }
         
-        // Clear any pending timers
         if (this.scrollTimer) clearTimeout(this.scrollTimer);
         if (this.scrollEndTimer) clearTimeout(this.scrollEndTimer);
         
-        // After animation completes, reset state
         this.scrollEndTimer = setTimeout(() => {
             this.isScrollingToTop = false;
             this.lastScrollTop = 0;
-            
-            // Force correct state
             this.showNavbar();
             this.hideBackToTop();
             
@@ -258,7 +390,9 @@ class BottomNavManager {
                 this.mainContent.style.bottom = 'var(--bottom-nav-height)';
             }
             
-            // Reset all categories
+            // 🫧 Navbar wapas aa gaya - bubble hide karo
+            this.notifyFloatingBubble();
+            
             const allBtn = document.querySelector('[data-category="all"]');
             if (allBtn && !allBtn.classList.contains('active')) {
                 allBtn.click();
@@ -275,6 +409,9 @@ class BottomNavManager {
         
         if (showBackToTop === true) this.showBackToTop();
         else if (showBackToTop === false) this.hideBackToTop();
+        
+        // Sync bubble after state change
+        this.notifyFloatingBubble();
     }
     
     goHome() {
@@ -319,8 +456,19 @@ class BottomNavManager {
             alert(lang === 'hi' ? '📋 ऑर्डर हिस्ट्री जल्द ही उपलब्ध होगी!' : '📋 Order history coming soon!');
         }
     }
+    
+    // ============================================
+    // CLEANUP
+    // ============================================
+    destroy() {
+        if (this.scrollTimer) clearTimeout(this.scrollTimer);
+        if (this.scrollEndTimer) clearTimeout(this.scrollEndTimer);
+        if (this.cartChangeTimer) clearTimeout(this.cartChangeTimer);
+        if (this.cartPollInterval) clearInterval(this.cartPollInterval);
+    }
 }
 
+// Initialize on DOM ready
 document.addEventListener('DOMContentLoaded', () => {
     window.bottomNavManager = new BottomNavManager();
 });
