@@ -1,6 +1,6 @@
 // ============================================
 // CHECKOUT.JS - Premium Checkout Logic (Final)
-// Quick Dukan - Uses LocationManager | Multilingual
+// Quick Dukan - Uses LocationManager | Multilingual | Location Fix
 // ============================================
 
 class CheckoutManager {
@@ -244,8 +244,8 @@ class CheckoutManager {
         if (this.location) {
             this.location.setLanguage(this.currentLang);
             this.location.start(
-                (data) => this.onLocationFound(data),    // Success
-                (error) => this.onLocationError(error)   // Error
+                (data) => this.onLocationFound(data),
+                (error) => this.onLocationError(error)
             );
         }
     }
@@ -446,14 +446,14 @@ class CheckoutManager {
     }
     
     // ============================================
-    // SUBMIT ORDER
+    // 🔥 SUBMIT ORDER — FIXED LOCATION
     // ============================================
     submitOrder() {
         const name = this.customerName?.value?.trim();
         const phone = this.customerPhone?.value?.replace(/\D/g, '');
         const villageCity = this.villageCity?.value?.trim();
         
-        // Validate
+        // Validate Name
         if (!name || name.length < 2) {
             this.showToast(this.getMsg('toast', 'nameRequired'));
             this.customerName?.classList.add('error');
@@ -462,6 +462,7 @@ class CheckoutManager {
         }
         this.customerName?.classList.remove('error');
         
+        // Validate Phone
         if (!phone || phone.length !== 10 || !/^[6-9]/.test(phone)) {
             this.showToast(this.getMsg('toast', 'phoneRequired'));
             this.customerPhone?.classList.add('error');
@@ -470,6 +471,7 @@ class CheckoutManager {
         }
         this.customerPhone?.classList.remove('error');
         
+        // Validate Village/City
         if (!villageCity || villageCity.length < 2) {
             this.showToast(this.getMsg('toast', 'cityRequired'));
             this.villageCity?.classList.add('error');
@@ -478,8 +480,34 @@ class CheckoutManager {
         }
         this.villageCity?.classList.remove('error');
         
-        // 🔥 Check GPS location via LocationManager
-        if (!this.location || !this.location.isReady()) {
+        // 🔥 FIX: Get location DIRECTLY from hidden fields
+        const lat = document.getElementById('latitude')?.value;
+        const lng = document.getElementById('longitude')?.value;
+        const locationUrl = document.getElementById('locationUrl')?.value;
+        
+        console.log('📍 Direct Location Check:', { lat, lng, locationUrl });
+        
+        // 🔥 Build location data
+        let locationData = { lat: '', lng: '', url: '' };
+        
+        if (lat && lng && parseFloat(lat) !== 0 && parseFloat(lng) !== 0) {
+            // Use hidden field values directly
+            locationData = {
+                lat: lat,
+                lng: lng,
+                url: locationUrl || `https://maps.google.com/?q=${lat},${lng}`
+            };
+            console.log('✅ Location from hidden fields:', locationData);
+        } else if (this.location && this.location.isReady()) {
+            // Fallback to location manager
+            locationData = this.location.getData();
+            console.log('✅ Location from manager:', locationData);
+        }
+        
+        // 🔥 FINAL VALIDATION: Ensure we have coordinates
+        if (!locationData.lat || !locationData.lng || 
+            parseFloat(locationData.lat) === 0 || parseFloat(locationData.lng) === 0) {
+            console.error('❌ Invalid coordinates:', locationData);
             this.showToast(this.getMsg('toast', 'gpsRequired'));
             if (this.location) {
                 this.location.showPopup();
@@ -495,9 +523,6 @@ class CheckoutManager {
         
         // Get delivery time
         const deliveryTime = this.getSelectedDeliveryTime();
-        
-        // 🔥 Get location data from LocationManager
-        const locationData = this.location.getData();
         
         // Build order data
         const orderData = {
@@ -517,6 +542,8 @@ class CheckoutManager {
             location: locationData,
         };
         
+        console.log('📦 Final Order Data:', JSON.stringify(orderData, null, 2));
+        
         // Send via WhatsApp
         if (window.whatsappManager?.sendOrder) {
             window.whatsappManager.sendOrder(orderData);
@@ -524,7 +551,7 @@ class CheckoutManager {
             this.sendDirectWhatsApp(orderData);
         }
         
-        // Save to order history
+        // 🔥 Save to order history WITH location
         if (window.ordersManager?.saveOrder) {
             window.ordersManager.saveOrder({
                 items: this.cartItems.map(item => ({
@@ -539,13 +566,14 @@ class CheckoutManager {
                 total: this.cartTotal,
                 itemCount: this.cartItemCount,
                 deliveryTime: deliveryTime,
+                location: locationData,
             });
         }
         
         // Success animation
         this.triggerConfetti();
         
-        // 🔥 SHOW SUCCESS POPUP AFTER 1.5 SECONDS
+        // 🔥 SHOW SUCCESS POPUP
         setTimeout(() => {
             if (window.orderPopupManager) {
                 window.orderPopupManager.showSuccessPopup({
