@@ -1,416 +1,390 @@
 // ============================================
-// LOCATION.JS - Quick Dukan
-// Perfect Auto-Detect | Smooth UX | Always Fresh
+// LOCATION.JS - Live GPS Manager
+// Quick Dukan - Silent Loop | GPS Popup | Auto-Detect
 // ============================================
 
 class LocationManager {
     constructor() {
-        // DOM Elements
-        this.getLocationBtn = document.getElementById('getLocationBtn');
-        this.locationText = document.getElementById('locationText');
-        this.latitude = document.getElementById('latitude');
-        this.longitude = document.getElementById('longitude');
-        this.locationUrl = document.getElementById('locationUrl');
-        this.villageCity = document.getElementById('villageCity');
-        this.landmark = document.getElementById('landmark');
-        
         // State
-        this.isLoading = false;
-        this.retryCount = 0;
-        this.maxRetries = 5;              // ✅ Balanced
-        this.watchId = null;
-        this.lastLocation = null;
-        this.gpsPopupVisible = false;
-        this.detectionActive = false;
-        this.lastAutoStartTime = 0;
-        this.locationResolved = false;    // ✅ Track if location already found
-        this.permissionState = 'prompt';  // prompt | granted | denied
+        this.isFound = false;
+        this.isSearching = false;
+        this.popupVisible = false;
+        this.currentLang = 'hi';
         
-        // Timers
-        this.toastTimer = null;
-        this.retryTimer = null;
-        this.liveTrackTimer = null;
-        this.popupAutoCloseTimer = null;
+        // Loop control
+        this.retryInterval = null;
+        this.retryDelay = 5000; // 5 seconds
         
-        // Settings
-        this.AUTO_START_DEBOUNCE = 5000;  // 5 sec
-        this.POPUP_AUTO_CLOSE = 0;        // ✅ Never auto-close
-        this.LIVE_TRACK_MAX_DURATION = 5 * 60 * 1000; // 5 min
-        this.MIN_ACCURACY = 80;           // meters
+        // GPS settings
+        this.gpsTimeout = 8000; // 8 seconds timeout
+        this.highAccuracy = true;
         
-        if (!this.getLocationBtn) return;
-        this.init();
+        // Callbacks
+        this.onFoundCallback = null;
+        this.onErrorCallback = null;
+        this.onStateChangeCallback = null;
+        
+        // DOM refs (set via setIndicator)
+        this.indicatorElement = null;
+        
+        // Hidden fields (auto-detect)
+        this.latitudeField = document.getElementById('latitude');
+        this.longitudeField = document.getElementById('longitude');
+        this.locationUrlField = document.getElementById('locationUrl');
+        this.villageCityField = document.getElementById('villageCity');
+        this.landmarkField = document.getElementById('landmark');
+        
+        // Auto-detect events
+        this.bindAutoDetectEvents();
+        
+        console.log('📍 LocationManager Initialized');
     }
-
+    
     // ============================================
-    // INITIALIZATION
+    // PUBLIC API
     // ============================================
-    init() {
-        // Manual button (fallback)
-        this.getLocationBtn.addEventListener('click', (e) => {
-            e.preventDefault();
-            this.getLocation(false);
-        });
-
-        // ✅ Checkout open → AUTO START
-        document.addEventListener('checkoutOpened', () => {
-            setTimeout(() => this.autoStart(), 400);
-        });
-
-        // ✅ Checkout close → RESET
-        document.addEventListener('checkoutClosed', () => {
-            this.resetAll();
-        });
-
-        // ✅ Watch for modal visibility changes
-        this.observeCheckoutModal();
+    
+    /**
+     * Start silent GPS detection loop
+     * @param {Function} onFound - Callback when location found
+     * @param {Function} onError - Callback when GPS error
+     */
+    start(onFound, onError) {
+        console.log('📍 Starting silent GPS loop...');
         
-        // ✅ Permission change → auto react
-        this.watchPermissionChanges();
+        this.onFoundCallback = onFound || null;
+        this.onErrorCallback = onError || null;
+        this.isSearching = true;
+        this.isFound = false;
         
-        // ✅ User returns to tab → retry if needed
-        document.addEventListener('visibilitychange', () => {
-            if (!document.hidden && this.detectionActive && !this.locationResolved) {
-                console.log('👁 Tab visible — checking location...');
-                setTimeout(() => this.getLocation(true), 800);
-            }
-        });
+        // Try immediately
+        this.tryGetLocation();
         
-        // ✅ Window focus → retry (user may have turned ON GPS)
-        window.addEventListener('focus', () => {
-            if (this.detectionActive && !this.locationResolved && this.gpsPopupVisible) {
-                console.log('👁 Window focused — GPS may be ON now...');
-                setTimeout(() => {
-                    this.hideGPSPopup();
-                    this.retryCount = 0;
-                    this.getLocation(true);
-                }, 1500);
-            }
-        });
+        // Start loop
+        this.startLoop();
+        
+        // Update indicator
+        this.updateIndicator('searching');
     }
-
-    observeCheckoutModal() {
-        const modal = document.getElementById('checkoutModal');
-        if (!modal) return;
+    
+    /**
+     * Stop GPS detection and hide popup
+     */
+    stop() {
+        console.log('📍 Stopping GPS...');
         
-        const observer = new MutationObserver((mutations) => {
-            mutations.forEach((mutation) => {
-                if (mutation.attributeName === 'class') {
-                    const isHidden = modal.classList.contains('hidden');
-                    if (!isHidden && !this.detectionActive) {
-                        setTimeout(() => this.autoStart(), 400);
-                    } else if (isHidden && this.detectionActive) {
-                        this.resetAll();
-                    }
-                }
-            });
-        });
+        this.stopLoop();
+        this.hidePopup();
+        this.isSearching = false;
+        this.isFound = false;
         
-        observer.observe(modal, { attributes: true, attributeFilter: ['class'] });
-        this.modalObserver = observer;
+        // Clear callbacks
+        this.onFoundCallback = null;
+        this.onErrorCallback = null;
+        
+        // Clear hidden fields
+        this.clearLocationData();
+        
+        // Update indicator
+        this.updateIndicator('off');
     }
-
-    // ============================================
-    // LANGUAGE SYSTEM
-    // ============================================
-    getLang() {
-        return localStorage.getItem('quickDukanLang') || CONFIG?.defaultLanguage || 'hi';
+    
+    /**
+     * Check if location is ready
+     * @returns {boolean}
+     */
+    isReady() {
+        return this.isFound && 
+               this.latitudeField?.value && 
+               this.longitudeField?.value;
     }
-
-    t(key) {
-        const lang = this.getLang();
-        const texts = {
-            hi: {
-                detecting: '📍 आपकी लोकेशन ली जा रही है...',
-                found: '✅ लोकेशन मिल गई!',
-                foundDetail: 'आपका ऑर्डर जल्द ही आपके घर पहुँचेगा! 🚀',
-                liveOn: '🟢 लाइव लोकेशन एक्टिव',
-                gpsOffTitle: '📡 GPS बंद है',
-                gpsOffMessage: 'आपका सामान सही-सलामत आपके घर तक पहुँचाने के लिए हमें आपकी सटीक लोकेशन चाहिए। कृपया GPS चालू करें। 🙏',
-                gpsInstruction: '📱 ऊपर से नीचे स्वाइप करें → 📍 Location icon दबाएं',
-                gpsOnDone: '✅ GPS चालू कर दिया! लोकेशन लें',
-                permissionTitle: '📍 लोकेशन की अनुमति',
-                permissionMessage: 'डिलीवरी के लिए आपकी लोकेशन ज़रूरी है। "Allow" करें।',
-                permissionButton: '📍 Allow करें',
-                retryBtn: '🔄 फिर से कोशिश करें',
-                closeBtn: '✕',
-                skipBtn: 'बाद में, खुद भर दूँगा',
-                manualHint: '✍️ अपना गाँव/शहर/इलाका लिखें',
-                accuracyHigh: '🎯 बहुत सटीक',
-                accuracyMedium: '📍 ठीक-ठाक',
-                accuracyLow: '🌍 कम सटीक — जाँच लें',
-                oldLocation: '⚠️ पुरानी लोकेशन मिली, नई ले रहे हैं...',
-                refreshingLocation: '🔄 बेहतर लोकेशन ले रहे हैं...',
+    
+    /**
+     * Get current location data
+     * @returns {Object} {lat, lng, url}
+     */
+    getData() {
+        return {
+            lat: this.latitudeField?.value || '',
+            lng: this.longitudeField?.value || '',
+            url: this.locationUrlField?.value || '',
+        };
+    }
+    
+    /**
+     * Show GPS popup (public)
+     */
+    showPopup() {
+        this.showGPSPopup();
+    }
+    
+    /**
+     * Hide GPS popup (public)
+     */
+    hidePopup() {
+        this.hideGPSPopup();
+    }
+    
+    /**
+     * Open device GPS settings
+     */
+    openSettings() {
+        this.openGPSSettings();
+    }
+    
+    /**
+     * Set indicator element for UI updates
+     * @param {HTMLElement} element 
+     */
+    setIndicator(element) {
+        this.indicatorElement = element;
+    }
+    
+    /**
+     * Set language
+     * @param {string} lang - 'hi' or 'en'
+     */
+    setLanguage(lang) {
+        this.currentLang = lang;
+        this.updateIndicator(this.isSearching ? 'searching' : (this.isFound ? 'found' : 'off'));
+    }
+    
+    /**
+     * Update location indicator UI
+     * @param {string} state - 'searching', 'found', 'off'
+     */
+    updateIndicator(state) {
+        if (!this.indicatorElement) return;
+        
+        const messages = {
+            searching: {
+                hi: '⏳ लोकेशन ले रहे हैं...',
+                en: '⏳ Getting location...'
             },
-            en: {
-                detecting: '📍 Getting your location...',
-                found: '✅ Location found!',
-                foundDetail: 'Your order will reach your doorstep soon! 🚀',
-                liveOn: '🟢 Live Location Active',
-                gpsOffTitle: '📡 GPS is OFF',
-                gpsOffMessage: 'We need your exact location to deliver your order safely to your home. Please turn ON GPS. 🙏',
-                gpsInstruction: '📱 Swipe down from top → Tap 📍 Location icon',
-                gpsOnDone: "✅ I've turned ON GPS! Get Location",
-                permissionTitle: '📍 Location Permission',
-                permissionMessage: 'We need your location for delivery. Please tap "Allow".',
-                permissionButton: '📍 Allow',
-                retryBtn: '🔄 Try Again',
-                closeBtn: '✕',
-                skipBtn: 'Skip, I\'ll type it',
-                manualHint: '✍️ Enter your city/village/area',
-                accuracyHigh: '🎯 Very Accurate',
-                accuracyMedium: '📍 Good',
-                accuracyLow: '🌍 Low Accuracy — Verify',
-                oldLocation: '⚠️ Old location found, getting fresh...',
-                refreshingLocation: '🔄 Getting better location...',
+            found: {
+                hi: '✅ लोकेशन मिल गई',
+                en: '✅ Location found'
+            },
+            off: {
+                hi: '📡 GPS बंद है',
+                en: '📡 GPS is OFF'
             }
         };
-        return texts[lang]?.[key] || texts['hi'][key] || key;
+        
+        const msg = messages[state]?.[this.currentLang] || messages[state]?.hi || '';
+        const dotClass = state === 'searching' ? 'searching' : (state === 'found' ? 'found' : 'off');
+        
+        this.indicatorElement.innerHTML = `<span class="location-dot ${dotClass}"></span> ${msg}`;
+        this.indicatorElement.className = `location-indicator ${state}`;
     }
-
-    // ============================================
-    // AUTO START
-    // ============================================
-    autoStart() {
-        // ✅ Debounce
-        if (Date.now() - this.lastAutoStartTime < this.AUTO_START_DEBOUNCE) {
-            console.log('⏭️ Too soon for auto-start');
-            return;
-        }
-        
-        // ✅ Already resolved? Skip
-        if (this.locationResolved) {
-            console.log('✅ Location already resolved, using existing');
-            return;
-        }
-        
-        console.log('🚀 AUTO START: Location detection');
-        this.lastAutoStartTime = Date.now();
-        this.detectionActive = true;
-        this.retryCount = 0;
-        this.gpsPopupVisible = false;
-        
-        // Clear any existing popup
-        this.hideGPSPopup();
-        
-        // Start fresh detection
-        this.showToast(this.t('detecting'), 'info');
-        this.getLocation(true);
+    
+    /**
+     * Register state change callback
+     * @param {Function} callback 
+     */
+    onStateChange(callback) {
+        this.onStateChangeCallback = callback;
     }
-
+    
     // ============================================
-    // GET LOCATION
+    // PRIVATE: SILENT LOOP
     // ============================================
-    getLocation(silent = true) {
-        if (this.isLoading) {
-            console.log('⏳ Already requesting location...');
-            return;
+    
+    startLoop() {
+        this.stopLoop();
+        
+        this.retryInterval = setInterval(() => {
+            if (this.isFound) {
+                this.stopLoop();
+                return;
+            }
+            this.tryGetLocation();
+        }, this.retryDelay);
+        
+        console.log(`🔄 GPS loop started (every ${this.retryDelay / 1000}s)`);
+    }
+    
+    stopLoop() {
+        if (this.retryInterval) {
+            clearInterval(this.retryInterval);
+            this.retryInterval = null;
+            console.log('🔄 GPS loop stopped');
         }
-
+    }
+    
+    tryGetLocation() {
+        if (this.isFound) return;
+        
         if (!navigator.geolocation) {
-            this.showGPSPopup('gpsOff');
+            console.error('❌ Geolocation not supported');
+            this.showGPSPopup();
             return;
         }
-
-        this.isLoading = true;
-
-        if (!silent && this.getLocationBtn) {
-            this.getLocationBtn.innerHTML = '⏳ ' + this.t('detecting');
-            this.getLocationBtn.style.background = '#FF9800';
-            this.getLocationBtn.style.color = '#FFF';
-        }
-
-        console.log(`📍 Requesting position... (attempt ${this.retryCount + 1}/${this.maxRetries})`);
-
-        // ✅ Progressive timeout
-        const timeout = this.retryCount <= 1 ? 10000 :
-                        this.retryCount <= 3 ? 15000 : 20000;
-
+        
+        console.log('📍 Trying GPS...');
+        
         navigator.geolocation.getCurrentPosition(
-            (position) => this.onSuccess(position, silent),
-            (error) => this.onError(error, silent),
+            (position) => this.onLocationSuccess(position),
+            (error) => this.onLocationError(error),
             {
-                enableHighAccuracy: true,
-                timeout: timeout,
-                maximumAge: 0  // ✅ ALWAYS FRESH — no cache
+                enableHighAccuracy: this.highAccuracy,
+                timeout: this.gpsTimeout,
+                maximumAge: 0 // LIVE only, no cached
             }
         );
     }
-
+    
     // ============================================
-    // SUCCESS
+    // PRIVATE: SUCCESS / ERROR HANDLERS
     // ============================================
-    onSuccess(position, silent) {
+    
+    onLocationSuccess(position) {
         const lat = position.coords.latitude;
         const lng = position.coords.longitude;
         const accuracy = position.coords.accuracy;
-        const timestamp = position.timestamp;
-        const ageMs = Date.now() - timestamp;
-
-        console.log('✅ LOCATION:', {
-            lat: lat.toFixed(6),
-            lng: lng.toFixed(6),
-            accuracy: `${Math.round(accuracy)}m`,
-            age: `${(ageMs / 1000).toFixed(1)}s`
-        });
-
-        // ❌ Invalid coordinates
+        const url = `https://maps.google.com/?q=${lat},${lng}`;
+        
+        console.log(`✅ GPS SUCCESS: ${lat.toFixed(6)}, ${lng.toFixed(6)} (${Math.round(accuracy)}m)`);
+        
+        // Validate coordinates
         if ((lat === 0 && lng === 0) || !isFinite(lat) || !isFinite(lng)) {
             console.error('❌ Invalid coordinates');
-            this.isLoading = false;
-            this.scheduleRetry();
             return;
         }
-
-        // ⚠️ Cached/old location — retry for fresh
-        if (ageMs > 30000 && this.retryCount < 3) {
-            console.warn('⚠️ Cached location — retrying for fresh...');
-            if (!silent) this.showToast(this.t('oldLocation'), 'warning');
-            this.isLoading = false;
-            this.retryCount++;
-            setTimeout(() => this.getLocation(silent), 1500);
-            return;
-        }
-
-        // ⚠️ Low accuracy — try for better
-        if (accuracy > this.MIN_ACCURACY && this.retryCount < 3) {
-            console.warn(`⚠️ Low accuracy (${Math.round(accuracy)}m) — retrying...`);
-            if (!silent) this.showToast(this.t('refreshingLocation'), 'info');
-            this.isLoading = false;
-            this.retryCount++;
-            setTimeout(() => this.getLocation(silent), 2000);
-            return;
-        }
-
-        // ✅ SUCCESS!
-        const data = { lat, lng, accuracy, timestamp: Date.now() };
-        this.lastLocation = data;
-        this.locationResolved = true;
-
-        // Apply to form
-        this.applyLocationToForm(data);
+        
+        // Save to hidden fields
+        this.saveLocationData(lat, lng, url);
+        
+        // Update state
+        this.isFound = true;
+        this.isSearching = false;
+        
+        // Stop loop
+        this.stopLoop();
+        
+        // Update indicator
+        this.updateIndicator('found');
+        
+        // Hide popup if visible
+        this.hideGPSPopup();
         
         // Reverse geocode
         this.reverseGeocode(lat, lng);
         
-        // Save
-        this.saveLocation(data);
-        
-        // Start live tracking
-        this.startLiveTracking();
-        
-        // Hide popup
-        this.hideGPSPopup();
-        
-        // Update UI
-        this.updateUIOnSuccess(accuracy);
-        
-        this.isLoading = false;
-        this.retryCount = 0;
-        this.gpsPopupVisible = false;
-
-        if (!silent) {
-            this.showToast(`${this.t('found')} ${this.t('foundDetail')}`, 'success');
-        }
-    }
-
-    applyLocationToForm(data) {
-        if (this.latitude) this.latitude.value = data.lat.toFixed(6);
-        if (this.longitude) this.longitude.value = data.lng.toFixed(6);
-        if (this.locationUrl) this.locationUrl.value = 
-            `https://maps.google.com/?q=${data.lat},${data.lng}`;
-    }
-
-    updateUIOnSuccess(accuracy) {
-        // Button
-        if (this.getLocationBtn) {
-            this.getLocationBtn.innerHTML = '✅ ' + this.t('found');
-            this.getLocationBtn.style.background = '#4CAF50';
-            this.getLocationBtn.style.color = '#FFF';
-            
-            // Reset button style after 5 sec
-            setTimeout(() => {
-                if (this.getLocationBtn && this.locationResolved) {
-                    this.getLocationBtn.style.background = '';
-                    this.getLocationBtn.style.color = '';
-                    this.getLocationBtn.innerHTML = '📍 ' + this.t('found');
-                }
-            }, 5000);
+        // Fire callbacks
+        if (this.onFoundCallback) {
+            this.onFoundCallback({ lat, lng, accuracy, url });
         }
         
-        // Status text
-        if (this.locationText) {
-            this.locationText.classList.remove('hidden');
-            
-            let accLabel;
-            if (accuracy <= 20) accLabel = this.t('accuracyHigh');
-            else if (accuracy <= 50) accLabel = this.t('accuracyMedium');
-            else accLabel = this.t('accuracyLow');
-            
-            this.locationText.innerHTML = `
-                <span style="color:#4CAF50">🟢</span> ${this.t('liveOn')}
-                <br><small>${accLabel} (~${Math.round(accuracy)}m)</small>
-            `;
+        if (this.onStateChangeCallback) {
+            this.onStateChangeCallback('found', { lat, lng, accuracy, url });
         }
     }
-
-    // ============================================
-    // ERROR
-    // ============================================
-    onError(error, silent) {
-        console.error('❌ Location error:', error.message, '(code:', error.code, ')');
-        this.isLoading = false;
-
-        if (error.code === 1) {
-            // PERMISSION_DENIED
-            this.permissionState = 'denied';
-            
-            if (this.retryCount < 2) {
-                // Temporary — auto retry
-                this.retryCount++;
-                console.log(`🔄 Permission temp deny — retry ${this.retryCount} in 6s`);
-                this.scheduleRetry(6000);
-            } else if (!this.gpsPopupVisible) {
-                // Show permission popup
-                this.showGPSPopup('permission');
-                this.gpsPopupVisible = true;
-            } else {
-                // Already showed popup — manual fallback
-                this.showManualFallback();
-            }
-        } else {
-            // POSITION_UNAVAILABLE (2) or TIMEOUT (3) = GPS OFF
-            if (!this.gpsPopupVisible && this.retryCount >= 1) {
-                this.showGPSPopup('gpsOff');
-                this.gpsPopupVisible = true;
-            }
-            
-            // Auto retry
-            if (this.retryCount < this.maxRetries) {
-                this.retryCount++;
-                const delay = this.retryCount <= 2 ? 3000 :
-                              this.retryCount <= 4 ? 6000 : 10000;
-                this.scheduleRetry(delay);
-            } else {
-                this.showManualFallback();
+    
+    onLocationError(error) {
+        const errorMessages = {
+            1: 'PERMISSION_DENIED',
+            2: 'POSITION_UNAVAILABLE',
+            3: 'TIMEOUT'
+        };
+        
+        const errorName = errorMessages[error.code] || 'UNKNOWN';
+        console.log(`❌ GPS Error: ${errorName} (${error.message})`);
+        
+        // Show popup for permission denied or unavailable
+        if (error.code === 1 || error.code === 2) {
+            if (!this.popupVisible) {
+                this.showGPSPopup();
             }
         }
+        
+        // Fire error callback
+        if (this.onErrorCallback) {
+            this.onErrorCallback({ code: error.code, message: error.message, name: errorName });
+        }
+        
+        if (this.onStateChangeCallback) {
+            this.onStateChangeCallback('error', { code: error.code, message: error.message });
+        }
     }
-
-    scheduleRetry(delay = 3000) {
-        clearTimeout(this.retryTimer);
-        console.log(`🔄 Scheduling retry in ${delay}ms`);
-        this.retryTimer = setTimeout(() => this.getLocation(true), delay);
+    
+    // ============================================
+    // PRIVATE: SAVE / CLEAR LOCATION DATA
+    // ============================================
+    
+    saveLocationData(lat, lng, url) {
+        if (this.latitudeField) this.latitudeField.value = lat.toFixed(6);
+        if (this.longitudeField) this.longitudeField.value = lng.toFixed(6);
+        if (this.locationUrlField) this.locationUrlField.value = url;
+        
+        // Also save to localStorage for persistence
+        try {
+            localStorage.setItem('quick-dukan-live-location', JSON.stringify({
+                lat: lat.toFixed(6),
+                lng: lng.toFixed(6),
+                url: url,
+                timestamp: Date.now()
+            }));
+        } catch (e) {}
     }
-
+    
+    clearLocationData() {
+        if (this.latitudeField) this.latitudeField.value = '';
+        if (this.longitudeField) this.longitudeField.value = '';
+        if (this.locationUrlField) this.locationUrlField.value = '';
+        
+        try {
+            localStorage.removeItem('quick-dukan-live-location');
+        } catch (e) {}
+    }
+    
     // ============================================
-    // GPS POPUP
+    // PRIVATE: REVERSE GEOCODE
     // ============================================
-    showGPSPopup(type) {
+    
+    async reverseGeocode(lat, lng) {
+        try {
+            const response = await fetch(
+                `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&addressdetails=1&accept-language=${this.currentLang}`,
+                { headers: { 'User-Agent': 'QuickDukan/1.0' } }
+            );
+            
+            if (!response.ok) return;
+            
+            const data = await response.json();
+            if (!data?.address) return;
+            
+            const addr = data.address;
+            const city = addr.village || addr.town || addr.city || 
+                         addr.county || addr.state_district || '';
+            
+            if (city && this.villageCityField && !this.villageCityField.value) {
+                this.villageCityField.value = city;
+                this.villageCityField.classList.add('valid');
+                console.log(`🏘️ Auto-filled city: ${city}`);
+            }
+            
+            const landmark = addr.road || addr.neighbourhood || addr.suburb || '';
+            if (landmark && this.landmarkField && !this.landmarkField.value) {
+                this.landmarkField.value = landmark;
+                console.log(`🏠 Auto-filled landmark: ${landmark}`);
+            }
+        } catch (error) {
+            console.log('📍 Reverse geocode failed (will use manual entry)');
+        }
+    }
+    
+    // ============================================
+    // PRIVATE: GPS POPUP
+    // ============================================
+    
+    showGPSPopup() {
+        if (this.popupVisible) return;
+        
         // Remove existing
         this.hideGPSPopup();
         
-        const isGPSOff = type === 'gpsOff';
+        const messages = this.getGPSPopupMessages();
         
         const overlay = document.createElement('div');
         overlay.id = 'gpsPopup';
@@ -418,395 +392,190 @@ class LocationManager {
         
         overlay.innerHTML = `
             <div class="gps-popup-card">
-                <!-- Close Button -->
-                <button class="gps-close-btn" id="gpsCloseBtn" aria-label="Close">
-                    ${this.t('closeBtn')}
+                <button class="gps-close-btn" id="gpsCloseBtn">✕</button>
+                
+                <div class="gps-popup-icon">📡</div>
+                
+                <h2 class="gps-popup-title">${messages.title}</h2>
+                
+                <p class="gps-popup-message">${messages.message}</p>
+                
+                <div class="gps-instruction-box">
+                    <p>${messages.instruction}</p>
+                </div>
+                
+                <div class="gps-waves">
+                    <span>📡</span>
+                    <span>📡</span>
+                    <span>📡</span>
+                </div>
+                
+                <button class="gps-primary-btn" id="gpsSettingsBtn">
+                    ${messages.openSettings}
                 </button>
                 
-                <!-- Icon -->
-                <div class="gps-popup-icon">${isGPSOff ? '📡' : '📍'}</div>
-                
-                <!-- Title -->
-                <h2 class="gps-popup-title">
-                    ${isGPSOff ? this.t('gpsOffTitle') : this.t('permissionTitle')}
-                </h2>
-                
-                <!-- Message -->
-                <p class="gps-popup-message">
-                    ${isGPSOff ? this.t('gpsOffMessage') : this.t('permissionMessage')}
-                </p>
-                
-                ${isGPSOff ? `
-                    <!-- GPS Instruction -->
-                    <div class="gps-instruction-box">
-                        <p>${this.t('gpsInstruction')}</p>
-                    </div>
-                    
-                    <!-- Animated Waves -->
-                    <div class="gps-waves">
-                        <span>📡</span><span>📡</span><span>📡</span>
-                    </div>
-                ` : ''}
-                
-                <!-- Primary Button -->
-                <button class="gps-primary-btn" id="gpsPrimaryBtn">
-                    ${isGPSOff ? this.t('gpsOnDone') : this.t('permissionButton')}
-                </button>
-                
-                <!-- Retry Button -->
                 <button class="gps-retry-btn" id="gpsRetryBtn">
-                    ${this.t('retryBtn')}
+                    ${messages.retry}
                 </button>
                 
-                <!-- Skip Button -->
-                <button class="gps-skip-btn" id="gpsSkipBtn">
-                    ${this.t('skipBtn')}
+                <button class="gps-skip-btn" id="gpsSkipBtn" style="display:block;width:100%;padding:10px;background:transparent;color:#999;border:none;font-size:12px;cursor:pointer;margin-top:4px;">
+                    ${messages.skip}
                 </button>
             </div>
         `;
         
         document.body.appendChild(overlay);
         
+        // Prevent body scroll
+        document.body.style.overflow = 'hidden';
+        
         // Animate in
         requestAnimationFrame(() => {
             overlay.classList.add('visible');
         });
         
-        // ✅ Close button
-        overlay.querySelector('#gpsCloseBtn').addEventListener('click', () => {
-            this.hideGPSPopup();
-            this.gpsPopupVisible = false;
-            this.showManualFallback();
-        });
+        // Bind events
+        this.bindPopupEvents(overlay);
         
-        // ✅ Primary button — "GPS ON kar diya"
-        overlay.querySelector('#gpsPrimaryBtn').addEventListener('click', () => {
-            this.hideGPSPopup();
-            this.gpsPopupVisible = false;
-            this.retryCount = 0;
-            this.showToast(this.t('detecting'), 'info');
-            
-            // Wait for GPS to initialize
-            setTimeout(() => this.getLocation(false), 2000);
-        });
-        
-        // ✅ Retry button
-        overlay.querySelector('#gpsRetryBtn').addEventListener('click', () => {
-            this.hideGPSPopup();
-            this.gpsPopupVisible = false;
-            this.retryCount = 0;
-            this.showToast(this.t('detecting'), 'info');
-            this.getLocation(false);
-        });
-        
-        // ✅ Skip button
-        overlay.querySelector('#gpsSkipBtn').addEventListener('click', () => {
-            this.hideGPSPopup();
-            this.gpsPopupVisible = false;
-            this.showManualFallback();
-        });
-        
-        // ✅ Click outside to close? NO — user must interact
-        // overlay.addEventListener('click', (e) => {
-        //     if (e.target === overlay) this.hideGPSPopup();
-        // });
-        
-        // ✅ Auto-close? NO — wait for user action
-        // clearTimeout(this.popupAutoCloseTimer);
-        // this.popupAutoCloseTimer = setTimeout(() => this.hideGPSPopup(), 60000);
+        this.popupVisible = true;
+        console.log('📡 GPS Popup shown');
     }
-
+    
     hideGPSPopup() {
         const popup = document.getElementById('gpsPopup');
         if (popup) {
             popup.classList.remove('visible');
             setTimeout(() => {
-                if (popup.parentNode) popup.remove();
+                if (popup.parentNode) {
+                    popup.remove();
+                }
+                // Restore body scroll if checkout modal is not open
+                const checkoutModal = document.getElementById('checkoutModal');
+                if (checkoutModal && checkoutModal.classList.contains('hidden')) {
+                    document.body.style.overflow = '';
+                }
             }, 300);
         }
-        this.gpsPopupVisible = false;
-        clearTimeout(this.popupAutoCloseTimer);
+        this.popupVisible = false;
     }
-
-    // ============================================
-    // LIVE TRACKING
-    // ============================================
-    startLiveTracking() {
-        this.stopLiveTracking();
+    
+    bindPopupEvents(overlay) {
+        // Close button
+        overlay.querySelector('#gpsCloseBtn')?.addEventListener('click', () => {
+            this.hideGPSPopup();
+        });
         
-        if (!navigator.geolocation) return;
+        // Open GPS Settings
+        overlay.querySelector('#gpsSettingsBtn')?.addEventListener('click', () => {
+            this.openGPSSettings();
+        });
         
-        console.log('🟢 Live tracking started (max 5 min)');
+        // Retry button
+        overlay.querySelector('#gpsRetryBtn')?.addEventListener('click', () => {
+            this.hideGPSPopup();
+            this.isFound = false;
+            this.isSearching = true;
+            this.updateIndicator('searching');
+            this.tryGetLocation();
+            this.startLoop();
+            
+            // Fire state change
+            if (this.onStateChangeCallback) {
+                this.onStateChangeCallback('retrying');
+            }
+        });
         
-        this.watchId = navigator.geolocation.watchPosition(
-            (position) => {
-                const accuracy = position.coords.accuracy;
-                
-                if (this.lastLocation && accuracy < this.lastLocation.accuracy) {
-                    console.log('📍 Better accuracy:', Math.round(accuracy), 'm');
-                    
-                    const data = {
-                        lat: position.coords.latitude,
-                        lng: position.coords.longitude,
-                        accuracy,
-                        timestamp: Date.now()
-                    };
-                    
-                    this.lastLocation = data;
-                    this.applyLocationToForm(data);
-                    this.saveLocation(data);
-                    
-                    // Update accuracy display
-                    if (this.locationText) {
-                        this.locationText.innerHTML = `
-                            <span style="color:#4CAF50">🟢</span> ${this.t('liveOn')}
-                            <br><small>${this.t('accuracyHigh')} (~${Math.round(accuracy)}m)</small>
-                        `;
-                    }
-                }
+        // Skip button
+        overlay.querySelector('#gpsSkipBtn')?.addEventListener('click', () => {
+            this.hideGPSPopup();
+        });
+    }
+    
+    openGPSSettings() {
+        console.log('⚙️ Opening GPS settings...');
+        
+        // Try Android intent
+        if (navigator.userAgent.match(/Android/i)) {
+            try {
+                window.location.href = 'intent://com.android.settings/#Intent;scheme=android-app;end';
+            } catch (e) {}
+        }
+        
+        // Fallback for iOS and others
+        setTimeout(() => {
+            try {
+                window.open('app-settings:', '_blank');
+            } catch (e) {
+                // Last resort
+                alert(this.currentLang === 'hi' 
+                    ? 'कृपया Settings में जाकर Location ON करें' 
+                    : 'Please go to Settings and turn ON Location');
+            }
+        }, 500);
+    }
+    
+    getGPSPopupMessages() {
+        const messages = {
+            hi: {
+                title: '📡 GPS बंद है!',
+                message: 'आपका सामान सही-सलामत पहुँचाने के लिए हमें आपकी सटीक लोकेशन चाहिए। कृपया GPS चालू करें। 🙏',
+                instruction: '📱 ऊपर से स्वाइप करें → ⚙️ Settings खोलें → 📍 Location ON करें',
+                openSettings: '⚙️ GPS SETTING खोलें',
+                retry: '🔄 फिर से कोशिश करें',
+                skip: '✕ बाद में'
             },
-            (error) => {
-                console.log('📍 Live tracking update:', error.message);
-            },
-            {
-                enableHighAccuracy: true,
-                timeout: 30000,
-                maximumAge: 0
+            en: {
+                title: '📡 GPS is OFF!',
+                message: 'We need your exact location to deliver your order safely. Please turn ON GPS. 🙏',
+                instruction: '📱 Swipe down → ⚙️ Open Settings → 📍 Turn Location ON',
+                openSettings: '⚙️ Open GPS Settings',
+                retry: '🔄 Try Again',
+                skip: '✕ Skip'
             }
-        );
-        
-        // ✅ Stop live tracking after 5 min (battery save)
-        clearTimeout(this.liveTrackTimer);
-        this.liveTrackTimer = setTimeout(() => {
-            this.stopLiveTracking();
-            console.log('🔴 Live tracking stopped — timeout');
-        }, this.LIVE_TRACK_MAX_DURATION);
-    }
-
-    stopLiveTracking() {
-        if (this.watchId !== null) {
-            navigator.geolocation.clearWatch(this.watchId);
-            this.watchId = null;
-            console.log('🔴 Live tracking stopped');
-        }
-    }
-
-    // ============================================
-    // PERMISSION WATCHER
-    // ============================================
-    async watchPermissionChanges() {
-        if (!navigator.permissions) return;
-        
-        try {
-            const perm = await navigator.permissions.query({ name: 'geolocation' });
-            this.permissionState = perm.state;
-            
-            perm.addEventListener('change', () => {
-                console.log('📍 Permission:', perm.state);
-                this.permissionState = perm.state;
-                
-                if (perm.state === 'granted') {
-                    // ✅ GRANTED! Auto-detect immediately
-                    console.log('✅ Permission GRANTED — auto detecting!');
-                    this.hideGPSPopup();
-                    this.retryCount = 0;
-                    setTimeout(() => this.getLocation(true), 600);
-                } else if (perm.state === 'denied') {
-                    console.log('❌ Permission DENIED');
-                }
-            });
-        } catch (e) {
-            console.log('Permission API not available');
-        }
-    }
-
-    // ============================================
-    // MANUAL FALLBACK
-    // ============================================
-    showManualFallback() {
-        console.log('✍️ Showing manual fallback');
-        
-        if (this.villageCity) {
-            this.villageCity.placeholder = this.t('manualHint');
-            this.villageCity.style.borderColor = '#FF9800';
-            this.villageCity.style.borderWidth = '2px';
-            this.villageCity.focus();
-            
-            setTimeout(() => {
-                if (this.villageCity) {
-                    this.villageCity.style.borderColor = '';
-                    this.villageCity.style.borderWidth = '';
-                }
-            }, 5000);
-        }
-        
-        if (this.locationText) {
-            this.locationText.classList.remove('hidden');
-            this.locationText.innerHTML = '✍️ Manual entry';
-        }
-        
-        if (this.getLocationBtn) {
-            this.getLocationBtn.innerHTML = '📍 ' + this.t('retryBtn');
-            this.getLocationBtn.style.background = '';
-            this.getLocationBtn.style.color = '';
-        }
-        
-        this.detectionActive = false;
-        this.gpsPopupVisible = false;
-    }
-
-    // ============================================
-    // RESET
-    // ============================================
-    resetAll() {
-        console.log('🔄 Resetting location manager...');
-        
-        this.detectionActive = false;
-        this.locationResolved = false;
-        this.retryCount = 0;
-        this.isLoading = false;
-        this.gpsPopupVisible = false;
-        this.lastLocation = null;
-        
-        this.stopLiveTracking();
-        this.hideGPSPopup();
-        
-        clearTimeout(this.retryTimer);
-        clearTimeout(this.liveTrackTimer);
-        clearTimeout(this.popupAutoCloseTimer);
-        
-        // Reset UI
-        if (this.getLocationBtn) {
-            this.getLocationBtn.innerHTML = '📍 ' + this.t('detecting');
-            this.getLocationBtn.style.background = '';
-            this.getLocationBtn.style.color = '';
-        }
-        
-        if (this.locationText) {
-            this.locationText.classList.add('hidden');
-        }
-        
-        // Clear form fields
-        if (this.latitude) this.latitude.value = '';
-        if (this.longitude) this.longitude.value = '';
-        if (this.locationUrl) this.locationUrl.value = '';
-    }
-
-    // ============================================
-    // REVERSE GEOCODING
-    // ============================================
-    async reverseGeocode(lat, lng) {
-        try {
-            const lang = this.getLang();
-            const res = await fetch(
-                `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&addressdetails=1&accept-language=${lang}`,
-                { headers: { 'User-Agent': 'QuickDukan/1.0' } }
-            );
-            
-            if (!res.ok) return;
-            const data = await res.json();
-            if (!data?.address) return;
-
-            const addr = data.address;
-            const city = addr.village || addr.town || addr.city || 
-                         addr.county || addr.state_district || '';
-            
-            if (city && this.villageCity && !this.villageCity.value) {
-                this.villageCity.value = city;
-                this.villageCity.style.background = '#E8F5E9';
-                this.villageCity.style.transition = 'background 0.4s ease';
-                setTimeout(() => {
-                    if (this.villageCity) this.villageCity.style.background = '';
-                }, 2500);
-            }
-            
-            const landmark = addr.road || addr.neighbourhood || addr.suburb || '';
-            if (landmark && this.landmark && !this.landmark.value) {
-                this.landmark.value = landmark;
-            }
-        } catch (e) {
-            console.log('📍 Reverse geocode failed, manual entry OK');
-        }
-    }
-
-    // ============================================
-    // STORAGE
-    // ============================================
-    saveLocation(data) {
-        try {
-            localStorage.setItem('quick-dukan-location', JSON.stringify({
-                ...data,
-                savedAt: Date.now()
-            }));
-        } catch (e) {}
-    }
-
-    getSavedLocation() {
-        try {
-            const raw = localStorage.getItem('quick-dukan-location');
-            if (!raw) return null;
-            
-            const data = JSON.parse(raw);
-            const age = Date.now() - data.savedAt;
-            
-            // ❌ Don't use if older than 5 minutes
-            if (age > 5 * 60 * 1000) {
-                localStorage.removeItem('quick-dukan-location');
-                return null;
-            }
-            
-            return data;
-        } catch (e) {
-            return null;
-        }
-    }
-
-    // ============================================
-    // TOAST
-    // ============================================
-    showToast(msg, type = 'info') {
-        const toast = document.getElementById('toast');
-        if (!toast) return;
-        
-        const colors = {
-            success: '#4CAF50',
-            error: '#F44336',
-            warning: '#FF9800',
-            info: '#2196F3'
         };
         
-        toast.textContent = msg;
-        toast.style.background = colors[type] || colors.info;
-        toast.classList.remove('hidden');
-        toast.style.animation = 'none';
-        toast.offsetHeight;
-        toast.style.animation = 'slideUp 0.3s ease';
-        
-        clearTimeout(this.toastTimer);
-        this.toastTimer = setTimeout(() => {
-            if (toast) {
-                toast.style.animation = 'fadeOut 0.3s ease forwards';
-                setTimeout(() => {
-                    if (toast) toast.classList.add('hidden');
-                }, 300);
-            }
-        }, 3000);
+        return messages[this.currentLang] || messages.hi;
     }
-
+    
     // ============================================
-    // CLEANUP
+    // PRIVATE: AUTO-DETECT EVENTS
     // ============================================
+    
+    bindAutoDetectEvents() {
+        // When user returns to tab (after turning on GPS)
+        document.addEventListener('visibilitychange', () => {
+            if (!document.hidden && this.isSearching && !this.isFound) {
+                console.log('👁 Tab visible — retrying GPS...');
+                setTimeout(() => this.tryGetLocation(), 1000);
+            }
+        });
+        
+        // When window gains focus (user may have turned on GPS)
+        window.addEventListener('focus', () => {
+            if (this.popupVisible && !this.isFound) {
+                console.log('👁 Window focused — checking GPS...');
+                setTimeout(() => {
+                    this.hideGPSPopup();
+                    this.isSearching = true;
+                    this.updateIndicator('searching');
+                    this.tryGetLocation();
+                    this.startLoop();
+                }, 1500);
+            }
+        });
+    }
+    
+    // ============================================
+    // DESTROY
+    // ============================================
+    
     destroy() {
-        this.resetAll();
-        
-        if (this.modalObserver) {
-            this.modalObserver.disconnect();
-        }
-        
-        clearTimeout(this.toastTimer);
-        clearTimeout(this.retryTimer);
-        clearTimeout(this.liveTrackTimer);
-        clearTimeout(this.popupAutoCloseTimer);
+        this.stop();
+        this.hideGPSPopup();
+        this.onFoundCallback = null;
+        this.onErrorCallback = null;
+        this.onStateChangeCallback = null;
+        console.log('📍 LocationManager destroyed');
     }
 }
 
@@ -817,6 +586,7 @@ document.addEventListener('DOMContentLoaded', () => {
     window.locationManager = new LocationManager();
 });
 
+// Cleanup on page unload
 window.addEventListener('beforeunload', () => {
     if (window.locationManager) {
         window.locationManager.destroy();
