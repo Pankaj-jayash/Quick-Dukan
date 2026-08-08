@@ -1,9 +1,11 @@
 // ============================================
-// ORDERS.JS - My Orders Logic (FIXED)
+// ORDERS.JS - My Orders Logic (Final)
+// Quick Dukan - All Statuses | GPS | Tracking | Cancel | Map
 // ============================================
 
 class OrdersManager {
     constructor() {
+        // DOM Elements
         this.ordersModal = document.getElementById('ordersModal');
         this.ordersList = document.getElementById('ordersList');
         this.emptyOrders = document.getElementById('emptyOrders');
@@ -13,72 +15,146 @@ class OrdersManager {
         this.activeFilter = 'all';
         this.storageKey = 'quick-dukan-orders';
         this.expandedOrder = null;
+        this.currentLang = 'hi';
         
-        // Check if modal exists
+        // Delivery check interval
+        this.deliveryCheckInterval = null;
+        
+        // Shop location
+        this.shopLocation = {
+            lat: 27.6667496,
+            lng: 77.7124673,
+            name: 'Quick Dukan'
+        };
+        
         if (!this.ordersModal) {
-            console.error('❌ Orders Modal not found in DOM! Check if id="ordersModal" exists in HTML');
+            console.error('❌ Orders Modal not found!');
             return;
         }
         
         this.ordersOverlay = this.ordersModal.querySelector('.orders-overlay');
-        
         this.init();
         console.log('✅ Orders Manager Initialized');
     }
     
+    // ============================================
+    // INITIALIZATION
+    // ============================================
     init() {
-        // Close button
-        if (this.closeOrdersBtn) {
-            this.closeOrdersBtn.addEventListener('click', () => this.close());
-        } else {
-            console.warn('⚠️ Close button #closeOrders not found');
+        this.detectLanguage();
+        this.bindEvents();
+        this.startDeliveryCheck();
+    }
+    
+    detectLanguage() {
+        if (window.languageManager?.currentLang) {
+            this.currentLang = window.languageManager.currentLang;
         }
+    }
+    
+    bindEvents() {
+        // Close button
+        this.closeOrdersBtn?.addEventListener('click', () => this.close());
         
         // Overlay click
-        if (this.ordersOverlay) {
-            this.ordersOverlay.addEventListener('click', () => this.close());
-        }
+        this.ordersOverlay?.addEventListener('click', () => this.close());
         
         // Filter buttons
         this.filterBtns.forEach(btn => {
-            btn.addEventListener('click', () => {
-                this.setFilter(btn);
-            });
+            btn.addEventListener('click', () => this.setFilter(btn));
         });
         
         // Start shopping button
-        const startBtn = document.querySelector('.start-shopping-btn');
-        if (startBtn) {
-            startBtn.addEventListener('click', () => {
-                this.close();
-                const allProducts = document.getElementById('allProductsSection');
-                if (allProducts) {
-                    allProducts.scrollIntoView({ behavior: 'smooth' });
-                }
-            });
-        }
-        
-        // DIRECT EVENT LISTENER for orders button in bottom nav
         document.addEventListener('click', (e) => {
-            const ordersBtn = e.target.closest('[data-nav="orders"]');
-            if (ordersBtn) {
+            if (e.target.closest('.start-shopping-btn')) {
                 e.preventDefault();
-                e.stopPropagation();
-                console.log('📋 Orders button clicked via direct listener');
-                this.open();
-                return;
+                this.close();
+                document.getElementById('allProductsSection')?.scrollIntoView({ behavior: 'smooth' });
             }
         });
         
-        // Keyboard shortcut
+        // Bottom nav orders button
+        document.addEventListener('click', (e) => {
+            if (e.target.closest('[data-nav="orders"]')) {
+                e.preventDefault();
+                e.stopPropagation();
+                this.open();
+            }
+        });
+        
+        // Escape key
         document.addEventListener('keydown', (e) => {
-            if (e.key === 'Escape') {
+            if (e.key === 'Escape' && !this.ordersModal.classList.contains('hidden')) {
                 this.close();
+            }
+        });
+        
+        // Language change
+        document.addEventListener('languageChanged', () => {
+            this.detectLanguage();
+            this.render();
+        });
+    }
+    
+    // ============================================
+    // DELIVERY TIME CHECK LOOP
+    // ============================================
+    startDeliveryCheck() {
+        this.deliveryCheckInterval = setInterval(() => {
+            this.checkDeliveryTime();
+        }, 60000);
+        
+        setTimeout(() => this.checkDeliveryTime(), 5000);
+    }
+    
+    checkDeliveryTime() {
+        const orders = this.getOrders();
+        const now = new Date();
+        
+        orders.forEach(order => {
+            if (order.status === 'confirmed' || order.status === 'in_transit') {
+                if (order.deliveryTime && !order.deliveryPopupShown) {
+                    const deliveryTime = this.parseDeliveryTime(order.deliveryTime);
+                    if (deliveryTime && now >= deliveryTime) {
+                        order.deliveryPopupShown = true;
+                        this.saveOrders(orders);
+                        this.triggerDeliveryPopup(order);
+                    }
+                }
             }
         });
     }
     
-    // Get all orders from localStorage
+    parseDeliveryTime(timeStr) {
+        if (!timeStr) return null;
+        
+        const now = new Date();
+        let targetHour = 18;
+        
+        if (timeStr.includes('5-7') || timeStr.includes('शाम 5-7')) {
+            targetHour = 17;
+        } else if (timeStr.includes('7-9') || timeStr.includes('शाम 7-9')) {
+            targetHour = 19;
+        } else if (timeStr.includes('अभी') || timeStr.includes('Now') || timeStr.includes('30-45')) {
+            return new Date(now.getTime() + 35 * 60000);
+        }
+        
+        const target = new Date(now);
+        target.setHours(targetHour, 0, 0, 0);
+        return target;
+    }
+    
+    triggerDeliveryPopup(order) {
+        if (window.orderPopupManager) {
+            window.orderPopupManager.showDeliveryPopup(order);
+        } else {
+            console.log('⏰ Delivery time reached for order:', order.id);
+        }
+    }
+    
+    // ============================================
+    // DATA PERSISTENCE
+    // ============================================
     getOrders() {
         try {
             const data = localStorage.getItem(this.storageKey);
@@ -89,27 +165,252 @@ class OrdersManager {
         }
     }
     
-    // Save a new order
+    saveOrders(orders) {
+        try {
+            localStorage.setItem(this.storageKey, JSON.stringify(orders));
+        } catch (e) {
+            console.error('Error saving orders:', e);
+        }
+    }
+    
+    getOrderById(orderId) {
+        const orders = this.getOrders();
+        return orders.find(o => o.id === orderId) || null;
+    }
+    
+    // ============================================
+    // SAVE NEW ORDER
+    // ============================================
     saveOrder(orderData) {
         const orders = this.getOrders();
-        orders.unshift({
+        
+        // 🔥 Save customer location from checkout
+        const customerLocation = orderData.location ? {
+            lat: parseFloat(orderData.location.lat),
+            lng: parseFloat(orderData.location.lng)
+        } : null;
+        
+        const newOrder = {
             id: 'ORD-' + Date.now().toString(36).toUpperCase(),
             date: new Date().toISOString(),
             status: 'pending',
             items: orderData.items || [],
             total: orderData.total || 0,
             itemCount: orderData.itemCount || 0,
+            deliveryTime: orderData.deliveryTime || null,
+            cancelReason: null,
+            deliveryPopupShown: false,
+            location: orderData.location || null,
+            tracking: {
+                enabled: false,
+                currentLocation: null,
+                customerLocation: customerLocation,
+                riderProgress: 0,
+                updates: []
+            },
             timeline: [
-                { label: 'भेजा गया', time: new Date().toISOString(), completed: true },
-                { label: 'कन्फर्म', time: null, completed: false },
-                { label: 'डिलीवर्ड', time: null, completed: false },
+                { label: 'भेजा गया', labelEn: 'Sent', time: new Date().toISOString(), completed: true },
+                { label: 'कन्फर्म', labelEn: 'Confirmed', time: null, completed: false },
+                { label: 'डिलीवर्ड', labelEn: 'Delivered', time: null, completed: false }
             ],
-        });
-        localStorage.setItem(this.storageKey, JSON.stringify(orders));
-        console.log('✅ Order saved:', orders[0].id);
+        };
+        
+        orders.unshift(newOrder);
+        this.saveOrders(orders);
+        console.log('✅ Order saved:', newOrder.id, '| Customer Location:', customerLocation);
+        
+        return newOrder;
     }
     
-    // Filter orders
+    // ============================================
+    // UPDATE ORDER
+    // ============================================
+    updateOrderStatus(orderId, newStatus) {
+        const orders = this.getOrders();
+        const order = orders.find(o => o.id === orderId);
+        
+        if (!order) {
+            console.error('❌ Order not found:', orderId);
+            return false;
+        }
+        
+        order.status = newStatus;
+        const now = new Date().toISOString();
+        
+        switch (newStatus) {
+            case 'confirmed':
+                order.timeline[1].completed = true;
+                order.timeline[1].time = now;
+                this.startTracking(order);
+                // 🔥 Notify floating map
+                if (window.floatingMapManager) {
+                    setTimeout(() => window.floatingMapManager.checkActiveOrder(), 500);
+                }
+                break;
+                
+            case 'cancelled':
+                order.timeline = [
+                    { label: 'भेजा गया', labelEn: 'Sent', time: order.timeline[0].time, completed: true },
+                    { label: 'रद्द', labelEn: 'Cancelled', time: now, completed: true }
+                ];
+                this.stopTracking(order);
+                // 🔥 Hide floating map
+                if (window.floatingMapManager) {
+                    window.floatingMapManager.hide();
+                    window.floatingMapManager.stopUpdates();
+                }
+                break;
+                
+            case 'delivered':
+                order.timeline[2].completed = true;
+                order.timeline[2].time = now;
+                this.stopTracking(order);
+                // 🔥 Hide floating map
+                if (window.floatingMapManager) {
+                    window.floatingMapManager.hide();
+                    window.floatingMapManager.stopUpdates();
+                }
+                break;
+                
+            case 'in_transit':
+                break;
+        }
+        
+        this.saveOrders(orders);
+        console.log(`✅ Order ${orderId} updated to: ${newStatus}`);
+        
+        if (!this.ordersModal.classList.contains('hidden')) {
+            this.render();
+        }
+        
+        return true;
+    }
+    
+    addCancelReason(orderId, reason) {
+        const orders = this.getOrders();
+        const order = orders.find(o => o.id === orderId);
+        
+        if (!order) return false;
+        
+        order.cancelReason = reason;
+        this.saveOrders(orders);
+        
+        if (!this.ordersModal.classList.contains('hidden')) {
+            this.render();
+        }
+        
+        return true;
+    }
+    
+    // ============================================
+    // GPS TRACKING
+    // ============================================
+    startTracking(order) {
+        if (!order) return;
+        
+        order.tracking.enabled = true;
+        
+        // Use customer location from order
+        if (!order.tracking.customerLocation && order.location) {
+            order.tracking.customerLocation = {
+                lat: parseFloat(order.location.lat),
+                lng: parseFloat(order.location.lng)
+            };
+        }
+        
+        // Simulate rider progress
+        order.tracking.riderProgress = 0;
+        order.tracking.interval = setInterval(() => {
+            if (!order.tracking.enabled) {
+                clearInterval(order.tracking.interval);
+                return;
+            }
+            
+            // Update rider progress
+            order.tracking.riderProgress = Math.min(
+                (order.tracking.riderProgress || 0) + 0.04, 
+                0.95
+            );
+            
+            // Save updated order
+            const orders = this.getOrders();
+            const idx = orders.findIndex(o => o.id === order.id);
+            if (idx !== -1) {
+                orders[idx] = order;
+                this.saveOrders(orders);
+            }
+        }, 30000);
+        
+        const orders = this.getOrders();
+        const idx = orders.findIndex(o => o.id === order.id);
+        if (idx !== -1) {
+            orders[idx] = order;
+            this.saveOrders(orders);
+        }
+        
+        // 🔥 Update floating map
+        if (window.floatingMapManager) {
+            window.floatingMapManager.activeOrder = order;
+            window.floatingMapManager.updateMapWithOrder(order);
+        }
+    }
+    
+    stopTracking(order) {
+        if (!order) return;
+        
+        order.tracking.enabled = false;
+        if (order.tracking.interval) {
+            clearInterval(order.tracking.interval);
+            order.tracking.interval = null;
+        }
+        
+        const orders = this.getOrders();
+        const idx = orders.findIndex(o => o.id === order.id);
+        if (idx !== -1) {
+            orders[idx] = order;
+            this.saveOrders(orders);
+        }
+    }
+    
+    // ============================================
+    // CALCULATE DISTANCE
+    // ============================================
+    calculateDistance(lat1, lng1, lat2, lng2) {
+        const R = 6371;
+        const dLat = this.toRad(lat2 - lat1);
+        const dLng = this.toRad(lng2 - lng1);
+        const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+                  Math.cos(this.toRad(lat1)) * Math.cos(this.toRad(lat2)) *
+                  Math.sin(dLng / 2) * Math.sin(dLng / 2);
+        const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+        return R * c;
+    }
+    
+    toRad(deg) {
+        return deg * (Math.PI / 180);
+    }
+    
+    getTrackingInfo(order) {
+        if (!order.tracking?.customerLocation) return null;
+        
+        const distance = this.calculateDistance(
+            this.shopLocation.lat, this.shopLocation.lng,
+            order.tracking.customerLocation.lat, order.tracking.customerLocation.lng
+        );
+        
+        const remainingDistance = distance * (1 - (order.tracking.riderProgress || 0));
+        const eta = Math.round(remainingDistance * 5);
+        
+        return {
+            distance: remainingDistance,
+            eta: eta,
+            progress: order.tracking.riderProgress || 0
+        };
+    }
+    
+    // ============================================
+    // FILTER & RENDER
+    // ============================================
     getFilteredOrders() {
         const orders = this.getOrders();
         if (this.activeFilter === 'all') return orders;
@@ -124,15 +425,16 @@ class OrdersManager {
     }
     
     open() {
-        if (!this.ordersModal) {
-            console.error('❌ Cannot open - ordersModal is null');
-            return;
-        }
+        if (!this.ordersModal) return;
         
-        console.log('📋 Opening orders modal...');
         this.render();
         this.ordersModal.classList.remove('hidden');
         document.body.style.overflow = 'hidden';
+        
+        // 🔥 Hide floating map when orders open
+        if (window.floatingMapManager) {
+            window.floatingMapManager.hide();
+        }
     }
     
     close() {
@@ -140,13 +442,17 @@ class OrdersManager {
         this.ordersModal.classList.add('hidden');
         document.body.style.overflow = '';
         this.expandedOrder = null;
+        
+        // 🔥 Check if floating map should show
+        setTimeout(() => {
+            if (window.floatingMapManager) {
+                window.floatingMapManager.checkActiveOrder();
+            }
+        }, 300);
     }
     
     render() {
-        if (!this.ordersList) {
-            console.error('❌ ordersList element not found');
-            return;
-        }
+        if (!this.ordersList) return;
         
         const orders = this.getFilteredOrders();
         this.ordersList.innerHTML = '';
@@ -164,91 +470,209 @@ class OrdersManager {
         });
     }
     
+    // ============================================
+    // CREATE ORDER CARD
+    // ============================================
     createOrderCard(order) {
         const card = document.createElement('div');
         card.className = 'order-card fade-in';
         
+        const isHindi = this.currentLang === 'hi';
         const date = new Date(order.date);
-        const dateStr = date.toLocaleDateString('hi-IN', {
+        const dateStr = date.toLocaleDateString(isHindi ? 'hi-IN' : 'en-IN', {
             day: 'numeric', month: 'short', year: 'numeric',
             hour: '2-digit', minute: '2-digit'
         });
         
         const statusLabels = {
-            pending: '⏳ पेंडिंग',
-            confirmed: '✅ कन्फर्म',
-            delivered: '🚚 डिलीवर्ड'
+            hi: {
+                pending: '⏳ पेंडिंग',
+                confirmed: '🟢 कन्फर्म',
+                in_transit: '🛵 आ रहा है',
+                delivered: '✅ डिलीवर्ड',
+                cancelled: '❌ रद्द'
+            },
+            en: {
+                pending: '⏳ Pending',
+                confirmed: '🟢 Confirmed',
+                in_transit: '🛵 In Transit',
+                delivered: '✅ Delivered',
+                cancelled: '❌ Cancelled'
+            }
         };
         
-        const previewItems = order.items.slice(0, 4);
-        const moreCount = order.items.length - 4;
+        const statusText = (statusLabels[this.currentLang] || statusLabels.hi)[order.status] || '⏳ पेंडिंग';
         
-        card.innerHTML = `
+        // 🔥 Get tracking info
+        const trackingInfo = this.getTrackingInfo(order);
+        
+        let html = '';
+        
+        // Header
+        html += `
             <div class="order-card-header">
                 <div>
                     <div class="order-id">#${order.id}</div>
                     <div class="order-date">${dateStr}</div>
                 </div>
-                <span class="order-status ${order.status}">${statusLabels[order.status] || '⏳ पेंडिंग'}</span>
+                <span class="order-status ${order.status}">${statusText}</span>
             </div>
+        `;
+        
+        // 🔥 Tracking bar with map integration (if confirmed or in_transit)
+        if (order.status === 'confirmed' || order.status === 'in_transit') {
+            let trackingText = isHindi ? 'आपका ऑर्डर आ रहा है...' : 'Your order is on the way...';
+            let distanceText = '';
             
-            <div class="order-items-preview">
-                ${previewItems.map(item => `
-                    <img src="${item.image || 'https://via.placeholder.com/40'}" 
-                         alt="${item.name?.hi || ''}" 
-                         class="order-item-thumb"
-                         onerror="this.src='https://via.placeholder.com/40?text=📦'">
-                `).join('')}
-                ${moreCount > 0 ? `<span class="order-item-more">+${moreCount}</span>` : ''}
-            </div>
+            if (trackingInfo) {
+                if (trackingInfo.distance < 1) {
+                    distanceText = `${Math.round(trackingInfo.distance * 1000)} m`;
+                } else {
+                    distanceText = `${trackingInfo.distance.toFixed(1)} km`;
+                }
+                
+                if (trackingInfo.eta < 1) {
+                    trackingText = isHindi ? 'अभी पहुँच रहा है!' : 'Arriving now!';
+                } else {
+                    trackingText = isHindi 
+                        ? `📍 ${distanceText} दूर | ⏱️ ~${trackingInfo.eta} मिनट`
+                        : `📍 ${distanceText} away | ⏱️ ~${trackingInfo.eta} min`;
+                }
+            }
             
+            html += `
+                <div class="order-tracking-mini" style="cursor:pointer;" 
+                     onclick="window.floatingMapManager?.show(); window.ordersManager?.close();">
+                    <span class="tracking-dot"></span>
+                    <span>${trackingText}</span>
+                    <span style="margin-left:auto;font-size:10px;opacity:0.7;">${isHindi ? '🗺️ देखें' : '🗺️ View'}</span>
+                </div>
+            `;
+        }
+        
+        // Items preview
+        const previewItems = order.items.slice(0, 4);
+        const moreCount = order.items.length - 4;
+        html += '<div class="order-items-preview">';
+        previewItems.forEach(item => {
+            const img = item.image || '';
+            const name = item.name?.hi || item.name?.en || '';
+            html += `<img src="${img}" alt="${name}" class="order-item-thumb" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 40 40%22><rect fill=%22%23f0f0f0%22 width=%2240%22 height=%2240%22 rx=%2210%22/><text x=%2220%22 y=%2228%22 text-anchor=%22middle%22 font-size=%2220%22>📦</text></svg>'">`;
+        });
+        if (moreCount > 0) {
+            html += `<span class="order-item-more">+${moreCount}</span>`;
+        }
+        html += '</div>';
+        
+        // Summary
+        html += `
             <div class="order-summary">
                 <span class="order-total">₹${order.total}</span>
-                <span class="order-item-count">${order.itemCount} आइटम</span>
+                <span class="order-item-count">${order.itemCount} ${isHindi ? 'आइटम' : 'items'}</span>
             </div>
+        `;
+        
+        // Delivery time
+        if (order.deliveryTime) {
+            html += `
+                <div class="order-delivery-time">
+                    ⏱️ ${order.deliveryTime}
+                </div>
+            `;
+        }
+        
+        // Cancel reason
+        if (order.status === 'cancelled' && order.cancelReason) {
+            html += `
+                <div class="order-cancel-reason">
+                    <div class="cancel-label">${isHindi ? 'रद्द करने का कारण' : 'Cancel Reason'}:</div>
+                    "${order.cancelReason}"
+                </div>
+            `;
+        }
+        
+        // Timeline
+        html += '<div class="order-timeline">';
+        order.timeline.forEach((step, i) => {
+            if (i > 0) {
+                html += `<div class="timeline-line ${step.completed ? 'completed' : ''}"></div>`;
+            }
             
-            <div class="order-timeline">
-                ${order.timeline.map((step, i) => `
-                    ${i > 0 ? `<div class="timeline-line ${step.completed ? 'completed' : ''}"></div>` : ''}
-                    <div class="timeline-step ${step.completed ? 'completed' : ''} ${!step.completed && (i === 0 || order.timeline[i-1].completed) ? 'active' : ''}">
-                        <div class="timeline-dot"></div>
-                        <span>${step.label}</span>
-                    </div>
-                `).join('')}
-            </div>
+            const isCancelled = step.label === 'रद्द' || step.label === 'Cancelled';
+            const isActive = !step.completed && (i === 0 || order.timeline[i - 1].completed);
             
-            <div class="order-actions">
-                <button class="order-action-btn reorder-btn" data-order-id="${order.id}">
-                    🔄 दोबारा ऑर्डर
+            html += `
+                <div class="timeline-step ${step.completed ? 'completed' : ''} ${isActive ? 'active' : ''} ${isCancelled ? 'cancelled-step' : ''}">
+                    <div class="timeline-dot"></div>
+                    <span>${isHindi ? step.label : (step.labelEn || step.label)}</span>
+                </div>
+            `;
+        });
+        html += '</div>';
+        
+        // Actions
+        html += '<div class="order-actions">';
+        html += `
+            <button class="order-action-btn reorder-btn" data-order-id="${order.id}">
+                🔄 ${isHindi ? 'दोबारा' : 'Reorder'}
+            </button>
+            <button class="order-action-btn view-detail-btn" data-order-id="${order.id}">
+                📋 ${isHindi ? 'डिटेल' : 'Details'}
+            </button>
+        `;
+        
+        // 🔥 Track button for active orders
+        if (order.status === 'confirmed' || order.status === 'in_transit') {
+            html += `
+                <button class="order-action-btn track-order-btn" data-order-id="${order.id}">
+                    🗺️ ${isHindi ? 'ट्रैक' : 'Track'}
                 </button>
-                <button class="order-action-btn view-detail-btn" data-order-id="${order.id}">
-                    📋 डिटेल
-                </button>
-            </div>
-            
+            `;
+        }
+        html += '</div>';
+        
+        // Detail view
+        html += `
             <div class="order-detail hidden" id="detail-${order.id}">
-                ${order.items.map(item => `
-                    <div class="order-detail-item">
-                        <span>${item.name?.hi || item.name?.en || 'प्रोडक्ट'} × ${item.quantity || 1}</span>
-                        <span>₹${(item.price || 0) * (item.quantity || 1)}</span>
-                    </div>
-                `).join('')}
+                ${order.items.map(item => {
+                    const name = item.name?.hi || item.name?.en || '';
+                    return `
+                        <div class="order-detail-item">
+                            <span>${name} × ${item.quantity || 1}</span>
+                            <span>₹${(item.price || 0) * (item.quantity || 1)}</span>
+                        </div>
+                    `;
+                }).join('')}
                 <div class="order-detail-item">
-                    <span>कुल</span>
+                    <span>${isHindi ? 'कुल' : 'Total'}</span>
                     <span>₹${order.total}</span>
                 </div>
             </div>
         `;
         
-        // Event Listeners
-        card.querySelector('.reorder-btn').addEventListener('click', (e) => {
+        card.innerHTML = html;
+        
+        // Event listeners
+        card.querySelector('.reorder-btn')?.addEventListener('click', (e) => {
             e.stopPropagation();
             this.reorder(order);
         });
         
-        card.querySelector('.view-detail-btn').addEventListener('click', (e) => {
+        card.querySelector('.view-detail-btn')?.addEventListener('click', (e) => {
             e.stopPropagation();
             this.toggleDetail(order.id);
+        });
+        
+        // 🔥 Track button
+        card.querySelector('.track-order-btn')?.addEventListener('click', (e) => {
+            e.stopPropagation();
+            this.close();
+            setTimeout(() => {
+                if (window.floatingMapManager) {
+                    window.floatingMapManager.show();
+                    window.floatingMapManager.updateMapWithOrder(order);
+                }
+            }, 300);
         });
         
         return card;
@@ -272,15 +696,10 @@ class OrdersManager {
     }
     
     reorder(order) {
-        if (!window.cartManager) {
-            console.error('❌ Cart manager not available');
-            return;
-        }
+        if (!window.cartManager) return;
         
-        // Clear current cart
         window.cartManager.cart = [];
         
-        // Add all items from order
         order.items.forEach(item => {
             window.cartManager.cart.push({
                 id: item.id || ('RE-' + Date.now().toString(36)),
@@ -296,17 +715,24 @@ class OrdersManager {
         window.cartManager.saveCart();
         window.cartManager.updateBadge();
         
-        // Close orders and open cart
         this.close();
         setTimeout(() => {
             if (window.cartManager) window.cartManager.openCart();
         }, 300);
     }
+    
+    // ============================================
+    // DESTROY
+    // ============================================
+    destroy() {
+        if (this.deliveryCheckInterval) {
+            clearInterval(this.deliveryCheckInterval);
+        }
+    }
 }
 
-// Initialize on DOM ready
+// Initialize
 document.addEventListener('DOMContentLoaded', () => {
-    // Wait a tiny bit to ensure DOM is fully ready
     setTimeout(() => {
         window.ordersManager = new OrdersManager();
     }, 100);
