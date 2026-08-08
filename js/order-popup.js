@@ -1,6 +1,6 @@
 // ============================================
 // ORDER-POPUP.JS - Order Popups Logic
-// Quick Dukan - Success | Cancel | Delivery | Map
+// Quick Dukan - Map Only on Confirm | Unclosable Delivery
 // ============================================
 
 class OrderPopupManager {
@@ -8,6 +8,7 @@ class OrderPopupManager {
         this.currentLang = 'hi';
         this.activePopup = null;
         this.deliveryRetryInterval = null;
+        this.unansweredPopup = null;
         
         this.init();
         console.log('✅ Order Popup Manager Initialized');
@@ -18,6 +19,20 @@ class OrderPopupManager {
         
         document.addEventListener('languageChanged', () => {
             this.detectLanguage();
+        });
+        
+        // PWA Reopen — check for unanswered popup
+        window.addEventListener('pageshow', () => {
+            setTimeout(() => this.checkUnansweredPopup(), 500);
+        });
+        
+        // Visibility change — when user returns to tab
+        document.addEventListener('visibilitychange', () => {
+            if (!document.hidden && this.unansweredPopup) {
+                setTimeout(() => {
+                    this.showStoredPopup();
+                }, 500);
+            }
         });
     }
     
@@ -48,16 +63,15 @@ class OrderPopupManager {
                 deliveryMessage: 'क्या आपका ऑर्डर आ गया?',
                 yesBtn: '✅ हाँ, आ गया!',
                 noBtn: '❌ नहीं आया',
-                retryMessage: 'हम 5 मिनट बाद फिर पूछेंगे।',
+                retryMessage: '⏱️ समय बढ़ा दिया गया, जल्द ही पहुँचेगा!',
                 
                 // Toast
                 confirmed: '✅ ऑर्डर कन्फर्म हो गया!',
                 cancelled: '❌ ऑर्डर रद्द कर दिया',
                 delivered: '🎉 ऑर्डर डिलीवर हो गया!',
                 reasonSent: '📤 कारण भेज दिया गया',
-                
-                // Map
-                mapOpened: '🗺️ लाइव ट्रैकिंग मैप खुल गया!',
+                mapOpened: '🗺️ लाइव ट्रैकिंग शुरू!',
+                orderComplete: '🎉 आपका ऑर्डर पूरा हुआ! धन्यवाद!',
             },
             en: {
                 successTitle: '🎉 Order Ready!',
@@ -75,18 +89,43 @@ class OrderPopupManager {
                 deliveryMessage: 'Has your order arrived?',
                 yesBtn: '✅ Yes, Arrived!',
                 noBtn: '❌ Not Yet',
-                retryMessage: 'We will check again in 5 minutes.',
+                retryMessage: '⏱️ Time extended, arriving soon!',
                 
                 confirmed: '✅ Order Confirmed!',
                 cancelled: '❌ Order Cancelled',
                 delivered: '🎉 Order Delivered!',
                 reasonSent: '📤 Reason sent',
-                
-                mapOpened: '🗺️ Live tracking map opened!',
+                mapOpened: '🗺️ Live tracking started!',
+                orderComplete: '🎉 Your order is complete! Thank you!',
             }
         };
         
         return messages[this.currentLang]?.[key] || messages.hi[key] || key;
+    }
+    
+    // ============================================
+    // CHECK UNANSWERED POPUP (PWA Reopen)
+    // ============================================
+    checkUnansweredPopup() {
+        if (!window.ordersManager) return;
+        
+        const orders = window.ordersManager.getOrders();
+        const activeOrder = orders.find(o => o.status === 'confirmed' || o.status === 'in_transit');
+        
+        if (activeOrder && this.unansweredPopup) {
+            console.log('🔄 PWA reopened — showing stored popup');
+            this.showStoredPopup();
+        }
+    }
+    
+    showStoredPopup() {
+        if (!this.unansweredPopup) return;
+        
+        const { type, order } = this.unansweredPopup;
+        
+        if (type === 'delivery' && order) {
+            this.showDeliveryPopup(order);
+        }
     }
     
     // ============================================
@@ -112,10 +151,10 @@ class OrderPopupManager {
                     <span>⏱️ ${orderData.deliveryTime || (isHindi ? 'अभी' : 'Now')}</span>
                 </div>
                 <div class="popup-buttons">
-                    <button class="popup-btn popup-btn-confirm" id="btnConfirmOrder">
+                    <button class="popup-btn popup-btn-confirm" id="btnConfirmOrder" type="button">
                         ${this.getMsg('confirmBtn')}
                     </button>
-                    <button class="popup-btn popup-btn-cancel" id="btnCancelOrder">
+                    <button class="popup-btn popup-btn-cancel" id="btnCancelOrder" type="button">
                         ${this.getMsg('cancelBtn')}
                     </button>
                 </div>
@@ -129,44 +168,47 @@ class OrderPopupManager {
             overlay.classList.add('visible');
         });
         
-        // Events
-        overlay.querySelector('#btnConfirmOrder').addEventListener('click', () => {
+        // 🔥 Use onclick for reliable button clicks
+        const btnConfirm = overlay.querySelector('#btnConfirmOrder');
+        const btnCancel = overlay.querySelector('#btnCancelOrder');
+        
+        btnConfirm.onclick = (e) => {
+            e.preventDefault();
+            e.stopPropagation();
             this.confirmOrder(orderData);
             this.hidePopup();
-        });
+        };
         
-        overlay.querySelector('#btnCancelOrder').addEventListener('click', () => {
+        btnCancel.onclick = (e) => {
+            e.preventDefault();
+            e.stopPropagation();
             this.hidePopup();
             setTimeout(() => this.showCancelReasonPopup(orderData), 300);
-        });
+        };
         
         this.activePopup = 'success';
     }
     
     // ============================================
-    // 🔥 CONFIRM ORDER — UPDATE STATUS + SHOW MAP
+    // 🔥 CONFIRM ORDER — ONLY HERE MAP OPENS
     // ============================================
     confirmOrder(orderData) {
-        // Update order status to confirmed
         if (window.ordersManager) {
             const orders = window.ordersManager.getOrders();
-            const order = orders[0]; // Latest order
+            const order = orders[0];
             
             if (order) {
-                // Update status to confirmed
+                // Update status to confirmed (this calls startTracking in orders.js)
+                // BUT we removed the map call from startTracking
                 window.ordersManager.updateOrderStatus(order.id, 'confirmed');
                 
-                // 🔥 SHOW FLOATING MAP AFTER CONFIRM
+                // 🔥 MAP SIRF YAHIN SE OPEN HOGA — Confirm button press ke baad
                 setTimeout(() => {
                     if (window.floatingMapManager) {
-                        // Get fresh order data with customer location
                         const updatedOrder = window.ordersManager.getOrderById(order.id);
                         if (updatedOrder && updatedOrder.tracking?.customerLocation) {
-                            // Show and update the floating map
                             window.floatingMapManager.show();
                             window.floatingMapManager.updateMapWithOrder(updatedOrder);
-                            
-                            // Show toast
                             this.showToast(this.getMsg('mapOpened'));
                         } else {
                             console.warn('⚠️ No customer location found for tracking');
@@ -175,7 +217,7 @@ class OrderPopupManager {
                     } else {
                         this.showToast(this.getMsg('confirmed'));
                     }
-                }, 600);
+                }, 800);
             }
         }
     }
@@ -198,10 +240,10 @@ class OrderPopupManager {
                 <textarea class="cancel-reason-textarea" id="cancelReasonInput" 
                           rows="3" placeholder="${this.getMsg('cancelPlaceholder')}"></textarea>
                 <div class="popup-buttons">
-                    <button class="popup-btn popup-btn-send" id="btnSendReason">
+                    <button class="popup-btn popup-btn-send" id="btnSendReason" type="button">
                         ${this.getMsg('sendReasonBtn')}
                     </button>
-                    <button class="popup-btn-skip" id="btnSkipCancel">
+                    <button class="popup-btn-skip" id="btnSkipCancel" type="button">
                         ${this.getMsg('skipBtn')}
                     </button>
                 </div>
@@ -215,19 +257,25 @@ class OrderPopupManager {
             overlay.classList.add('visible');
         });
         
-        // Events
-        overlay.querySelector('#btnSendReason').addEventListener('click', () => {
+        // Use onclick
+        const btnSend = overlay.querySelector('#btnSendReason');
+        const btnSkip = overlay.querySelector('#btnSkipCancel');
+        
+        btnSend.onclick = (e) => {
+            e.preventDefault();
+            e.stopPropagation();
             const reason = document.getElementById('cancelReasonInput')?.value?.trim();
             this.cancelOrder(orderData, reason || 'कोई कारण नहीं');
             this.hidePopup();
-        });
+        };
         
-        overlay.querySelector('#btnSkipCancel').addEventListener('click', () => {
+        btnSkip.onclick = (e) => {
+            e.preventDefault();
+            e.stopPropagation();
             this.cancelOrder(orderData, 'कोई कारण नहीं');
             this.hidePopup();
-        });
+        };
         
-        // Focus textarea
         setTimeout(() => {
             document.getElementById('cancelReasonInput')?.focus();
         }, 500);
@@ -235,6 +283,9 @@ class OrderPopupManager {
         this.activePopup = 'cancel';
     }
     
+    // ============================================
+    // 🔥 CANCEL ORDER — MAP NAHI KHULEGA
+    // ============================================
     cancelOrder(orderData, reason) {
         if (window.ordersManager) {
             const orders = window.ordersManager.getOrders();
@@ -243,10 +294,15 @@ class OrderPopupManager {
             if (order) {
                 window.ordersManager.updateOrderStatus(order.id, 'cancelled');
                 window.ordersManager.addCancelReason(order.id, reason);
-                
-                // Send WhatsApp message
                 this.sendCancelWhatsApp(orderData, reason);
             }
+        }
+        
+        // 🔥 MAP HIDE — Cancel pe map nahi khulega
+        if (window.floatingMapManager) {
+            window.floatingMapManager.hide();
+            window.floatingMapManager.stopTimer();
+            window.floatingMapManager.stopRiderUpdates();
         }
         
         this.showToast(this.getMsg('cancelled'));
@@ -276,19 +332,30 @@ class OrderPopupManager {
     }
     
     // ============================================
-    // POPUP 3: DELIVERY CONFIRMATION
+    // POPUP 3: DELIVERY CONFIRMATION (UNCLOSABLE)
     // ============================================
     showDeliveryPopup(order) {
         this.hidePopup();
+        
+        // Store for PWA reopen
+        this.unansweredPopup = { type: 'delivery', order: order };
         
         const overlay = document.createElement('div');
         overlay.className = 'order-popup-overlay';
         overlay.id = 'orderDeliveryPopup';
         
+        // BLOCK overlay click (cannot close by tapping outside)
+        overlay.addEventListener('click', (e) => {
+            if (e.target === overlay) {
+                e.stopPropagation();
+                e.preventDefault();
+            }
+        });
+        
         const isHindi = this.currentLang === 'hi';
         
         overlay.innerHTML = `
-            <div class="order-popup-card">
+            <div class="order-popup-card" style="pointer-events:auto;">
                 <div class="popup-icon">🚚</div>
                 <h2 class="popup-title">${this.getMsg('deliveryTitle')}</h2>
                 <p class="popup-message">${this.getMsg('deliveryMessage')}</p>
@@ -298,10 +365,10 @@ class OrderPopupManager {
                     <span>⏱️ ${order.deliveryTime || ''}</span>
                 </div>
                 <div class="popup-buttons">
-                    <button class="popup-btn popup-btn-yes" id="btnDeliveryYes">
+                    <button class="popup-btn popup-btn-yes" id="btnDeliveryYes" type="button">
                         ${this.getMsg('yesBtn')}
                     </button>
-                    <button class="popup-btn popup-btn-no" id="btnDeliveryNo">
+                    <button class="popup-btn popup-btn-no" id="btnDeliveryNo" type="button">
                         ${this.getMsg('noBtn')}
                     </button>
                 </div>
@@ -311,45 +378,81 @@ class OrderPopupManager {
         document.body.appendChild(overlay);
         document.body.style.overflow = 'hidden';
         
+        // Prevent escape key from closing
+        const escapeHandler = (e) => {
+            if (e.key === 'Escape') {
+                e.preventDefault();
+                e.stopPropagation();
+            }
+        };
+        document.addEventListener('keydown', escapeHandler, true);
+        
         requestAnimationFrame(() => {
             overlay.classList.add('visible');
         });
         
-        // Events
-        overlay.querySelector('#btnDeliveryYes').addEventListener('click', () => {
+        // 🔥 Use onclick for BOTH buttons - RELIABLE
+        const btnYes = overlay.querySelector('#btnDeliveryYes');
+        const btnNo = overlay.querySelector('#btnDeliveryNo');
+        
+        btnYes.onclick = (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            document.removeEventListener('keydown', escapeHandler, true);
             this.confirmDelivery(order);
             this.hidePopup();
-        });
+        };
         
-        overlay.querySelector('#btnDeliveryNo').addEventListener('click', () => {
+        btnNo.onclick = (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            document.removeEventListener('keydown', escapeHandler, true);
             this.retryDelivery(order);
             this.hidePopup();
-        });
+        };
         
         this.activePopup = 'delivery';
     }
     
+    // ============================================
+    // 🔥 CONFIRM DELIVERY — MAP HIDE
+    // ============================================
     confirmDelivery(order) {
+        // Clear unanswered popup
+        this.unansweredPopup = null;
+        
         if (window.ordersManager) {
             window.ordersManager.updateOrderStatus(order.id, 'delivered');
         }
         
-        this.showToast(this.getMsg('delivered'));
+        // 🔥 Hide floating map on delivery
+        if (window.floatingMapManager) {
+            window.floatingMapManager.hide();
+            window.floatingMapManager.stopTimer();
+            window.floatingMapManager.stopRiderUpdates();
+        }
+        
+        this.showToast(this.getMsg('orderComplete'));
     }
     
+    // ============================================
+    // 🔥 RETRY DELIVERY — ADD EXTRA TIME
+    // ============================================
     retryDelivery(order) {
+        // Clear unanswered popup (will be set again when timer ends)
+        this.unansweredPopup = null;
+        
         if (window.ordersManager) {
             window.ordersManager.updateOrderStatus(order.id, 'in_transit');
         }
         
-        this.showToast(this.getMsg('retryMessage'));
+        // 🔥 ADD EXTRA TIME TO TIMER
+        if (window.floatingMapManager) {
+            window.floatingMapManager.addExtraTime();
+            window.floatingMapManager.show();
+        }
         
-        setTimeout(() => {
-            const updatedOrder = window.ordersManager?.getOrderById(order.id);
-            if (updatedOrder && updatedOrder.status !== 'delivered') {
-                this.showDeliveryPopup(updatedOrder);
-            }
-        }, 300000);
+        this.showToast(this.getMsg('retryMessage'));
     }
     
     // ============================================
@@ -400,6 +503,7 @@ class OrderPopupManager {
     // ============================================
     destroy() {
         this.hidePopup();
+        this.unansweredPopup = null;
         if (this.deliveryRetryInterval) {
             clearInterval(this.deliveryRetryInterval);
         }
