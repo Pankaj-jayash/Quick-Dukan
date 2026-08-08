@@ -388,4 +388,4 @@ body.dark-mode .floating-map-resize-handle::after {
 
 body.dark-mode .floating-map-resize-handle:hover::after {
     border-color: rgba(255, 255, 255, 0.35);
-}
+} 
