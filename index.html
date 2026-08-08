@@ -9,11 +9,11 @@
     <title>Quick Dukan - आपकी विश्वसनीय किराना दुकान</title>
     
     <!-- PWA Manifest -->
-<link rel="manifest" href="manifest.json">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="Quick Dukan">
-<link rel="apple-touch-icon" href="/Quick-Dukan/icons/icon-192.png">
+    <link rel="manifest" href="manifest.json">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Quick Dukan">
+    <link rel="apple-touch-icon" href="/Quick-Dukan/icons/icon-192.png">
     
     <!-- Favicon -->
     <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🛒</text></svg>">
@@ -41,8 +41,13 @@
     <link rel="stylesheet" href="css/checkout.css">
     <link rel="stylesheet" href="css/cart.css">
     <link rel="stylesheet" href="css/splash-screen.css">
-<link rel="stylesheet" href="css/pull-to-refresh.css">
-<link rel="stylesheet" href="css/floating-cart-bubble.css">
+    <link rel="stylesheet" href="css/pull-to-refresh.css">
+    <link rel="stylesheet" href="css/floating-cart-bubble.css">
+    <link rel="stylesheet" href="css/order-popup.css">
+    <link rel="stylesheet" href="css/floating-map.css">
+    
+    <!-- Leaflet CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     
     <!-- Font Awesome Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
@@ -65,24 +70,25 @@
             ⚠️ कृपया JavaScript चालू करें! हमारी साइट ठीक से काम करने के लिए JS की ज़रूरत है।
         </div>
     </noscript>
+    
     <!-- ============================================ -->
-<!-- SPLASH SCREEN -->
-<!-- ============================================ -->
-<div id="splashScreen" aria-hidden="true">
-    <div class="splash-bg">
-        <div class="splash-circle"></div>
-        <div class="splash-circle"></div>
-        <div class="splash-circle"></div>
+    <!-- SPLASH SCREEN -->
+    <!-- ============================================ -->
+    <div id="splashScreen" aria-hidden="true">
+        <div class="splash-bg">
+            <div class="splash-circle"></div>
+            <div class="splash-circle"></div>
+            <div class="splash-circle"></div>
+        </div>
+        <div class="splash-logo">🛒</div>
+        <div class="splash-brand">Quick Dukan</div>
+        <div class="splash-tagline">आपकी विश्वसनीय किराना दुकान</div>
+        <div class="splash-loader">
+            <div class="splash-dot"></div>
+            <div class="splash-dot"></div>
+            <div class="splash-dot"></div>
+        </div>
     </div>
-    <div class="splash-logo">🛒</div>
-    <div class="splash-brand">Quick Dukan</div>
-    <div class="splash-tagline">आपकी विश्वसनीय किराना दुकान</div>
-    <div class="splash-loader">
-        <div class="splash-dot"></div>
-        <div class="splash-dot"></div>
-        <div class="splash-dot"></div>
-    </div>
-</div>
     
     <!-- ============================================ -->
     <!-- SECTION 1: TOP HEADER (FIXED) -->
@@ -97,23 +103,23 @@
             </div>
         </div>
         
-     <!-- CENTER: Alternating Badge -->
-<div class="header-center">
-    <span class="center-badge" id="centerBadge">
-        <!-- Free Delivery Content (9 seconds) -->
-        <span class="badge-content delivery-content visible" id="deliveryContent">
-            <span class="badge-icon">🚚</span>
-            <span class="badge-text" data-lang-key="freeDelivery">फ्री डिलीवरी</span>
-        </span>
-        
-        <!-- Trust Shield Content (3 seconds) -->
-        <span class="badge-content trust-content hidden" id="trustContent">
-            <span class="trust-shield-icon">🛡️</span>
-            <span class="trust-check-badge">✓</span>
-            <span class="badge-text" data-lang-key="verifiedTrust">Verified</span>
-        </span>
-    </span>
-</div>
+        <!-- CENTER: Alternating Badge -->
+        <div class="header-center">
+            <span class="center-badge" id="centerBadge">
+                <!-- Free Delivery Content (9 seconds) -->
+                <span class="badge-content delivery-content visible" id="deliveryContent">
+                    <span class="badge-icon">🚚</span>
+                    <span class="badge-text" data-lang-key="freeDelivery">फ्री डिलीवरी</span>
+                </span>
+                
+                <!-- Trust Shield Content (3 seconds) -->
+                <span class="badge-content trust-content hidden" id="trustContent">
+                    <span class="trust-shield-icon">🛡️</span>
+                    <span class="trust-check-badge">✓</span>
+                    <span class="badge-text" data-lang-key="verifiedTrust">Verified</span>
+                </span>
+            </span>
+        </div>
         
         <!-- RIGHT: Language + Theme Toggle -->
         <div class="header-right">
@@ -126,46 +132,47 @@
         </div>
     </header>
     
-  <!-- ============================================ -->
-<!-- SECTION 2: SEARCH BAR (FIXED) -->
-<!-- ============================================ -->
-<div id="searchSection" class="search-section">
-    <div class="search-container">
-        <input 
-            type="text" 
-            id="searchInput" 
-            class="search-input" 
-            data-lang-key="searchPlaceholder"
-            placeholder="आज क्या चाहिए? 😋" 
-            autocomplete="off"
-        >
-        <!-- Clear (×) Button - type karne pe show hoga -->
-        <button id="clearSearchBtn" class="clear-search-btn hidden" aria-label="साफ करें">
-            <span>✕</span>
-        </button>
-        <!-- Voice Search Button -->
-        <button id="voiceSearchBtn" class="voice-search-btn" aria-label="आवाज़ से खोजें">
-            <span>🎤</span>
-        </button>
-        <!-- Search Button -->
-        <button id="searchIcon" class="search-icon-btn" aria-label="खोजें">
-            <span>🔍</span>
-        </button>
-    </div>
-    <!-- Live Search Results Dropdown -->
-    <div id="searchResults" class="search-results hidden"></div>
-    <!-- No Results Found -->
-    <div id="noResults" class="no-results hidden">
-        <div class="no-results-inner">
-            <span class="no-results-icon">🔍</span>
-            <p class="no-results-msg" data-lang-key="noProductMsg">
-                अरे! यह सामान अभी नहीं है। हम जल्दी ऐड करेंगे! 😊
-            </p>
-            <p class="no-results-hint">आप ये ट्राई कर सकते हैं:</p>
-            <div id="suggestedProducts" class="suggested-products"></div>
+    <!-- ============================================ -->
+    <!-- SECTION 2: SEARCH BAR (FIXED) -->
+    <!-- ============================================ -->
+    <div id="searchSection" class="search-section">
+        <div class="search-container">
+            <input 
+                type="text" 
+                id="searchInput" 
+                class="search-input" 
+                data-lang-key="searchPlaceholder"
+                placeholder="आज क्या चाहिए? 😋" 
+                autocomplete="off"
+            >
+            <!-- Clear (×) Button - type karne pe show hoga -->
+            <button id="clearSearchBtn" class="clear-search-btn hidden" aria-label="साफ करें">
+                <span>✕</span>
+            </button>
+            <!-- Voice Search Button -->
+            <button id="voiceSearchBtn" class="voice-search-btn" aria-label="आवाज़ से खोजें">
+                <span>🎤</span>
+            </button>
+            <!-- Search Button -->
+            <button id="searchIcon" class="search-icon-btn" aria-label="खोजें">
+                <span>🔍</span>
+            </button>
+        </div>
+        <!-- Live Search Results Dropdown -->
+        <div id="searchResults" class="search-results hidden"></div>
+        <!-- No Results Found -->
+        <div id="noResults" class="no-results hidden">
+            <div class="no-results-inner">
+                <span class="no-results-icon">🔍</span>
+                <p class="no-results-msg" data-lang-key="noProductMsg">
+                    अरे! यह सामान अभी नहीं है। हम जल्दी ऐड करेंगे! 😊
+                </p>
+                <p class="no-results-hint">आप ये ट्राई कर सकते हैं:</p>
+                <div id="suggestedProducts" class="suggested-products"></div>
+            </div>
         </div>
     </div>
-</div>
+    
     <!-- ============================================ -->
     <!-- SECTION 3: CATEGORIES (FIXED) -->
     <!-- ============================================ -->
@@ -221,20 +228,20 @@
         </section>
         
         <!-- ============================================ -->
-    <!-- FOOTER - INSIDE MAIN CONTENT (FIX) -->
-    <!-- ============================================ -->
-    <footer class="site-footer" role="contentinfo">
-        <div class="footer-content">
-            <p class="footer-text">© 2026 Quick Dukan. सर्वाधिकार सुरक्षित।</p>
-            <div class="footer-links">
-                <a href="#" class="footer-link">शर्तें</a>
-                <span class="footer-divider">|</span>
-                <a href="#" class="footer-link">गोपनीयता</a>
-                <span class="footer-divider">|</span>
-                <a href="tel:+919876543210" class="footer-link">📞 संपर्क</a>
+        <!-- FOOTER - INSIDE MAIN CONTENT (FIX) -->
+        <!-- ============================================ -->
+        <footer class="site-footer" role="contentinfo">
+            <div class="footer-content">
+                <p class="footer-text">© 2026 Quick Dukan. सर्वाधिकार सुरक्षित।</p>
+                <div class="footer-links">
+                    <a href="#" class="footer-link">शर्तें</a>
+                    <span class="footer-divider">|</span>
+                    <a href="#" class="footer-link">गोपनीयता</a>
+                    <span class="footer-divider">|</span>
+                    <a href="tel:+919719312956" class="footer-link">📞 संपर्क</a>
+                </div>
             </div>
-        </div>
-    </footer>
+        </footer>
         
         <!-- Bottom Spacer -->
         <div class="bottom-spacer" aria-hidden="true"></div>
@@ -248,7 +255,6 @@
         <span class="back-to-top-arrow" aria-hidden="true">⬆</span>
         <span class="back-to-top-text" data-lang-key="backToTop">Back to Top</span>
     </button>
-  
     
     <!-- ============================================ -->
     <!-- SECTION 8: BOTTOM NAVBAR (FIXED) -->
@@ -281,37 +287,77 @@
     </nav>
     
     <!-- ============================================ -->
-    <!-- CART MODAL -->
+    <!-- CART MODAL (FINAL - 40 FEATURES) -->
     <!-- ============================================ -->
     <div id="cartModal" class="cart-modal hidden" role="dialog" aria-modal="true" aria-labelledby="cartTitle">
         <div class="cart-overlay"></div>
-        <div class="cart-content">
-            <!-- Cart Header -->
+        <div class="cart-content" id="cartContent">
+            
+            <!-- 1. DRAG HANDLE -->
+            <div class="cart-drag-handle" id="cartDragHandle">
+                <div class="drag-bar"></div>
+            </div>
+            
+            <!-- 2. HEADER - Solid Color -->
             <div class="cart-header">
                 <div class="cart-header-left">
                     <span class="cart-header-icon" aria-hidden="true">🛒</span>
-                    <div>
+                    <div class="cart-header-text">
                         <h2 id="cartTitle" data-lang-key="yourCart">आपका कार्ट</h2>
                         <p class="cart-subtitle" data-lang-key="cartSubtitle">सब कुछ सही है? 😊</p>
                     </div>
                 </div>
-                <button id="closeCart" class="close-btn" aria-label="कार्ट बंद करें">
-                    <span aria-hidden="true">✕</span>
-                </button>
+                <div class="cart-header-right">
+                    <span id="savedBadge" class="saved-badge hidden">✓ 0 सेव</span>
+                    <button id="closeCart" class="close-btn" aria-label="कार्ट बंद करें">
+                        <span aria-hidden="true">✕</span>
+                    </button>
+                </div>
             </div>
             
-            <!-- Progress Bar -->
+            <!-- 3. PROGRESS BAR - Compact + Mota -->
             <div class="cart-progress">
+                <div class="milestones-row">
+                    <span class="milestone-icon" data-milestone="0">🥉</span>
+                    <span class="milestone-icon" data-milestone="1">🥈</span>
+                    <span class="milestone-icon" data-milestone="2">🥇</span>
+                </div>
                 <div class="progress-bar" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="500">
                     <div class="progress-fill" id="progressFill"></div>
                 </div>
-                <p class="progress-text" id="progressText" data-lang-key="addMore">
+                <p class="progress-message" id="progressMessage">
                     🚚 फ्री डिलीवरी के लिए सिर्फ ₹500 और जोड़ें!
                 </p>
+                <div class="milestone-reward hidden" id="milestoneReward"></div>
             </div>
             
-            <!-- Cart Items -->
+            <!-- 4. COUPON SYSTEM - Compact 1-Row -->
+            <div class="cart-coupon">
+                <div class="coupon-input-row">
+                    <input 
+                        type="text" 
+                        id="couponInput" 
+                        class="coupon-input" 
+                        placeholder="कूपन कोड" 
+                        autocomplete="off"
+                        maxlength="15"
+                    >
+                    <button id="couponApplyBtn" class="coupon-apply-btn">लगाएं</button>
+                </div>
+                <div class="coupon-chips" id="couponChips">
+                    <!-- Dynamically filled -->
+                </div>
+                <div id="activeCouponTag" class="active-coupon-tag" style="display:none;">
+                    <!-- Active coupon tag -->
+                </div>
+            </div>
+            
+            <!-- 5. CART ITEMS -->
             <div class="cart-items-wrapper">
+                <!-- Undo Notification -->
+                <div id="undoNotification" class="undo-notification" style="display:none;"></div>
+                
+                <!-- Cart Items List -->
                 <div id="cartItems" class="cart-items" role="list" aria-label="कार्ट में मौजूद आइटम"></div>
                 
                 <!-- Empty Cart State -->
@@ -322,45 +368,84 @@
                             <span>.</span><span>.</span><span>.</span>
                         </div>
                     </div>
-                    <h3 data-lang-key="emptyCart">आपका कार्ट खाली है</h3>
+                    <h3 data-lang-key="emptyCart">आपका कार्ट खाली है 🛒</h3>
                     <p data-lang-key="emptyCartDesc">कुछ सामान जोड़ो, फिर मज़ा आएगा! 🛍️</p>
-                    <button class="browse-products-btn" data-lang-key="browseProducts">
+                    <div id="emptyCartSuggestions"></div>
+                    <button class="browse-products-btn" data-lang-key="browseProducts" style="margin-top:12px;">
                         🏪 प्रोडक्ट देखें
                     </button>
                 </div>
             </div>
             
-            <!-- Cart Summary -->
-            <div id="cartSummary" class="cart-summary hidden">
-                <div class="summary-row">
-                    <span data-lang-key="totalItems">कुल आइटम</span>
-                    <span id="totalItems">0</span>
+            <!-- 6. SAVED ITEMS - Compact 1-Row -->
+            <div id="savedItemsSection" class="saved-items-section">
+                <div class="saved-items-header" id="savedItemsHeader">
+                    <span class="saved-items-title">
+                        📦 सेव 
+                        <span class="saved-items-count">(0)</span>
+                    </span>
+                    <span class="saved-items-toggle">▼</span>
                 </div>
-                <div class="summary-row">
-                    <span data-lang-key="subtotal">सबटोटल</span>
-                    <span id="subtotal">₹0</span>
-                </div>
-                <div class="summary-row discount-row">
-                    <span data-lang-key="delivery">डिलीवरी</span>
-                    <span class="free-delivery-text">🎉 फ्री!</span>
-                </div>
-                <div class="summary-row total-row">
-                    <span data-lang-key="total">कुल राशि</span>
-                    <span id="totalPrice" class="total-price">₹0</span>
+                <div class="saved-items-list" id="savedItemsList">
+                    <!-- Dynamically filled -->
                 </div>
             </div>
             
-            <!-- Checkout Footer -->
+            <!-- 7. ORDER SUMMARY - Collapsible -->
+            <div id="cartSummary" class="cart-summary">
+                <div class="summary-header" id="summaryHeader">
+                    <span class="summary-header-left">
+                        📋 समरी 
+                        <span class="summary-item-count" id="summaryItemCount">(0 आइटम)</span>
+                    </span>
+                    <span class="summary-toggle">▼</span>
+                </div>
+                <div class="summary-detail">
+                    <div class="summary-row">
+                        <span>सबटोटल</span>
+                        <span id="summarySubtotal">₹0</span>
+                    </div>
+                    <div class="summary-row coupon-discount-row" id="couponDiscountRow" style="display:none;">
+                        <span>कूपन</span>
+                        <span id="summaryCouponDiscount">-₹0</span>
+                    </div>
+                    <div class="summary-row delivery-row">
+                        <span>डिलीवरी</span>
+                        <span id="summaryDelivery">🎉 फ्री!</span>
+                    </div>
+                    <div class="summary-row total-row">
+                        <span>कुल</span>
+                        <span id="summaryTotal" class="total-price">₹0</span>
+                    </div>
+                    <div id="summarySavings" class="savings-highlight" style="display:none;">
+                        🎉 बचाए: ₹0!
+                    </div>
+                    <div id="deliveryEstimate" class="delivery-estimate">
+                        ⏱️ 30-45 मिनट
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 8. FOOTER - WhatsApp Focused -->
             <div class="cart-footer">
-                <button id="clearCartBtn" class="clear-cart-btn" data-lang-key="clearCart">
-                    🗑️ खाली करें
-                </button>
-                <button id="sendOrderBtn" class="send-order-btn" data-lang-key="sendOrder" data-loading-text="भेज रहे हैं...">
+                <button id="sendOrderBtn" class="send-order-btn">
                     <span class="whatsapp-icon" aria-hidden="true">💬</span>
                     <span>WhatsApp पर भेजें</span>
                     <span class="send-arrow" aria-hidden="true">→</span>
                 </button>
+                
+                <div class="cart-footer-secondary">
+                    <button id="copyOrderBtn" class="copy-order-btn">
+                        📋 कॉपी करें
+                    </button>
+                    <button id="clearCartBtn" class="clear-cart-btn">
+                        🗑️ खाली करें
+                    </button>
+                </div>
             </div>
+            
+            <!-- 9. CONFETTI -->
+            <div id="cartConfetti" class="cart-confetti-container"></div>
         </div>
     </div>
     
@@ -420,118 +505,127 @@
     </div>
     
     <!-- ============================================ -->
-    <!-- CHECKOUT MODAL -->
+    <!-- CHECKOUT MODAL (FINAL - Live GPS + Multilingual) -->
     <!-- ============================================ -->
     <div id="checkoutModal" class="checkout-modal hidden" role="dialog" aria-modal="true" aria-labelledby="checkoutTitle">
         <div class="checkout-overlay"></div>
         <div class="checkout-content">
+            
+            <!-- Header -->
             <div class="checkout-header">
                 <div class="checkout-header-left">
                     <span class="checkout-header-icon" aria-hidden="true">📦</span>
-                    <div>
-                        <h2 id="checkoutTitle" data-lang-key="checkoutTitle">ऑर्डर कन्फर्म करें</h2>
-                        <p class="checkout-subtitle" data-lang-key="checkoutSubtitle">डिलीवरी के लिए जानकारी भरें</p>
+                    <div class="checkout-header-text">
+                        <h2 id="checkoutTitle">ऑर्डर कन्फर्म करें</h2>
+                        <p class="checkout-subtitle">डिलीवरी जानकारी भरें</p>
                     </div>
                 </div>
-                <button id="closeCheckout" class="close-btn" aria-label="चेकआउट बंद करें">
+                <button id="closeCheckout" class="close-btn" aria-label="बंद करें">
                     <span aria-hidden="true">✕</span>
                 </button>
             </div>
             
-            <!-- Checkout Form -->
+            <!-- Cart Total -->
+            <div class="checkout-cart-total">
+                <span class="total-items">📋 <span id="checkoutItemCount">0 आइटम</span></span>
+                <span class="total-price" id="checkoutTotal">₹0</span>
+            </div>
+            
+            <!-- Form -->
             <div class="checkout-form">
-                <div class="checkout-order-summary">
-                    <div class="summary-toggle" id="summaryToggle" role="button" tabindex="0" aria-expanded="false">
-                        <span data-lang-key="orderSummary">📋 ऑर्डर समरी</span>
-                        <span class="summary-items-count" id="checkoutItemCount">0 आइटम</span>
-                        <span class="summary-total" id="checkoutTotal">₹0</span>
-                        <span class="toggle-arrow" aria-hidden="true">▼</span>
-                    </div>
-                    <div class="summary-detail hidden" id="summaryDetail"></div>
-                </div>
                 
-                <!-- Personal Details -->
+                <!-- Name -->
                 <div class="form-group">
-                    <label class="form-label" for="customerName" data-lang-key="fullName">
-                        <span class="label-icon" aria-hidden="true">👤</span> पूरा नाम
-                    </label>
                     <input type="text" id="customerName" class="form-input" 
-                           placeholder="अपना पूरा नाम लिखें" autocomplete="name" required>
-                    <span class="input-hint" data-lang-key="nameHint">जैसे: रमेश कुमार</span>
+                           placeholder="👤  पूरा नाम लिखें..." autocomplete="name" required>
                 </div>
                 
+                <!-- Phone -->
                 <div class="form-group">
-                    <label class="form-label" for="customerPhone" data-lang-key="phoneNumber">
-                        <span class="label-icon" aria-hidden="true">📱</span> मोबाइल नंबर
-                    </label>
                     <div class="phone-input-group">
-                        <span class="phone-prefix" aria-hidden="true">+91</span>
-                        <input type="tel" id="customerPhone" class="form-input phone-input" 
-                               placeholder="9876543210" maxlength="10" autocomplete="tel"
+                        <span class="phone-prefix">+91</span>
+                        <input type="tel" id="customerPhone" class="phone-input" 
+                               placeholder="📱  मोबाइल नंबर" maxlength="10" autocomplete="tel"
                                inputmode="numeric" pattern="[0-9]{10}" required>
                     </div>
-                    <span class="input-hint" data-lang-key="phoneHint">10 अंक का मोबाइल नंबर</span>
-                    <span class="input-error hidden" id="phoneError" data-lang-key="phoneError" role="alert">
-                        ⚠️ कृपया सही 10 अंक का नंबर डालें
+                </div>
+                
+                <!-- Location Status Indicator -->
+                <div class="location-status">
+                    <span id="locationIndicator" class="location-indicator searching">
+                        <span class="location-dot searching"></span> ⏳ लोकेशन ले रहे हैं...
                     </span>
                 </div>
                 
-                <!-- Location Section -->
+                <!-- Village/City -->
                 <div class="form-group">
-                    <label class="form-label" data-lang-key="deliveryAddress">
-                        <span class="label-icon" aria-hidden="true">📍</span> डिलीवरी का पता
-                    </label>
-                    
-                    <div class="location-status" id="locationStatus">
-                        <button type="button" id="getLocationBtn" class="location-btn">
-                            <span class="location-icon" aria-hidden="true">📍</span>
-                            <span data-lang-key="getLocation">लोकेशन लें</span>
-                        </button>
-                        <span class="location-text hidden" id="locationText">
-                            <span class="location-dot" aria-hidden="true"></span> लोकेशन मिल गई!
-                        </span>
-                    </div>
-                    
                     <input type="text" id="villageCity" class="form-input" 
-                           placeholder="गाँव या शहर का नाम" data-lang-key="villageCity" required>
-                    <input type="text" id="landmark" class="form-input" 
-                           placeholder="आस-पास की जगह (स्कूल, मंदिर, आदि)" data-lang-key="landmark">
-                    <input type="text" id="pincode" class="form-input" 
-                           placeholder="पिन कोड (वैकल्पिक)" maxlength="6" inputmode="numeric" pattern="[0-9]{6}">
-                    
-                    <!-- Hidden location fields -->
-                    <input type="hidden" id="latitude">
-                    <input type="hidden" id="longitude">
-                    <input type="hidden" id="locationUrl">
+                           placeholder="🏘️  गाँव या शहर" required>
                 </div>
                 
-                <!-- Order Notes -->
+                <!-- Nearby Place -->
                 <div class="form-group">
-                    <label class="form-label" for="orderNotes" data-lang-key="orderNotes">
-                        <span class="label-icon" aria-hidden="true">📝</span> कोई खास निर्देश
-                    </label>
-                    <textarea id="orderNotes" class="form-textarea" rows="2" 
-                              placeholder="जैसे: शाम 5 बजे के बाद डिलीवर करें" 
-                              data-lang-key="notesPlaceholder"></textarea>
+                    <input type="text" id="landmark" class="form-input" 
+                           placeholder="🏠  आस-पास की जगह (वैकल्पिक)">
                 </div>
                 
-                <!-- Save Info Checkbox -->
+                <!-- Pincode (Optional) -->
+                <div class="form-group">
+                    <input type="text" id="pincode" class="form-input" 
+                           placeholder="📮  पिन कोड (वैकल्पिक)" maxlength="6" inputmode="numeric" pattern="[0-9]{6}">
+                </div>
+                
+                <!-- Delivery Time -->
+                <div class="delivery-time-section">
+                    <div class="delivery-time-label">
+                        <span>⏱️</span>
+                        <span>डिलीवरी समय</span>
+                    </div>
+                    <div class="delivery-time-options">
+                        <label class="time-radio-label selected" for="timeNow">
+                            <input type="radio" id="timeNow" name="deliveryTime" value="अभी" checked>
+                            <span>अभी (30-45 मिनट)</span>
+                        </label>
+                        <label class="time-radio-label" for="timeEve1">
+                            <input type="radio" id="timeEve1" name="deliveryTime" value="शाम 5-7 बजे">
+                            <span>शाम 5-7 बजे</span>
+                        </label>
+                        <label class="time-radio-label" for="timeEve2">
+                            <input type="radio" id="timeEve2" name="deliveryTime" value="शाम 7-9 बजे">
+                            <span>शाम 7-9 बजे</span>
+                        </label>
+                        <input type="text" id="manualTime" class="time-manual-input" 
+                               placeholder="अपना समय...">
+                    </div>
+                </div>
+                
+                <!-- Save Info -->
                 <div class="form-group save-info-group">
                     <label class="checkbox-label">
                         <input type="checkbox" id="saveInfo" checked>
-                        <span class="checkmark" aria-hidden="true"></span>
-                        <span data-lang-key="saveInfo">यह जानकारी सेव करें (अगली बार ऑटो-फिल होगी)</span>
+                        <span class="checkmark"></span>
+                        <span>जानकारी सेव करें</span>
                     </label>
                 </div>
+                
+                <!-- Hidden Location Fields -->
+                <input type="hidden" id="latitude">
+                <input type="hidden" id="longitude">
+                <input type="hidden" id="locationUrl">
+                
             </div>
             
-            <!-- Checkout Footer -->
+            <!-- Footer -->
             <div class="checkout-footer">
-                <button id="confirmOrderBtn" class="confirm-order-btn" data-lang-key="confirmOrder" data-loading-text="ऑर्डर भेज रहे हैं...">
-                    <span class="whatsapp-icon" aria-hidden="true">💬</span>
-                    <span>WhatsApp पर ऑर्डर भेजें</span>
+                <button id="confirmOrderBtn" class="confirm-order-btn state-waiting">
+                    <span class="btn-spinner"></span>
+                    <span class="whatsapp-icon" style="display:none;">💬</span>
+                    <span>⏳ लोकेशन का इंतज़ार...</span>
                 </button>
             </div>
+            
+            <!-- Confetti Container -->
+            <div id="checkoutConfetti" class="checkout-confetti-container"></div>
         </div>
     </div>
     
@@ -558,9 +652,16 @@
     <script src="js/pwa-install.js"></script>
     <script src="js/orders.js"></script>
     <script src="js/location.js"></script>
-   <script src="js/pull-to-refresh.js"></script>
+    <script src="js/pull-to-refresh.js"></script>
     <script src="js/checkout.js"></script>
     <script src="js/floating-cart-bubble.js"></script>
+    <script src="js/order-popup.js"></script>
+    
+    <!-- Leaflet JS -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    
+    <!-- Floating Map -->
+    <script src="js/floating-map.js"></script>
     
     <!-- Font Loading Script -->
     <script>
@@ -568,37 +669,38 @@
             document.documentElement.classList.add('fonts-loaded');
         });
     </script>
+    
     <!-- Splash Screen Handler -->
-<script>
-    (function() {
-        const splash = document.getElementById('splashScreen');
-        if (!splash) return;
-        
-        // Hide splash when page is fully loaded
-        window.addEventListener('load', function() {
+    <script>
+        (function() {
+            const splash = document.getElementById('splashScreen');
+            if (!splash) return;
+            
+            // Hide splash when page is fully loaded
+            window.addEventListener('load', function() {
+                setTimeout(function() {
+                    splash.classList.add('hide');
+                    // Remove from DOM after animation
+                    setTimeout(function() {
+                        if (splash.parentNode) {
+                            splash.parentNode.removeChild(splash);
+                        }
+                    }, 700);
+                }, 2000); // Show for 2 seconds
+            });
+            
+            // Fallback: Hide after 4 seconds if load event didn't fire
             setTimeout(function() {
-                splash.classList.add('hide');
-                // Remove from DOM after animation
-                setTimeout(function() {
-                    if (splash.parentNode) {
-                        splash.parentNode.removeChild(splash);
-                    }
-                }, 700);
-            }, 2000); // Show for 2 seconds
-        });
-        
-        // Fallback: Hide after 4 seconds if load event didn't fire
-        setTimeout(function() {
-            if (splash && !splash.classList.contains('hide')) {
-                splash.classList.add('hide');
-                setTimeout(function() {
-                    if (splash.parentNode) {
-                        splash.parentNode.removeChild(splash);
-                    }
-                }, 700);
-            }
-        }, 4000);
-    })();
-</script>
+                if (splash && !splash.classList.contains('hide')) {
+                    splash.classList.add('hide');
+                    setTimeout(function() {
+                        if (splash.parentNode) {
+                            splash.parentNode.removeChild(splash);
+                        }
+                    }, 700);
+                }
+            }, 4000);
+        })();
+    </script>
 </body>
 </html>
