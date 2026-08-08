@@ -1,8 +1,11 @@
 /* ============================================
-   ORDERS.CSS - My Orders Modal (Updated)
-   Quick Dukan - All Statuses | Tracking | Cancel
+   ORDERS.CSS - My Orders Modal (Redesigned)
+   Quick Dukan - Kamri Theme | Premium Look
    ============================================ */
 
+/* ============================================
+   1. OVERLAY & CONTAINER
+   ============================================ */
 .orders-modal {
     position: fixed;
     top: 0;
@@ -26,9 +29,9 @@
     left: 0;
     width: 100%;
     height: 100%;
-    background: rgba(0, 0, 0, 0.6);
-    backdrop-filter: blur(4px);
-    -webkit-backdrop-filter: blur(4px);
+    background: rgba(0, 0, 0, 0.65);
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
     animation: fadeInOverlay 0.3s ease;
 }
 
@@ -40,67 +43,86 @@
 .orders-content {
     position: relative;
     width: 100%;
-    max-width: 480px;
-    max-height: 90vh;
-    max-height: 90dvh;
-    background: var(--bg-card, #FFFFFF);
+    max-width: 500px;
+    max-height: 92vh;
+    max-height: 92dvh;
+    background: #FAFAFA;
     border-radius: 24px 24px 0 0;
     overflow: hidden;
-    animation: slideUpCart 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    animation: slideUpOrders 0.45s cubic-bezier(0.16, 1, 0.3, 1);
     display: flex;
     flex-direction: column;
     z-index: 1;
-    box-shadow: 0 -8px 40px rgba(0, 0, 0, 0.15);
+    box-shadow: 0 -12px 50px rgba(0, 0, 0, 0.2);
 }
 
-@keyframes slideUpCart {
+@keyframes slideUpOrders {
     from { transform: translateY(100%); opacity: 0; }
     to { transform: translateY(0); opacity: 1; }
 }
 
 /* ============================================
-   HEADER
+   2. HEADER - Premium Green
    ============================================ */
 .orders-header {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 16px 18px 12px;
-    background: var(--primary, #2E7D32);
+    padding: 16px 20px 14px;
+    background: linear-gradient(135deg, #1B5E20, #2E7D32);
     flex-shrink: 0;
+    position: relative;
+}
+
+.orders-header::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 20px;
+    right: 20px;
+    height: 1px;
+    background: rgba(255, 255, 255, 0.15);
 }
 
 .orders-header-left {
     display: flex;
     align-items: center;
-    gap: 10px;
+    gap: 12px;
 }
 
 .orders-header-icon {
-    font-size: 28px;
-    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2));
+    font-size: 30px;
+    filter: drop-shadow(0 3px 6px rgba(0, 0, 0, 0.25));
+    animation: iconFloat 3s ease-in-out infinite;
+}
+
+@keyframes iconFloat {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-4px); }
 }
 
 .orders-header h2 {
-    font-size: 18px;
-    font-weight: 700;
+    font-size: 19px;
+    font-weight: 800;
     margin: 0;
     color: #FFFFFF;
+    letter-spacing: 0.3px;
 }
 
 .orders-subtitle {
-    font-size: 10px;
-    color: rgba(255, 255, 255, 0.8);
+    font-size: 11px;
+    color: rgba(255, 255, 255, 0.85);
     margin: 2px 0 0;
+    font-weight: 400;
 }
 
 .close-btn {
-    width: 32px;
-    height: 32px;
+    width: 34px;
+    height: 34px;
     border-radius: 50%;
-    background: rgba(255, 255, 255, 0.2);
-    border: none;
-    font-size: 15px;
+    background: rgba(255, 255, 255, 0.18);
+    border: 1.5px solid rgba(255, 255, 255, 0.25);
+    font-size: 16px;
     cursor: pointer;
     display: flex;
     align-items: center;
@@ -112,18 +134,21 @@
 
 .close-btn:hover {
     background: #FF4444;
+    border-color: #FF4444;
     color: white;
     transform: rotate(90deg);
+    box-shadow: 0 4px 15px rgba(255, 68, 68, 0.4);
 }
 
 /* ============================================
-   FILTERS
+   3. FILTERS - Pill Style
    ============================================ */
 .orders-filters {
     display: flex;
-    gap: 6px;
-    padding: 10px 16px;
+    gap: 8px;
+    padding: 12px 18px;
     overflow-x: auto;
+    background: #FFF;
     border-bottom: 1px solid rgba(0, 0, 0, 0.05);
     scrollbar-width: none;
     -ms-overflow-style: none;
@@ -135,135 +160,152 @@
 }
 
 .order-filter-btn {
-    padding: 7px 14px;
-    border-radius: 20px;
-    border: 1.5px solid rgba(0, 0, 0, 0.1);
-    background: var(--bg-card, #FFF);
-    font-size: 11px;
+    padding: 8px 16px;
+    border-radius: 22px;
+    border: 2px solid #E0E0E0;
+    background: #FFF;
+    font-size: 12px;
     font-weight: 600;
     cursor: pointer;
     white-space: nowrap;
     transition: all 0.3s ease;
-    color: #666;
+    color: #777;
     flex-shrink: 0;
+    letter-spacing: 0.2px;
+}
+
+.order-filter-btn:hover {
+    border-color: #4CAF50;
+    color: #4CAF50;
+    background: #F1F8E9;
 }
 
 .order-filter-btn.active {
-    background: var(--primary, #2E7D32);
+    background: linear-gradient(135deg, #2E7D32, #43A047);
     color: white;
-    border-color: var(--primary, #2E7D32);
-    box-shadow: 0 2px 8px rgba(46, 125, 50, 0.25);
+    border-color: #2E7D32;
+    box-shadow: 0 3px 12px rgba(46, 125, 50, 0.3);
+    font-weight: 700;
 }
 
 .order-filter-btn:active {
-    transform: scale(0.95);
+    transform: scale(0.94);
 }
 
 /* ============================================
-   ORDERS LIST
+   4. ORDERS LIST
    ============================================ */
 .orders-list {
     flex: 1;
     overflow-y: auto;
-    padding: 8px 0 12px;
+    padding: 10px 0 16px;
+    background: #FAFAFA;
     -webkit-overflow-scrolling: touch;
 }
 
 /* ============================================
-   ORDER CARD
+   5. ORDER CARD - Premium Card
    ============================================ */
 .order-card {
-    margin: 8px 14px;
-    background: var(--bg-card, #FFF);
-    border-radius: 16px;
-    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
+    margin: 10px 16px;
+    background: #FFFFFF;
+    border-radius: 18px;
+    box-shadow: 0 3px 16px rgba(0, 0, 0, 0.06);
     overflow: hidden;
-    animation: fadeIn 0.4s ease;
+    animation: cardFadeIn 0.45s ease;
     border: 1px solid rgba(0, 0, 0, 0.04);
-    transition: all 0.3s ease;
+    transition: all 0.35s ease;
 }
 
-@keyframes fadeIn {
-    from { opacity: 0; transform: translateY(10px); }
+@keyframes cardFadeIn {
+    from { opacity: 0; transform: translateY(16px); }
     to { opacity: 1; transform: translateY(0); }
 }
 
-.order-card:hover {
-    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+.order-card:active {
+    transform: scale(0.985);
 }
 
 /* Card Header */
 .order-card-header {
     display: flex;
     justify-content: space-between;
-    align-items: flex-start;
-    padding: 14px 14px 10px;
+    align-items: center;
+    padding: 14px 16px 10px;
+    background: #FAFAFA;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.03);
 }
 
 .order-id {
-    font-size: 12px;
+    font-size: 13px;
     font-weight: 700;
-    color: #555;
-    letter-spacing: 0.3px;
+    color: #444;
+    letter-spacing: 0.4px;
 }
 
 .order-date {
     font-size: 10px;
     color: #999;
-    margin-top: 2px;
+    margin-top: 3px;
+    font-weight: 500;
 }
 
 /* ============================================
-   STATUS BADGES
+   6. STATUS BADGES - Vibrant Colors
    ============================================ */
 .order-status {
-    padding: 4px 10px;
-    border-radius: 12px;
+    padding: 5px 12px;
+    border-radius: 14px;
     font-size: 10px;
     font-weight: 700;
     text-transform: uppercase;
-    letter-spacing: 0.3px;
+    letter-spacing: 0.5px;
     white-space: nowrap;
 }
 
 .order-status.pending {
-    background: #FFF3E0;
-    color: #E65100;
+    background: #FFF8E1;
+    color: #F57F17;
+    border: 1px solid rgba(245, 127, 23, 0.2);
 }
 
 .order-status.confirmed {
     background: #E8F5E9;
     color: #2E7D32;
+    border: 1px solid rgba(46, 125, 50, 0.2);
 }
 
 .order-status.in_transit {
     background: #E8F5E9;
     color: #2E7D32;
-    animation: transitPulse 1.5s infinite;
+    border: 1px solid rgba(46, 125, 50, 0.2);
+    animation: transitGlow 1.8s infinite;
 }
 
-@keyframes transitPulse {
-    0%, 100% { opacity: 1; }
-    50% { opacity: 0.5; }
+@keyframes transitGlow {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(76, 175, 80, 0.4); }
+    50% { box-shadow: 0 0 0 8px rgba(76, 175, 80, 0); }
 }
 
 .order-status.delivered {
     background: #E3F2FD;
     color: #1565C0;
+    border: 1px solid rgba(21, 101, 192, 0.2);
 }
 
 .order-status.cancelled {
     background: #FFEBEE;
     color: #C62828;
+    border: 1px solid rgba(198, 40, 40, 0.2);
 }
 
 /* ============================================
-   ITEMS PREVIEW
+   7. ITEMS PREVIEW - Bigger & Better
    ============================================ */
 .order-items-preview {
     display: flex;
-    gap: 6px;
-    padding: 4px 14px 8px;
+    gap: 8px;
+    padding: 6px 16px 10px;
     overflow-x: auto;
     scrollbar-width: none;
 }
@@ -273,136 +315,156 @@
 }
 
 .order-item-thumb {
-    width: 40px;
-    height: 40px;
-    border-radius: 10px;
+    width: 46px;
+    height: 46px;
+    border-radius: 12px;
     object-fit: cover;
-    border: 2px solid rgba(0, 0, 0, 0.05);
+    border: 2px solid #F0F0F0;
     flex-shrink: 0;
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+    transition: transform 0.2s ease;
+}
+
+.order-item-thumb:hover {
+    transform: scale(1.1);
 }
 
 .order-item-more {
-    width: 40px;
-    height: 40px;
-    border-radius: 10px;
-    background: rgba(0, 0, 0, 0.04);
+    width: 46px;
+    height: 46px;
+    border-radius: 12px;
+    background: linear-gradient(135deg, #F5F5F5, #E8E8E8);
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 11px;
-    font-weight: 700;
-    color: #888;
+    font-size: 12px;
+    font-weight: 800;
+    color: #777;
     flex-shrink: 0;
 }
 
 /* ============================================
-   SUMMARY ROW
+   8. SUMMARY ROW - Bold
    ============================================ */
 .order-summary {
-    padding: 0 14px 6px;
+    padding: 0 16px 8px;
     display: flex;
     justify-content: space-between;
     align-items: center;
 }
 
 .order-total {
-    font-size: 16px;
-    font-weight: 800;
-    color: #2E7D32;
+    font-size: 18px;
+    font-weight: 900;
+    color: #1B5E20;
+    letter-spacing: 0.3px;
 }
 
 .order-item-count {
     font-size: 11px;
     color: #999;
-    font-weight: 500;
+    font-weight: 600;
+    background: #F5F5F5;
+    padding: 3px 10px;
+    border-radius: 10px;
 }
 
 /* ============================================
-   DELIVERY TIME
+   9. DELIVERY TIME
    ============================================ */
 .order-delivery-time {
     display: flex;
     align-items: center;
-    gap: 4px;
-    padding: 2px 14px 6px;
+    gap: 5px;
+    padding: 2px 16px 6px;
     font-size: 11px;
-    color: #666;
-    font-weight: 500;
+    color: #777;
+    font-weight: 600;
 }
 
 /* ============================================
-   CANCEL REASON
+   10. CANCEL REASON
    ============================================ */
 .order-cancel-reason {
-    padding: 8px 14px;
-    margin: 4px 14px 8px;
-    background: #FFEBEE;
-    border-radius: 8px;
+    padding: 10px 16px;
+    margin: 6px 16px 10px;
+    background: #FFF5F5;
+    border-radius: 10px;
     font-size: 11px;
     color: #C62828;
-    border-left: 3px solid #C62828;
+    border-left: 4px solid #EF5350;
     font-weight: 500;
+    line-height: 1.5;
 }
 
 .order-cancel-reason .cancel-label {
-    font-weight: 700;
+    font-weight: 800;
     font-size: 10px;
     text-transform: uppercase;
-    letter-spacing: 0.3px;
+    letter-spacing: 0.5px;
+    display: block;
+    margin-bottom: 3px;
 }
 
 /* ============================================
-   GPS TRACKING MINI BAR
+   11. GPS TRACKING MINI BAR - Glowing
    ============================================ */
 .order-tracking-mini {
     display: flex;
     align-items: center;
-    gap: 8px;
-    padding: 8px 14px;
-    margin: 4px 14px 8px;
+    gap: 10px;
+    padding: 10px 16px;
+    margin: 6px 16px 10px;
     background: linear-gradient(135deg, #E8F5E9, #C8E6C9);
-    border-radius: 10px;
-    font-size: 11px;
-    font-weight: 600;
-    color: #2E7D32;
-    animation: trackingBarPulse 2s infinite;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: 700;
+    color: #1B5E20;
+    animation: trackingGlow 2.5s infinite;
+    cursor: pointer;
+    transition: all 0.3s ease;
 }
 
-@keyframes trackingBarPulse {
-    0%, 100% { box-shadow: 0 0 0 0 rgba(76, 175, 80, 0.3); }
-    50% { box-shadow: 0 0 0 6px rgba(76, 175, 80, 0); }
+.order-tracking-mini:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 16px rgba(76, 175, 80, 0.3);
+}
+
+@keyframes trackingGlow {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(76, 175, 80, 0.35); }
+    50% { box-shadow: 0 0 0 10px rgba(76, 175, 80, 0); }
 }
 
 .order-tracking-mini .tracking-dot {
-    width: 8px;
-    height: 8px;
+    width: 10px;
+    height: 10px;
     border-radius: 50%;
     background: #4CAF50;
-    animation: dotPulse 1.5s infinite;
+    animation: dotPulse 1.2s infinite;
 }
 
 @keyframes dotPulse {
     0%, 100% { opacity: 1; transform: scale(1); }
-    50% { opacity: 0.5; transform: scale(1.3); }
+    50% { opacity: 0.4; transform: scale(1.5); }
 }
 
 .order-tracking-mini .tracking-distance {
-    font-weight: 700;
+    font-weight: 800;
     color: #1B5E20;
 }
 
 /* ============================================
-   TIMELINE
+   12. TIMELINE - Sleek
    ============================================ */
 .order-timeline {
     display: flex;
     align-items: center;
     gap: 0;
-    padding: 10px 14px;
-    margin: 4px 14px 10px;
-    background: rgba(0, 0, 0, 0.015);
-    border-radius: 10px;
+    padding: 10px 16px;
+    margin: 6px 16px 12px;
+    background: #FAFAFA;
+    border-radius: 12px;
+    border: 1px solid rgba(0, 0, 0, 0.04);
     overflow-x: auto;
 }
 
@@ -410,29 +472,29 @@
     display: flex;
     align-items: center;
     gap: 5px;
-    font-size: 9px;
-    color: #BBB;
+    font-size: 10px;
+    color: #CCC;
     flex-shrink: 0;
     transition: all 0.3s ease;
 }
 
 .timeline-step span {
     white-space: nowrap;
-    font-weight: 500;
+    font-weight: 600;
 }
 
 .timeline-dot {
-    width: 10px;
-    height: 10px;
+    width: 11px;
+    height: 11px;
     border-radius: 50%;
     background: #DDD;
     flex-shrink: 0;
-    transition: all 0.3s ease;
+    transition: all 0.4s ease;
 }
 
 .timeline-step.completed .timeline-dot {
     background: #4CAF50;
-    box-shadow: 0 0 6px rgba(76, 175, 80, 0.4);
+    box-shadow: 0 0 8px rgba(76, 175, 80, 0.5);
 }
 
 .timeline-step.completed span {
@@ -441,19 +503,19 @@
 }
 
 .timeline-step.active .timeline-dot {
-    background: var(--primary, #2E7D32);
-    animation: pulse 1.5s infinite;
-    box-shadow: 0 0 8px rgba(46, 125, 50, 0.5);
+    background: #2E7D32;
+    animation: pulse 1.2s infinite;
+    box-shadow: 0 0 10px rgba(46, 125, 50, 0.6);
 }
 
 .timeline-step.active span {
-    color: var(--primary, #2E7D32);
+    color: #2E7D32;
     font-weight: 700;
 }
 
 .timeline-step.cancelled-step .timeline-dot {
     background: #FF4444;
-    box-shadow: 0 0 6px rgba(255, 68, 68, 0.4);
+    box-shadow: 0 0 8px rgba(255, 68, 68, 0.5);
 }
 
 .timeline-step.cancelled-step span {
@@ -463,89 +525,99 @@
 
 .timeline-line {
     flex: 1;
-    height: 2px;
-    background: #DDD;
-    margin: 0 3px;
-    min-width: 16px;
-    transition: all 0.3s ease;
+    height: 2.5px;
+    background: #E0E0E0;
+    margin: 0 4px;
+    min-width: 18px;
+    border-radius: 2px;
+    transition: all 0.4s ease;
 }
 
 .timeline-line.completed {
-    background: #4CAF50;
+    background: linear-gradient(90deg, #4CAF50, #66BB6A);
 }
 
 @keyframes pulse {
-    0%, 100% { opacity: 1; }
-    50% { opacity: 0.4; }
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.3; transform: scale(1.4); }
 }
 
 /* ============================================
-   ORDER ACTIONS
+   13. ORDER ACTIONS
    ============================================ */
 .order-actions {
     display: flex;
     gap: 8px;
-    padding: 4px 14px 12px;
+    padding: 6px 16px 14px;
 }
 
 .order-action-btn {
     flex: 1;
-    padding: 10px 8px;
-    border-radius: 10px;
+    padding: 11px 10px;
+    border-radius: 12px;
     border: none;
-    font-size: 11px;
-    font-weight: 600;
+    font-size: 12px;
+    font-weight: 700;
     cursor: pointer;
     transition: all 0.3s ease;
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 4px;
+    gap: 5px;
+    letter-spacing: 0.2px;
 }
 
 .reorder-btn {
-    background: var(--primary, #2E7D32);
+    background: linear-gradient(135deg, #2E7D32, #43A047);
     color: white;
+    box-shadow: 0 3px 12px rgba(46, 125, 50, 0.25);
 }
 
 .reorder-btn:hover {
-    background: #1B5E20;
-    transform: translateY(-1px);
-    box-shadow: 0 4px 12px rgba(46, 125, 50, 0.3);
+    background: linear-gradient(135deg, #1B5E20, #2E7D32);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(46, 125, 50, 0.4);
 }
 
 .view-detail-btn {
-    background: rgba(0, 0, 0, 0.04);
+    background: #F5F5F5;
     color: #666;
+    border: 1.5px solid #E0E0E0;
 }
 
 .view-detail-btn:hover {
-    background: rgba(0, 0, 0, 0.08);
+    background: #EEEEEE;
+    border-color: #CCC;
 }
 
 .track-order-btn {
-    background: #FF9800;
+    background: linear-gradient(135deg, #FF9800, #F57C00);
     color: white;
+    box-shadow: 0 3px 12px rgba(255, 152, 0, 0.25);
 }
 
 .track-order-btn:hover {
-    background: #F57C00;
-    transform: translateY(-1px);
-    box-shadow: 0 4px 12px rgba(255, 152, 0, 0.3);
+    background: linear-gradient(135deg, #F57C00, #E65100);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(255, 152, 0, 0.4);
+}
+
+.order-action-btn:active {
+    transform: scale(0.95);
 }
 
 /* ============================================
-   ORDER DETAIL (EXPANDED)
+   14. ORDER DETAIL (EXPANDED)
    ============================================ */
 .order-detail {
-    padding: 0 14px 12px;
-    border-top: 1px solid rgba(0, 0, 0, 0.04);
-    animation: slideDown 0.3s ease;
+    padding: 0 16px 14px;
+    border-top: 1px solid rgba(0, 0, 0, 0.05);
+    animation: detailSlide 0.3s ease;
 }
 
-@keyframes slideDown {
+@keyframes detailSlide {
     from { opacity: 0; max-height: 0; }
-    to { opacity: 1; max-height: 300px; }
+    to { opacity: 1; max-height: 400px; }
 }
 
 .order-detail.hidden {
@@ -555,29 +627,30 @@
 .order-detail-item {
     display: flex;
     justify-content: space-between;
-    padding: 6px 0;
-    font-size: 12px;
+    padding: 7px 0;
+    font-size: 13px;
     color: #666;
+    font-weight: 500;
 }
 
 .order-detail-item:last-child {
-    font-weight: 700;
+    font-weight: 800;
     color: #333;
-    border-top: 1px dashed rgba(0, 0, 0, 0.1);
-    padding-top: 8px;
-    margin-top: 4px;
-    font-size: 13px;
+    border-top: 1.5px dashed rgba(0, 0, 0, 0.1);
+    padding-top: 10px;
+    margin-top: 6px;
+    font-size: 14px;
 }
 
 /* ============================================
-   EMPTY STATE
+   15. EMPTY STATE - Premium
    ============================================ */
 .empty-orders {
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    padding: 40px 20px;
+    padding: 50px 24px;
     text-align: center;
 }
 
@@ -586,92 +659,104 @@
 }
 
 .empty-orders-icon {
-    font-size: 56px;
-    margin-bottom: 12px;
+    font-size: 64px;
+    margin-bottom: 14px;
     animation: emptyFloat 3s ease-in-out infinite;
 }
 
 @keyframes emptyFloat {
     0%, 100% { transform: translateY(0); }
-    50% { transform: translateY(-8px); }
+    50% { transform: translateY(-10px); }
 }
 
 .empty-orders h3 {
-    font-size: 17px;
-    font-weight: 700;
-    margin: 0 0 4px;
+    font-size: 18px;
+    font-weight: 800;
+    margin: 0 0 6px;
     color: #555;
 }
 
 .empty-orders p {
-    font-size: 12px;
+    font-size: 13px;
     color: #999;
-    margin: 0 0 16px;
+    margin: 0 0 20px;
+    line-height: 1.5;
 }
 
 .start-shopping-btn {
-    padding: 11px 24px;
-    background: var(--primary, #2E7D32);
+    padding: 12px 28px;
+    background: linear-gradient(135deg, #2E7D32, #43A047);
     color: white;
     border: none;
-    border-radius: 20px;
-    font-size: 13px;
-    font-weight: 600;
+    border-radius: 24px;
+    font-size: 14px;
+    font-weight: 700;
     cursor: pointer;
     transition: all 0.3s ease;
-    box-shadow: 0 4px 15px rgba(46, 125, 50, 0.3);
+    box-shadow: 0 4px 18px rgba(46, 125, 50, 0.35);
+    letter-spacing: 0.3px;
 }
 
 .start-shopping-btn:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(46, 125, 50, 0.4);
+    transform: translateY(-3px);
+    box-shadow: 0 8px 28px rgba(46, 125, 50, 0.5);
 }
 
 /* ============================================
-   DARK MODE
+   16. DARK MODE
    ============================================ */
 body.dark-mode .orders-content {
-    background: #1a1f2e;
+    background: #141824;
 }
 
 body.dark-mode .orders-header {
-    background: #1B5E20;
+    background: linear-gradient(135deg, #0D3B0F, #1B5E20);
+}
+
+body.dark-mode .orders-filters {
+    background: #1a1f2e;
+    border-bottom-color: rgba(255, 255, 255, 0.04);
+}
+
+body.dark-mode .orders-list {
+    background: #141824;
 }
 
 body.dark-mode .order-card {
     background: #1a1f2e;
-    border-color: rgba(255, 255, 255, 0.06);
+    border-color: rgba(255, 255, 255, 0.05);
+    box-shadow: 0 3px 16px rgba(0, 0, 0, 0.3);
 }
 
 body.dark-mode .order-card-header {
+    background: #1E2433;
     border-bottom-color: rgba(255, 255, 255, 0.04);
 }
 
-body.dark-mode .order-detail {
-    border-top-color: rgba(255, 255, 255, 0.04);
-}
-
-body.dark-mode .order-timeline {
-    background: rgba(255, 255, 255, 0.03);
-}
-
-body.dark-mode .order-tracking-mini {
-    background: linear-gradient(135deg, rgba(76, 175, 80, 0.15), rgba(76, 175, 80, 0.08));
-    color: #81C784;
-}
-
-body.dark-mode .order-cancel-reason {
-    background: rgba(198, 40, 40, 0.1);
-    color: #EF9A9A;
-    border-left-color: #EF5350;
-}
-
 body.dark-mode .order-id {
-    color: #BBB;
+    color: #CCC;
+}
+
+body.dark-mode .order-date {
+    color: #888;
 }
 
 body.dark-mode .order-total {
     color: #81C784;
+}
+
+body.dark-mode .order-item-count {
+    background: #252b3b;
+    color: #AAA;
+}
+
+body.dark-mode .order-detail {
+    border-top-color: rgba(255, 255, 255, 0.05);
+}
+
+body.dark-mode .order-timeline {
+    background: #1E2433;
+    border-color: rgba(255, 255, 255, 0.04);
 }
 
 body.dark-mode .timeline-dot {
@@ -682,89 +767,203 @@ body.dark-mode .timeline-line {
     background: #444;
 }
 
+body.dark-mode .timeline-line.completed {
+    background: linear-gradient(90deg, #388E3C, #4CAF50);
+}
+
+body.dark-mode .order-tracking-mini {
+    background: linear-gradient(135deg, rgba(76, 175, 80, 0.12), rgba(76, 175, 80, 0.05));
+    color: #81C784;
+}
+
+body.dark-mode .order-cancel-reason {
+    background: rgba(198, 40, 40, 0.08);
+    color: #EF9A9A;
+    border-left-color: #EF5350;
+}
+
 body.dark-mode .order-filter-btn {
     background: #252b3b;
     border-color: rgba(255, 255, 255, 0.1);
     color: #AAA;
 }
 
+body.dark-mode .order-filter-btn:hover {
+    border-color: #4CAF50;
+    color: #81C784;
+    background: rgba(76, 175, 80, 0.08);
+}
+
 body.dark-mode .order-filter-btn.active {
-    background: #2E7D32;
+    background: linear-gradient(135deg, #2E7D32, #388E3C);
     color: white;
     border-color: #2E7D32;
 }
 
 body.dark-mode .order-item-thumb {
-    border-color: rgba(255, 255, 255, 0.1);
+    border-color: rgba(255, 255, 255, 0.08);
 }
 
 body.dark-mode .order-item-more {
-    background: rgba(255, 255, 255, 0.06);
+    background: linear-gradient(135deg, #252b3b, #1E2433);
+    color: #999;
+}
+
+body.dark-mode .view-detail-btn {
+    background: #252b3b;
+    color: #AAA;
+    border-color: rgba(255, 255, 255, 0.1);
+}
+
+body.dark-mode .view-detail-btn:hover {
+    background: #2a3040;
+}
+
+body.dark-mode .order-detail-item {
     color: #AAA;
 }
 
+body.dark-mode .order-detail-item:last-child {
+    color: #DDD;
+    border-top-color: rgba(255, 255, 255, 0.1);
+}
+
+body.dark-mode .empty-orders h3 {
+    color: #BBB;
+}
+
+body.dark-mode .empty-orders p {
+    color: #888;
+}
+
 /* ============================================
-   MOBILE
+   17. MOBILE
    ============================================ */
-@media (max-width: 380px) {
+@media (max-width: 420px) {
+    .orders-content {
+        max-height: 94vh;
+        max-height: 94dvh;
+        border-radius: 20px 20px 0 0;
+    }
+    
     .orders-header {
-        padding: 12px 14px 10px;
+        padding: 14px 16px 12px;
     }
     
     .orders-header h2 {
-        font-size: 16px;
+        font-size: 17px;
     }
     
     .orders-header-icon {
-        font-size: 24px;
+        font-size: 26px;
     }
     
     .orders-filters {
+        padding: 10px 14px;
+        gap: 6px;
+    }
+    
+    .order-filter-btn {
+        padding: 7px 12px;
+        font-size: 11px;
+    }
+    
+    .order-card {
+        margin: 8px 12px;
+        border-radius: 16px;
+    }
+    
+    .order-card-header {
+        padding: 12px 14px 8px;
+    }
+    
+    .order-items-preview {
+        padding: 4px 14px 8px;
+        gap: 6px;
+    }
+    
+    .order-item-thumb,
+    .order-item-more {
+        width: 42px;
+        height: 42px;
+    }
+    
+    .order-summary {
+        padding: 0 14px 6px;
+    }
+    
+    .order-total {
+        font-size: 16px;
+    }
+    
+    .order-actions {
+        padding: 4px 14px 12px;
+        gap: 6px;
+    }
+    
+    .order-action-btn {
+        padding: 10px 8px;
+        font-size: 11px;
+    }
+    
+    .order-timeline {
         padding: 8px 12px;
+        margin: 4px 12px 10px;
+    }
+    
+    .timeline-step {
+        font-size: 9px;
+        gap: 4px;
+    }
+}
+
+@media (max-width: 360px) {
+    .orders-header {
+        padding: 10px 12px 10px;
+    }
+    
+    .orders-header h2 {
+        font-size: 15px;
+    }
+    
+    .orders-header-icon {
+        font-size: 22px;
+    }
+    
+    .orders-filters {
+        padding: 8px 10px;
         gap: 5px;
     }
     
     .order-filter-btn {
         padding: 6px 10px;
         font-size: 10px;
+        border-radius: 18px;
     }
     
     .order-card {
-        margin: 6px 10px;
-    }
-    
-    .order-card-header {
-        padding: 10px 12px 8px;
+        margin: 6px 8px;
+        border-radius: 14px;
     }
     
     .order-items-preview {
-        padding: 2px 12px 6px;
+        gap: 5px;
     }
     
-    .order-summary {
-        padding: 0 12px 4px;
+    .order-item-thumb,
+    .order-item-more {
+        width: 38px;
+        height: 38px;
+        border-radius: 10px;
     }
     
     .order-total {
-        font-size: 14px;
-    }
-    
-    .order-actions {
-        padding: 2px 12px 10px;
+        font-size: 15px;
     }
     
     .order-action-btn {
         padding: 8px 6px;
         font-size: 10px;
-    }
-    
-    .order-timeline {
-        padding: 8px 10px;
-        margin: 2px 10px 8px;
-    }
-    
-    .timeline-step {
-        font-size: 8px;
-        gap: 3px;
+        border-radius: 10px;
     }
 }
