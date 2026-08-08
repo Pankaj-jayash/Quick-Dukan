@@ -1,6 +1,6 @@
 // ============================================
 // ORDERS.JS - My Orders Logic (Final)
-// Quick Dukan - All Statuses | GPS | Tracking | Cancel | Map Fix
+// Quick Dukan - All Statuses | GPS | Tracking | Cancel | Track Fix
 // ============================================
 
 class OrdersManager {
@@ -184,7 +184,7 @@ class OrdersManager {
     saveOrder(orderData) {
         const orders = this.getOrders();
         
-        // 🔥 Save customer location from checkout
+        // Save customer location from checkout
         let customerLocation = null;
         
         if (orderData.location && orderData.location.lat && orderData.location.lng) {
@@ -197,6 +197,9 @@ class OrdersManager {
             console.error('❌ No location in orderData!');
         }
         
+        // Save customer name for celebration popup
+        const customerName = orderData.customer?.name || '';
+        
         const newOrder = {
             id: 'ORD-' + Date.now().toString(36).toUpperCase(),
             date: new Date().toISOString(),
@@ -205,6 +208,7 @@ class OrdersManager {
             total: orderData.total || 0,
             itemCount: orderData.itemCount || 0,
             deliveryTime: orderData.deliveryTime || null,
+            customerName: customerName,
             cancelReason: null,
             deliveryPopupShown: false,
             location: orderData.location || null,
@@ -224,7 +228,7 @@ class OrdersManager {
         
         orders.unshift(newOrder);
         this.saveOrders(orders);
-        console.log('✅ Order saved:', newOrder.id, '| Location:', customerLocation);
+        console.log('✅ Order saved:', newOrder.id, '| Customer:', customerName, '| Location:', customerLocation);
         
         return newOrder;
     }
@@ -249,6 +253,10 @@ class OrdersManager {
                 order.timeline[1].completed = true;
                 order.timeline[1].time = now;
                 this.startTracking(order);
+                // Notify floating map
+                if (window.floatingMapManager) {
+                    setTimeout(() => window.floatingMapManager.checkActiveOrder(), 500);
+                }
                 break;
                 
             case 'cancelled':
@@ -257,9 +265,11 @@ class OrdersManager {
                     { label: 'रद्द', labelEn: 'Cancelled', time: now, completed: true }
                 ];
                 this.stopTracking(order);
-                // 🔥 Hide floating map on cancel
+                // Hide floating map on cancel
                 if (window.floatingMapManager) {
                     window.floatingMapManager.hide();
+                    window.floatingMapManager.stopTimer();
+                    window.floatingMapManager.stopRiderUpdates();
                 }
                 break;
                 
@@ -267,9 +277,11 @@ class OrdersManager {
                 order.timeline[2].completed = true;
                 order.timeline[2].time = now;
                 this.stopTracking(order);
-                // 🔥 Hide floating map on delivered
+                // Hide floating map on delivered
                 if (window.floatingMapManager) {
                     window.floatingMapManager.hide();
+                    window.floatingMapManager.stopTimer();
+                    window.floatingMapManager.stopRiderUpdates();
                 }
                 break;
                 
@@ -304,8 +316,7 @@ class OrdersManager {
     }
     
     // ============================================
-    // 🔥 GPS TRACKING — MAP CALL HATAYA GAYA
-    // (Map ab sirf order-popup.js → confirmOrder() se khulega)
+    // GPS TRACKING — MAP CALL SIRF POPUP CONFIRM SE
     // ============================================
     startTracking(order) {
         if (!order) return;
@@ -328,8 +339,7 @@ class OrdersManager {
             this.saveOrders(orders);
         }
         
-        // 🔥 MAP CALL HATAYA — Ab order-popup.js se hoga
-        console.log('📍 Tracking started for order:', order.id, '(map will open via popup confirm)');
+        console.log('📍 Tracking started for order:', order.id, '(map opens via popup confirm)');
     }
     
     stopTracking(order) {
@@ -404,7 +414,7 @@ class OrdersManager {
         this.ordersModal.classList.remove('hidden');
         document.body.style.overflow = 'hidden';
         
-        // 🔥 Hide floating map when orders open
+        // Hide floating map when orders open
         if (window.floatingMapManager) {
             window.floatingMapManager.hide();
         }
@@ -416,7 +426,7 @@ class OrdersManager {
         document.body.style.overflow = '';
         this.expandedOrder = null;
         
-        // 🔥 Check if floating map should show (without resetting timer)
+        // Check if floating map should show (without resetting timer)
         setTimeout(() => {
             if (window.floatingMapManager) {
                 const activeOrder = this.getOrders().find(o => 
@@ -500,7 +510,7 @@ class OrdersManager {
             </div>
         `;
         
-        // Tracking bar with map integration
+        // Tracking bar with map integration (clickable)
         if (order.status === 'confirmed' || order.status === 'in_transit') {
             let trackingText = isHindi ? 'आपका ऑर्डर आ रहा है...' : 'Your order is on the way...';
             let distanceText = '';
@@ -523,7 +533,7 @@ class OrdersManager {
             
             html += `
                 <div class="order-tracking-mini" style="cursor:pointer;" 
-                     onclick="window.floatingMapManager?.show(); window.ordersManager?.close();">
+                     onclick="window.ordersManager?.close(); setTimeout(() => window.floatingMapManager?.show(), 400);">
                     <span class="tracking-dot"></span>
                     <span>${trackingText}</span>
                     <span style="margin-left:auto;font-size:10px;opacity:0.7;">${isHindi ? '🗺️ देखें' : '🗺️ View'}</span>
@@ -632,6 +642,7 @@ class OrdersManager {
         
         card.innerHTML = html;
         
+        // Event listeners
         card.querySelector('.reorder-btn')?.addEventListener('click', (e) => {
             e.stopPropagation();
             this.reorder(order);
@@ -642,13 +653,22 @@ class OrdersManager {
             this.toggleDetail(order.id);
         });
         
+        // 🔥 TRACK BUTTON FIX — Don't reset timer if already running
         card.querySelector('.track-order-btn')?.addEventListener('click', (e) => {
             e.stopPropagation();
             this.close();
             setTimeout(() => {
                 if (window.floatingMapManager) {
-                    window.floatingMapManager.show();
-                    window.floatingMapManager.updateMapWithOrder(order);
+                    // Agar timer already chal raha hai — sirf show karo, reset mat karo
+                    if (window.floatingMapManager.timerInterval || window.floatingMapManager.riderInterval) {
+                        window.floatingMapManager.show();
+                        console.log('🗺️ Track: Map shown (timer already running, no reset)');
+                    } else {
+                        // Timer nahi chal raha — full update
+                        window.floatingMapManager.show();
+                        window.floatingMapManager.updateMapWithOrder(order);
+                        console.log('🗺️ Track: Map updated with order (fresh start)');
+                    }
                 }
             }, 300);
         });
