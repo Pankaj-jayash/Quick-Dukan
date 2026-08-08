@@ -1,6 +1,6 @@
 /* ============================================
    FLOATING-MAP.CSS - Live Tracking Floating Map
-   Quick Dukan - Zomato-Style | Collapsible
+   Quick Dukan - Compact | GPU Optimized | Offline Banner
    ============================================ */
 
 /* ============================================
@@ -8,63 +8,99 @@
    ============================================ */
 .floating-map-container {
     position: fixed;
-    bottom: 80px;
-    right: 12px;
-    width: 300px;
+    bottom: 85px;
+    right: 10px;
+    width: 280px;
     z-index: 1500;
-    transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
     display: none;
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.22);
+    background: #fff;
+    will-change: transform;
+    transform: translate3d(0, 0, 0);
+    cursor: default;
+    user-select: none;
 }
 
 .floating-map-container.visible {
     display: block;
-    animation: floatIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    animation: floatIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
 
 @keyframes floatIn {
     from {
         opacity: 0;
-        transform: translateY(30px) scale(0.9);
+        transform: translate3d(0, 20px, 0) scale(0.95);
     }
     to {
         opacity: 1;
-        transform: translateY(0) scale(1);
+        transform: translate3d(0, 0, 0) scale(1);
     }
 }
 
 /* ============================================
-   MAP HEADER
+   OFFLINE BANNER
+   ============================================ */
+.map-offline-banner {
+    display: none;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding: 6px 10px;
+    background: #FFF3E0;
+    color: #E65100;
+    font-size: 10px;
+    font-weight: 700;
+    text-align: center;
+    border-bottom: 2px solid #FF9800;
+    animation: offlinePulse 2s infinite;
+}
+
+@keyframes offlinePulse {
+    0%, 100% { background: #FFF3E0; }
+    50% { background: #FFE0B2; }
+}
+
+/* ============================================
+   MAP HEADER - Draggable
    ============================================ */
 .floating-map-header {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 8px 12px;
-    background: var(--primary, #2E7D32);
-    border-radius: 14px 14px 0 0;
+    padding: 7px 12px;
+    background: linear-gradient(135deg, #1B5E20, #2E7D32);
     color: white;
-    font-size: 12px;
-    font-weight: 600;
-    cursor: move;
+    font-size: 11px;
+    font-weight: 700;
+    cursor: grab;
+    user-select: none;
+    letter-spacing: 0.2px;
+}
+
+.floating-map-header:active {
+    cursor: grabbing;
 }
 
 .floating-map-header-left {
     display: flex;
     align-items: center;
-    gap: 6px;
+    gap: 7px;
 }
 
 .floating-map-header-left .pulse-dot {
     width: 8px;
     height: 8px;
     border-radius: 50%;
-    background: #4CAF50;
-    animation: dotPulse 1.5s infinite;
+    background: #69F0AE;
+    animation: dotPulse 1.2s infinite;
+    box-shadow: 0 0 6px rgba(105, 240, 174, 0.6);
 }
 
 @keyframes dotPulse {
     0%, 100% { opacity: 1; transform: scale(1); }
-    50% { opacity: 0.4; transform: scale(1.5); }
+    50% { opacity: 0.3; transform: scale(1.6); }
 }
 
 .floating-map-actions {
@@ -73,13 +109,13 @@
 }
 
 .floating-map-btn {
-    width: 26px;
-    height: 26px;
+    width: 24px;
+    height: 24px;
     border-radius: 50%;
     border: none;
-    background: rgba(255, 255, 255, 0.2);
+    background: rgba(255, 255, 255, 0.18);
     color: white;
-    font-size: 14px;
+    font-size: 13px;
     cursor: pointer;
     display: flex;
     align-items: center;
@@ -88,20 +124,19 @@
 }
 
 .floating-map-btn:hover {
-    background: rgba(255, 255, 255, 0.35);
+    background: rgba(255, 255, 255, 0.3);
+    transform: scale(1.1);
 }
 
 /* ============================================
-   MAP BODY
+   MAP BODY - Compact
    ============================================ */
 .floating-map-body {
     position: relative;
     width: 100%;
-    height: 180px;
+    height: 160px;
     background: #E8F5E9;
     overflow: hidden;
-    border-left: 2px solid var(--primary, #2E7D32);
-    border-right: 2px solid var(--primary, #2E7D32);
 }
 
 .floating-map-body .leaflet-container {
@@ -110,15 +145,25 @@
     z-index: 1;
 }
 
+/* Custom Rider Marker */
+.rider-marker {
+    font-size: 30px;
+    animation: riderBounce 0.8s ease-in-out infinite;
+    filter: drop-shadow(0 3px 5px rgba(0, 0, 0, 0.3));
+}
+
+@keyframes riderBounce {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-5px); }
+}
+
 /* ============================================
-   MAP INFO BAR
+   MAP INFO BAR - Compact
    ============================================ */
 .floating-map-info {
-    padding: 8px 12px;
+    padding: 7px 12px;
     background: white;
-    border: 2px solid var(--primary, #2E7D32);
-    border-top: none;
-    border-radius: 0 0 14px 14px;
+    border-top: 2px solid #2E7D32;
 }
 
 .floating-map-info-row {
@@ -127,38 +172,43 @@
     align-items: center;
     font-size: 11px;
     color: #555;
-    font-weight: 500;
+    font-weight: 600;
+}
+
+.floating-map-info-row .timer {
+    font-weight: 800;
+    color: #FF6D00;
+    font-size: 13px;
+    letter-spacing: 0.5px;
+    font-variant-numeric: tabular-nums;
 }
 
 .floating-map-info-row .distance {
     font-weight: 700;
     color: #2E7D32;
-}
-
-.floating-map-info-row .eta {
-    font-weight: 700;
-    color: #FF9800;
+    font-size: 11px;
 }
 
 .floating-map-actions-row {
     display: flex;
     gap: 6px;
-    margin-top: 8px;
+    margin-top: 7px;
 }
 
 .floating-map-action-btn {
     flex: 1;
-    padding: 8px 6px;
+    padding: 7px 6px;
     border-radius: 8px;
     border: none;
     font-size: 10px;
-    font-weight: 600;
+    font-weight: 700;
     cursor: pointer;
     transition: all 0.2s ease;
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 4px;
+    gap: 3px;
+    letter-spacing: 0.2px;
 }
 
 .floating-map-action-btn.call-btn {
@@ -166,17 +216,56 @@
     color: #2E7D32;
 }
 
-.floating-map-action-btn.view-btn {
-    background: var(--primary, #2E7D32);
-    color: white;
+.floating-map-action-btn.call-btn:hover {
+    background: #C8E6C9;
 }
 
-.floating-map-action-btn:hover {
+.floating-map-action-btn.view-btn {
+    background: linear-gradient(135deg, #2E7D32, #43A047);
+    color: white;
+    box-shadow: 0 2px 8px rgba(46, 125, 50, 0.25);
+}
+
+.floating-map-action-btn.view-btn:hover {
     transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(46, 125, 50, 0.35);
+}
+
+.floating-map-action-btn:active {
+    transform: scale(0.95);
 }
 
 /* ============================================
-   COLLAPSED STATE (Mobile)
+   RESIZE HANDLE
+   ============================================ */
+.floating-map-resize-handle {
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    width: 20px;
+    height: 20px;
+    cursor: nwse-resize;
+    z-index: 10;
+}
+
+.floating-map-resize-handle::after {
+    content: '';
+    position: absolute;
+    bottom: 4px;
+    right: 4px;
+    width: 10px;
+    height: 10px;
+    border-right: 2.5px solid rgba(0, 0, 0, 0.18);
+    border-bottom: 2.5px solid rgba(0, 0, 0, 0.18);
+    transition: all 0.2s ease;
+}
+
+.floating-map-resize-handle:hover::after {
+    border-color: rgba(0, 0, 0, 0.35);
+}
+
+/* ============================================
+   COLLAPSED STATE
    ============================================ */
 .floating-map-container.collapsed .floating-map-body {
     height: 0;
@@ -186,60 +275,117 @@
     display: none;
 }
 
+.floating-map-container.collapsed .map-offline-banner {
+    display: none;
+}
+
 /* ============================================
    MOBILE
    ============================================ */
 @media (max-width: 480px) {
     .floating-map-container {
-        bottom: 75px;
-        right: 8px;
-        left: 8px;
+        bottom: 78px;
+        right: 6px;
+        left: 6px;
         width: auto;
+        border-radius: 14px;
     }
     
     .floating-map-body {
-        height: 150px;
+        height: 140px;
     }
     
     .floating-map-header {
-        font-size: 11px;
+        font-size: 10px;
         padding: 6px 10px;
     }
     
     .floating-map-info {
         padding: 6px 10px;
     }
+    
+    .floating-map-info-row .timer {
+        font-size: 12px;
+    }
+    
+    .map-offline-banner {
+        font-size: 9px;
+        padding: 5px 8px;
+    }
 }
 
 @media (max-width: 380px) {
     .floating-map-container {
-        bottom: 70px;
-        right: 4px;
-        left: 4px;
+        bottom: 72px;
+        right: 3px;
+        left: 3px;
     }
     
     .floating-map-body {
-        height: 130px;
+        height: 120px;
+    }
+    
+    .rider-marker {
+        font-size: 26px;
     }
 }
 
 /* ============================================
    DARK MODE
    ============================================ */
-body.dark-mode .floating-map-body {
+body.dark-mode .floating-map-container {
     background: #1a1f2e;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+}
+
+body.dark-mode .floating-map-header {
+    background: linear-gradient(135deg, #0D3B0F, #1B5E20);
+}
+
+body.dark-mode .floating-map-body {
+    background: #141824;
 }
 
 body.dark-mode .floating-map-info {
     background: #1a1f2e;
-    border-color: #2E7D32;
+    border-top-color: #2E7D32;
 }
 
 body.dark-mode .floating-map-info-row {
     color: #BBB;
 }
 
-body.dark-mode .floating-map-action-btn.call-btn {
-    background: rgba(76, 175, 80, 0.15);
+body.dark-mode .floating-map-info-row .timer {
+    color: #FFB74D;
+}
+
+body.dark-mode .floating-map-info-row .distance {
     color: #81C784;
+}
+
+body.dark-mode .floating-map-action-btn.call-btn {
+    background: rgba(76, 175, 80, 0.12);
+    color: #81C784;
+}
+
+body.dark-mode .floating-map-action-btn.call-btn:hover {
+    background: rgba(76, 175, 80, 0.2);
+}
+
+body.dark-mode .floating-map-action-btn.view-btn {
+    background: linear-gradient(135deg, #2E7D32, #388E3C);
+}
+
+body.dark-mode .map-offline-banner {
+    background: #2D1B00;
+    color: #FFB74D;
+    border-bottom-color: #FF9800;
+}
+
+body.dark-mode .floating-map-resize-handle::after {
+    border-color: rgba(255, 255, 255, 0.18);
+}
+
+body.dark-mode .floating-map-resize-handle:hover::after {
+    border-color: rgba(255, 255, 255, 0.35);
 }
