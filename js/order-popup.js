@@ -13,7 +13,7 @@ class OrderPopupManager {
         
         this.init();
         console.log('✅ Order Popup Manager Initialized');
-    }
+    } 
     
     init() {
         this.detectLanguage();
