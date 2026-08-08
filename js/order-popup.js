@@ -1,6 +1,6 @@
 // ============================================
 // ORDER-POPUP.JS - Order Popups Logic
-// Quick Dukan - Map Only on Confirm | Unclosable Delivery
+// Quick Dukan - Map Only on Confirm | Unclosable Delivery | Celebration
 // ============================================
 
 class OrderPopupManager {
@@ -9,6 +9,7 @@ class OrderPopupManager {
         this.activePopup = null;
         this.deliveryRetryInterval = null;
         this.unansweredPopup = null;
+        this.celebrationTimer = null;
         
         this.init();
         console.log('✅ Order Popup Manager Initialized');
@@ -65,6 +66,15 @@ class OrderPopupManager {
                 noBtn: '❌ नहीं आया',
                 retryMessage: '⏱️ समय बढ़ा दिया गया, जल्द ही पहुँचेगा!',
                 
+                // Celebration Popup
+                celebrationTitle: '🎊 धन्यवाद!',
+                celebrationMessage: 'आपका ऑर्डर सफलतापूर्वक डिलीवर हो गया!',
+                celebrationSubMessage: 'हमें खुशी है कि हम आपकी सेवा कर पाए! 🙏',
+                celebrationStars: '⭐⭐⭐⭐⭐',
+                reorderBtn: '🛒 फिर से ऑर्डर करें',
+                browseBtn: '🏪 और प्रोडक्ट देखें',
+                closeBtn: '✕ बंद करें',
+                
                 // Toast
                 confirmed: '✅ ऑर्डर कन्फर्म हो गया!',
                 cancelled: '❌ ऑर्डर रद्द कर दिया',
@@ -72,6 +82,7 @@ class OrderPopupManager {
                 reasonSent: '📤 कारण भेज दिया गया',
                 mapOpened: '🗺️ लाइव ट्रैकिंग शुरू!',
                 orderComplete: '🎉 आपका ऑर्डर पूरा हुआ! धन्यवाद!',
+                welcomeBack: 'फिर मिलेंगे! ❤️',
             },
             en: {
                 successTitle: '🎉 Order Ready!',
@@ -91,12 +102,23 @@ class OrderPopupManager {
                 noBtn: '❌ Not Yet',
                 retryMessage: '⏱️ Time extended, arriving soon!',
                 
+                // Celebration Popup
+                celebrationTitle: '🎊 Thank You!',
+                celebrationMessage: 'Your order has been delivered successfully!',
+                celebrationSubMessage: 'We are happy to serve you! 🙏',
+                celebrationStars: '⭐⭐⭐⭐⭐',
+                reorderBtn: '🛒 Order Again',
+                browseBtn: '🏪 Browse Products',
+                closeBtn: '✕ Close',
+                
+                // Toast
                 confirmed: '✅ Order Confirmed!',
                 cancelled: '❌ Order Cancelled',
                 delivered: '🎉 Order Delivered!',
                 reasonSent: '📤 Reason sent',
                 mapOpened: '🗺️ Live tracking started!',
                 orderComplete: '🎉 Your order is complete! Thank you!',
+                welcomeBack: 'See you again! ❤️',
             }
         };
         
@@ -168,7 +190,6 @@ class OrderPopupManager {
             overlay.classList.add('visible');
         });
         
-        // 🔥 Use onclick for reliable button clicks
         const btnConfirm = overlay.querySelector('#btnConfirmOrder');
         const btnCancel = overlay.querySelector('#btnCancelOrder');
         
@@ -190,7 +211,7 @@ class OrderPopupManager {
     }
     
     // ============================================
-    // 🔥 CONFIRM ORDER — ONLY HERE MAP OPENS
+    // CONFIRM ORDER — ONLY HERE MAP OPENS
     // ============================================
     confirmOrder(orderData) {
         if (window.ordersManager) {
@@ -198,21 +219,28 @@ class OrderPopupManager {
             const order = orders[0];
             
             if (order) {
-                // Update status to confirmed (this calls startTracking in orders.js)
-                // BUT we removed the map call from startTracking
                 window.ordersManager.updateOrderStatus(order.id, 'confirmed');
                 
-                // 🔥 MAP SIRF YAHIN SE OPEN HOGA — Confirm button press ke baad
+                // MAP SIRF YAHIN SE OPEN HOGA
                 setTimeout(() => {
                     if (window.floatingMapManager) {
-                        const updatedOrder = window.ordersManager.getOrderById(order.id);
-                        if (updatedOrder && updatedOrder.tracking?.customerLocation) {
-                            window.floatingMapManager.show();
-                            window.floatingMapManager.updateMapWithOrder(updatedOrder);
-                            this.showToast(this.getMsg('mapOpened'));
-                        } else {
-                            console.warn('⚠️ No customer location found for tracking');
+                        // Check if map already running for another order
+                        const isMapRunning = window.floatingMapManager.timerInterval || 
+                                            window.floatingMapManager.riderInterval;
+                        
+                        if (isMapRunning) {
+                            console.log('🗺️ Map already running for previous order — keeping it');
                             this.showToast(this.getMsg('confirmed'));
+                        } else {
+                            const updatedOrder = window.ordersManager.getOrderById(order.id);
+                            if (updatedOrder && updatedOrder.tracking?.customerLocation) {
+                                window.floatingMapManager.show();
+                                window.floatingMapManager.updateMapWithOrder(updatedOrder);
+                                this.showToast(this.getMsg('mapOpened'));
+                            } else {
+                                console.warn('⚠️ No customer location found for tracking');
+                                this.showToast(this.getMsg('confirmed'));
+                            }
                         }
                     } else {
                         this.showToast(this.getMsg('confirmed'));
@@ -257,7 +285,6 @@ class OrderPopupManager {
             overlay.classList.add('visible');
         });
         
-        // Use onclick
         const btnSend = overlay.querySelector('#btnSendReason');
         const btnSkip = overlay.querySelector('#btnSkipCancel');
         
@@ -284,7 +311,7 @@ class OrderPopupManager {
     }
     
     // ============================================
-    // 🔥 CANCEL ORDER — MAP NAHI KHULEGA
+    // CANCEL ORDER — MAP NAHI KHULEGA
     // ============================================
     cancelOrder(orderData, reason) {
         if (window.ordersManager) {
@@ -298,7 +325,6 @@ class OrderPopupManager {
             }
         }
         
-        // 🔥 MAP HIDE — Cancel pe map nahi khulega
         if (window.floatingMapManager) {
             window.floatingMapManager.hide();
             window.floatingMapManager.stopTimer();
@@ -337,14 +363,12 @@ class OrderPopupManager {
     showDeliveryPopup(order) {
         this.hidePopup();
         
-        // Store for PWA reopen
         this.unansweredPopup = { type: 'delivery', order: order };
         
         const overlay = document.createElement('div');
         overlay.className = 'order-popup-overlay';
         overlay.id = 'orderDeliveryPopup';
         
-        // BLOCK overlay click (cannot close by tapping outside)
         overlay.addEventListener('click', (e) => {
             if (e.target === overlay) {
                 e.stopPropagation();
@@ -378,7 +402,6 @@ class OrderPopupManager {
         document.body.appendChild(overlay);
         document.body.style.overflow = 'hidden';
         
-        // Prevent escape key from closing
         const escapeHandler = (e) => {
             if (e.key === 'Escape') {
                 e.preventDefault();
@@ -391,7 +414,6 @@ class OrderPopupManager {
             overlay.classList.add('visible');
         });
         
-        // 🔥 Use onclick for BOTH buttons - RELIABLE
         const btnYes = overlay.querySelector('#btnDeliveryYes');
         const btnNo = overlay.querySelector('#btnDeliveryNo');
         
@@ -415,44 +437,162 @@ class OrderPopupManager {
     }
     
     // ============================================
-    // 🔥 CONFIRM DELIVERY — MAP HIDE
+    // CONFIRM DELIVERY — SHOW CELEBRATION POPUP
     // ============================================
     confirmDelivery(order) {
-        // Clear unanswered popup
         this.unansweredPopup = null;
         
         if (window.ordersManager) {
             window.ordersManager.updateOrderStatus(order.id, 'delivered');
         }
         
-        // 🔥 Hide floating map on delivery
         if (window.floatingMapManager) {
             window.floatingMapManager.hide();
             window.floatingMapManager.stopTimer();
             window.floatingMapManager.stopRiderUpdates();
         }
         
-        this.showToast(this.getMsg('orderComplete'));
+        // 🔥 SHOW CELEBRATION POPUP
+        setTimeout(() => {
+            this.showCelebrationPopup(order);
+        }, 400);
     }
     
     // ============================================
-    // 🔥 RETRY DELIVERY — ADD EXTRA TIME
+    // RETRY DELIVERY — ADD EXTRA TIME
     // ============================================
     retryDelivery(order) {
-        // Clear unanswered popup (will be set again when timer ends)
         this.unansweredPopup = null;
         
         if (window.ordersManager) {
             window.ordersManager.updateOrderStatus(order.id, 'in_transit');
         }
         
-        // 🔥 ADD EXTRA TIME TO TIMER
         if (window.floatingMapManager) {
             window.floatingMapManager.addExtraTime();
             window.floatingMapManager.show();
         }
         
         this.showToast(this.getMsg('retryMessage'));
+    }
+    
+    // ============================================
+    // 🎉 CELEBRATION POPUP — NEW!
+    // ============================================
+    showCelebrationPopup(order) {
+        this.hidePopup();
+        
+        const overlay = document.createElement('div');
+        overlay.className = 'order-popup-overlay celebration-overlay';
+        overlay.id = 'orderCelebrationPopup';
+        
+        const isHindi = this.currentLang === 'hi';
+        const customerName = order.customerName || (isHindi ? 'ग्राहक' : 'Customer');
+        
+        overlay.innerHTML = `
+            <div class="order-popup-card celebration-card">
+                <div class="celebration-confetti-container" id="celebrationConfetti"></div>
+                <div class="popup-icon celebration-icon">🎉</div>
+                <h2 class="popup-title celebration-title">
+                    ${customerName} ${isHindi ? 'जी!' : '!'} 🎉
+                </h2>
+                <p class="popup-message celebration-message">${this.getMsg('celebrationMessage')}</p>
+                <p class="celebration-sub-message">${this.getMsg('celebrationSubMessage')}</p>
+                <div class="celebration-stars">${this.getMsg('celebrationStars')}</div>
+                <div class="popup-order-info">
+                    <span>📦 #${order.id}</span>
+                    <span>💰 ₹${order.total}</span>
+                    <span>📦 ${order.itemCount} ${isHindi ? 'आइटम' : 'items'}</span>
+                </div>
+                <div class="popup-buttons">
+                    <button class="popup-btn popup-btn-confirm celebration-reorder-btn" id="btnCelebrationReorder" type="button">
+                        ${this.getMsg('reorderBtn')}
+                    </button>
+                    <button class="popup-btn celebration-browse-btn" id="btnCelebrationBrowse" type="button">
+                        ${this.getMsg('browseBtn')}
+                    </button>
+                </div>
+                <button class="celebration-close-btn" id="btnCelebrationClose" type="button">
+                    ${this.getMsg('closeBtn')}
+                </button>
+            </div>
+        `;
+        
+        document.body.appendChild(overlay);
+        document.body.style.overflow = 'hidden';
+        
+        requestAnimationFrame(() => {
+            overlay.classList.add('visible');
+        });
+        
+        // 🔥 Trigger confetti
+        this.triggerCelebrationConfetti();
+        
+        // 🔥 Auto-close after 7 seconds
+        this.celebrationTimer = setTimeout(() => {
+            this.hidePopup();
+        }, 7000);
+        
+        // Button events
+        const btnReorder = overlay.querySelector('#btnCelebrationReorder');
+        const btnBrowse = overlay.querySelector('#btnCelebrationBrowse');
+        const btnClose = overlay.querySelector('#btnCelebrationClose');
+        
+        btnReorder.onclick = (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            clearTimeout(this.celebrationTimer);
+            this.hidePopup();
+            // Open cart
+            setTimeout(() => {
+                if (window.cartManager) {
+                    window.cartManager.openCart();
+                }
+            }, 300);
+        };
+        
+        btnBrowse.onclick = (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            clearTimeout(this.celebrationTimer);
+            this.hidePopup();
+            // Scroll to products
+            setTimeout(() => {
+                document.getElementById('allProductsSection')?.scrollIntoView({ behavior: 'smooth' });
+            }, 300);
+        };
+        
+        btnClose.onclick = (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            clearTimeout(this.celebrationTimer);
+            this.hidePopup();
+        };
+        
+        this.activePopup = 'celebration';
+    }
+    
+    // ============================================
+    // 🎊 CELEBRATION CONFETTI
+    // ============================================
+    triggerCelebrationConfetti() {
+        const container = document.getElementById('celebrationConfetti');
+        if (!container) return;
+        
+        const colors = ['#FF9933', '#138808', '#FFD700', '#FF4444', '#25D366', '#FF6D00', '#2196F3', '#9C27B0'];
+        
+        for (let i = 0; i < 60; i++) {
+            const piece = document.createElement('div');
+            piece.className = 'confetti-piece celebration-piece';
+            piece.style.left = Math.random() * 100 + '%';
+            piece.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+            piece.style.animationDelay = Math.random() * 0.8 + 's';
+            piece.style.animationDuration = (Math.random() * 1.5 + 1) + 's';
+            piece.style.width = (Math.random() * 8 + 4) + 'px';
+            piece.style.height = (Math.random() * 8 + 4) + 'px';
+            container.appendChild(piece);
+            setTimeout(() => piece.remove(), 2500);
+        }
     }
     
     // ============================================
@@ -470,6 +610,11 @@ class OrderPopupManager {
         const otherModals = document.getElementById('checkoutModal');
         if (!otherModals || otherModals.classList.contains('hidden')) {
             document.body.style.overflow = '';
+        }
+        
+        if (this.celebrationTimer) {
+            clearTimeout(this.celebrationTimer);
+            this.celebrationTimer = null;
         }
         
         this.activePopup = null;
@@ -506,6 +651,9 @@ class OrderPopupManager {
         this.unansweredPopup = null;
         if (this.deliveryRetryInterval) {
             clearInterval(this.deliveryRetryInterval);
+        }
+        if (this.celebrationTimer) {
+            clearTimeout(this.celebrationTimer);
         }
     }
 }
