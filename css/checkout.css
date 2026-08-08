@@ -1,14 +1,19 @@
 /* ============================================
-   CHECKOUT.CSS - Fix for OLD HTML Structure
+   CHECKOUT.CSS - Premium Checkout Modal (Final)
+   Quick Dukan - Cart Theme | Multilingual
    ============================================ */
 
+/* ============================================
+   1. OVERLAY & CONTAINER
+   ============================================ */
 .checkout-modal {
     position: fixed;
     top: 0;
     left: 0;
     width: 100%;
     height: 100%;
-    z-index: 2000;
+    height: 100dvh;
+    z-index: 2100;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -25,7 +30,7 @@
     left: 0;
     width: 100%;
     height: 100%;
-    background: rgba(0,0,0,0.6);
+    background: rgba(0, 0, 0, 0.6);
     backdrop-filter: blur(4px);
     -webkit-backdrop-filter: blur(4px);
     animation: fadeInOverlay 0.3s ease;
@@ -37,418 +42,193 @@
 }
 
 /* ============================================
-   GPS POPUP - Emotional Message
+   2. CHECKOUT CONTENT
    ============================================ */
-.gps-popup-overlay {
-    position: fixed;
-    top: 0; left: 0;
-    width: 100%; height: 100%;
-    background: rgba(0, 0, 0, 0.75);
-    z-index: 99999;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    opacity: 0;
-    transition: opacity 0.3s ease;
-    padding: 20px;
-}
-
-.gps-popup-overlay.visible {
-    opacity: 1;
-}
-
-.gps-popup-card {
-    background: #FFFFFF;
-    border-radius: 24px;
-    padding: 32px 24px;
-    text-align: center;
-    max-width: 380px;
-    width: 100%;
-    box-shadow: 0 24px 80px rgba(0,0,0,0.4);
-    animation: popupBounceIn 0.5s ease;
-}
-
-@keyframes popupBounceIn {
-    0% { transform: scale(0.7); opacity: 0; }
-    60% { transform: scale(1.05); }
-    80% { transform: scale(0.95); }
-    100% { transform: scale(1); opacity: 1; }
-}
-
-.gps-popup-icon {
-    font-size: 70px;
-    margin-bottom: 16px;
-    animation: gpsFloat 2s ease-in-out infinite;
-}
-
-@keyframes gpsFloat {
-    0%, 100% { transform: translateY(0); }
-    50% { transform: translateY(-12px); }
-}
-
-.gps-popup-title {
-    font-size: 22px;
-    font-weight: 800;
-    color: #333;
-    margin-bottom: 12px;
-}
-
-.gps-popup-message {
-    font-size: 15px;
-    color: #666;
-    line-height: 1.7;
-    margin-bottom: 16px;
-    padding: 0 8px;
-}
-
-.gps-instruction-box {
-    background: #FFF3E0;
-    border: 2px dashed #FF9800;
-    border-radius: 16px;
-    padding: 14px;
-    margin: 12px 0;
-}
-
-.gps-instruction-box p {
-    color: #E65100;
-    font-size: 13px;
-    font-weight: 600;
-    line-height: 1.6;
-    margin: 0;
-}
-
-/* 📡 Waves */
-.gps-waves {
-    display: flex;
-    justify-content: center;
-    gap: 10px;
-    margin: 16px 0;
-}
-
-.gps-waves span {
-    font-size: 28px;
-    animation: wave 1.5s ease-in-out infinite;
-}
-
-.gps-waves span:nth-child(2) { animation-delay: 0.3s; }
-.gps-waves span:nth-child(3) { animation-delay: 0.6s; }
-
-@keyframes wave {
-    0%, 100% { opacity: 0.2; transform: translateY(0) scale(1); }
-    50% { opacity: 1; transform: translateY(-14px) scale(1.2); }
-}
-
-/* Buttons */
-.gps-primary-btn {
-    display: block;
-    width: 100%;
-    padding: 16px;
-    background: linear-gradient(135deg, #FF9800, #F57C00);
-    color: #FFF;
-    border: none;
-    border-radius: 30px;
-    font-size: 16px;
-    font-weight: 700;
-    cursor: pointer;
-    margin-top: 12px;
-    transition: all 0.3s;
-    box-shadow: 0 8px 24px rgba(255,152,0,0.35);
-}
-
-.gps-primary-btn:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 12px 32px rgba(255,152,0,0.5);
-}
-
-.gps-retry-btn-auto {
-    display: block;
-    width: 100%;
-    padding: 12px;
-    background: transparent;
-    color: #FF9800;
-    border: 2px solid #FF9800;
-    border-radius: 30px;
-    font-size: 14px;
-    font-weight: 600;
-    cursor: pointer;
-    margin-top: 8px;
-}
-
-.gps-skip-btn {
-    display: block;
-    width: 100%;
-    padding: 10px;
-    background: transparent;
-    color: #999;
-    border: none;
-    font-size: 13px;
-    cursor: pointer;
-    margin-top: 4px;
-}
-
-/* Dark mode */
-body.dark-mode .gps-popup-card {
-    background: #1E1E1E;
-}
-body.dark-mode .gps-popup-title {
-    color: #E0E0E0;
-}
-body.dark-mode .gps-popup-message {
-    color: #B0B0B0;
-}
-body.dark-mode .gps-instruction-box {
-    background: #3E2723;
-    border-color: #FF9800;
-}
-body.dark-mode .gps-instruction-box p {
-    color: #FFB74D;
-}
-/* ⭐ CHECKOUT CONTENT ⭐ */
 .checkout-content {
     position: relative;
     width: 100%;
-    max-width: 480px;
-    max-height: calc(100vh - 32px);
-    background: var(--bg-card, #fff);
-    border-radius: 24px;
+    max-width: 460px;
+    max-height: 90vh;
+    max-height: 90dvh;
+    background: var(--bg-card, #FFFFFF);
+    border-radius: 20px;
     overflow: hidden;
     animation: scaleIn 0.35s cubic-bezier(0.16, 1, 0.3, 1);
     display: flex;
     flex-direction: column;
     z-index: 1;
-    box-shadow: 0 20px 60px rgba(0,0,0,0.25);
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.25);
 }
 
 @keyframes scaleIn {
-    from {
-        opacity: 0;
-        transform: scale(0.92) translateY(20px);
-    }
-    to {
-        opacity: 1;
-        transform: scale(1) translateY(0);
-    }
+    from { opacity: 0; transform: scale(0.92) translateY(20px); }
+    to { opacity: 1; transform: scale(1) translateY(0); }
 }
 
-@keyframes scaleOut {
-    from {
-        opacity: 1;
-        transform: scale(1) translateY(0);
-    }
-    to {
-        opacity: 0;
-        transform: scale(0.92) translateY(20px);
-    }
-}
-
-/* Header */
+/* ============================================
+   3. HEADER - Green Theme
+   ============================================ */
 .checkout-header {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 14px 16px 10px;
-    border-bottom: 1px solid rgba(0,0,0,0.06);
-    background: var(--bg-card);
+    padding: 14px 18px 12px;
+    background: var(--primary, #2E7D32);
     flex-shrink: 0;
 }
 
 .checkout-header-left {
     display: flex;
     align-items: center;
-    gap: 8px;
+    gap: 10px;
 }
 
 .checkout-header-icon {
     font-size: 26px;
+    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2));
 }
 
-.checkout-header h2 {
-    font-size: 18px;
+.checkout-header-text h2 {
+    font-size: 17px;
     font-weight: 700;
     margin: 0;
+    color: #FFFFFF;
+    line-height: 1.2;
 }
 
 .checkout-subtitle {
-    font-size: 11px;
-    color: var(--text-light);
-    margin: 0;
+    font-size: 10px;
+    color: rgba(255, 255, 255, 0.8);
+    margin: 1px 0 0;
+    font-weight: 400;
 }
 
 .close-btn {
-    width: 34px;
-    height: 34px;
+    width: 32px;
+    height: 32px;
     border-radius: 50%;
-    background: rgba(0,0,0,0.05);
+    background: rgba(255, 255, 255, 0.2);
     border: none;
-    font-size: 18px;
+    font-size: 15px;
     cursor: pointer;
     display: flex;
     align-items: center;
     justify-content: center;
     transition: all 0.3s ease;
-    color: var(--text-secondary);
+    color: #FFFFFF;
     flex-shrink: 0;
 }
 
 .close-btn:hover {
-    background: #ff4444;
+    background: #FF4444;
     color: white;
     transform: rotate(90deg);
 }
 
-/* ⭐ FORM - This is the scrollable part ⭐ */
+/* ============================================
+   4. CART TOTAL - Compact
+   ============================================ */
+.checkout-cart-total {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px 18px;
+    background: rgba(46, 125, 50, 0.05);
+    border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+    flex-shrink: 0;
+    font-size: 12px;
+    font-weight: 600;
+    color: #555;
+}
+
+.checkout-cart-total .total-items {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.checkout-cart-total .total-price {
+    font-size: 15px;
+    font-weight: 800;
+    color: #2E7D32;
+}
+
+/* ============================================
+   5. FORM - Scrollable
+   ============================================ */
 .checkout-form {
     flex: 1;
     overflow-y: auto;
     -webkit-overflow-scrolling: touch;
-    padding: 8px 16px 4px;
+    padding: 12px 18px 8px;
 }
 
-/* Order Summary */
-.checkout-order-summary {
-    margin: 0 0 12px;
-    background: rgba(106, 27, 154, 0.04);
-    border-radius: 12px;
-    overflow: hidden;
-    border: 1px solid rgba(106, 27, 154, 0.08);
-}
-
-.summary-toggle {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    padding: 10px 14px;
-    cursor: pointer;
-    font-weight: 600;
-    font-size: 13px;
-}
-
-.summary-items-count {
-    font-size: 11px;
-    color: var(--text-light);
-}
-
-.summary-total {
-    margin-left: auto;
-    font-weight: 700;
-    color: var(--primary);
-    font-size: 15px;
-}
-
-.toggle-arrow {
-    font-size: 10px;
-    transition: transform 0.3s;
-    color: var(--text-light);
-}
-
-.toggle-arrow.open {
-    transform: rotate(180deg);
-}
-
-.summary-detail {
-    border-top: 1px solid rgba(0,0,0,0.04);
-    padding: 8px 14px;
-    max-height: 100px;
-    overflow-y: auto;
-}
-
-.summary-detail.hidden {
-    display: none;
-}
-
-.summary-detail-item {
-    display: flex;
-    justify-content: space-between;
-    padding: 3px 0;
-    font-size: 11px;
-    color: var(--text-secondary);
-}
-
-/* Form Groups */
+/* ============================================
+   6. FORM INPUTS - Placeholder as Label
+   ============================================ */
 .form-group {
-    margin-bottom: 12px;
+    margin-bottom: 10px;
 }
 
-.form-label {
-    display: flex;
-    align-items: center;
-    gap: 5px;
-    font-size: 13px;
-    font-weight: 600;
-    margin-bottom: 5px;
-}
-
-.label-icon {
-    font-size: 15px;
-}
-
-.form-input,
-.form-textarea {
+.form-input {
     width: 100%;
-    padding: 11px 13px;
-    border: 2px solid rgba(0,0,0,0.08);
+    padding: 12px 14px;
+    border: 2px solid rgba(0, 0, 0, 0.08);
     border-radius: 12px;
     font-size: 14px;
     font-family: inherit;
-    color: var(--text-primary);
-    background: var(--bg-card);
+    color: var(--text-primary, #333);
+    background: var(--bg-card, #FFF);
     transition: all 0.3s ease;
     outline: none;
+    box-sizing: border-box;
 }
 
-.form-input:focus,
-.form-textarea:focus {
-    border-color: var(--primary);
-    box-shadow: 0 0 0 3px rgba(106, 27, 154, 0.06);
+.form-input:focus {
+    border-color: var(--primary, #2E7D32);
+    box-shadow: 0 0 0 3px rgba(46, 125, 50, 0.08);
 }
 
 .form-input.error {
-    border-color: #ff4444 !important;
+    border-color: #FF4444 !important;
+    box-shadow: 0 0 0 3px rgba(255, 68, 68, 0.08) !important;
 }
 
 .form-input.valid {
-    border-color: #25D366 !important;
+    border-color: #4CAF50 !important;
 }
 
-.input-hint {
-    font-size: 10px;
-    color: var(--text-light);
-    display: block;
-    margin-top: 3px;
+.form-input::placeholder {
+    color: #999;
+    font-size: 13px;
 }
 
-.input-error {
-    font-size: 11px;
-    color: #ff4444;
-    display: block;
-    margin-top: 3px;
-    font-weight: 500;
-}
-
-.input-error.hidden {
-    display: none;
-}
-
-/* Phone */
+/* Phone Input */
 .phone-input-group {
     display: flex;
     align-items: center;
-    border: 2px solid rgba(0,0,0,0.08);
+    border: 2px solid rgba(0, 0, 0, 0.08);
     border-radius: 12px;
     overflow: hidden;
+    transition: all 0.3s ease;
 }
 
 .phone-input-group:focus-within {
-    border-color: var(--primary);
-    box-shadow: 0 0 0 3px rgba(106, 27, 154, 0.06);
+    border-color: var(--primary, #2E7D32);
+    box-shadow: 0 0 0 3px rgba(46, 125, 50, 0.08);
+}
+
+.phone-input-group.error {
+    border-color: #FF4444 !important;
 }
 
 .phone-prefix {
-    padding: 11px 8px 11px 13px;
+    padding: 12px 8px 12px 14px;
     font-weight: 700;
     font-size: 14px;
-    background: rgba(0,0,0,0.02);
-    border-right: 1px solid rgba(0,0,0,0.06);
+    background: rgba(0, 0, 0, 0.02);
+    border-right: 1px solid rgba(0, 0, 0, 0.06);
+    color: #555;
 }
 
 .phone-input {
@@ -456,79 +236,160 @@ body.dark-mode .gps-instruction-box p {
     border-radius: 0 !important;
     box-shadow: none !important;
     flex: 1;
+    padding: 12px 14px;
 }
 
-/* Location */
+.phone-input:focus {
+    box-shadow: none !important;
+}
+
+/* Location Status */
 .location-status {
     display: flex;
     align-items: center;
     gap: 8px;
-    margin-bottom: 10px;
+    margin-bottom: 8px;
+    flex-wrap: wrap;
 }
 
-.location-btn {
-    display: flex;
+.location-indicator {
+    display: inline-flex;
     align-items: center;
-    gap: 5px;
-    padding: 8px 14px;
-    background: linear-gradient(135deg, #25D366, #128C7E);
-    color: white;
-    border: none;
-    border-radius: 20px;
-    font-size: 12px;
+    gap: 4px;
+    font-size: 11px;
     font-weight: 600;
-    cursor: pointer;
+    padding: 4px 10px;
+    border-radius: 12px;
     transition: all 0.3s ease;
-    white-space: nowrap;
 }
 
-.location-btn:hover {
-    transform: translateY(-1px);
-    box-shadow: 0 4px 12px rgba(37, 211, 102, 0.3);
+.location-indicator.searching {
+    background: #FFF3E0;
+    color: #E65100;
 }
 
-.location-btn:active {
-    transform: scale(0.95);
+.location-indicator.found {
+    background: #E8F5E9;
+    color: #2E7D32;
 }
 
-.location-btn.loading {
-    opacity: 0.7;
-    pointer-events: none;
-}
-
-.location-icon {
-    font-size: 14px;
-}
-
-.location-text {
-    display: flex;
-    align-items: center;
-    gap: 5px;
-    font-size: 12px;
-    color: #25D366;
-    font-weight: 600;
-}
-
-.location-text.hidden {
-    display: none;
+.location-indicator.off {
+    background: #FFEBEE;
+    color: #C62828;
 }
 
 .location-dot {
-    width: 7px;
-    height: 7px;
+    width: 6px;
+    height: 6px;
     border-radius: 50%;
-    background: #25D366;
-    animation: pulse 2s infinite;
+    display: inline-block;
+}
+
+.location-dot.searching {
+    background: #FF9800;
+    animation: pulse 1.5s infinite;
+}
+
+.location-dot.found {
+    background: #4CAF50;
+}
+
+.location-dot.off {
+    background: #F44336;
 }
 
 @keyframes pulse {
     0%, 100% { opacity: 1; }
-    50% { opacity: 0.4; }
+    50% { opacity: 0.3; }
 }
 
-/* Checkbox */
+/* ============================================
+   7. DELIVERY TIME - Compact 1-Row
+   ============================================ */
+.delivery-time-section {
+    margin-bottom: 10px;
+}
+
+.delivery-time-label {
+    font-size: 12px;
+    font-weight: 600;
+    color: #555;
+    margin-bottom: 6px;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.delivery-time-options {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    align-items: center;
+}
+
+.time-radio-label {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding: 7px 12px;
+    border: 1.5px solid rgba(0, 0, 0, 0.12);
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    white-space: nowrap;
+    user-select: none;
+    color: #666;
+    background: #FAFAFA;
+}
+
+.time-radio-label:hover {
+    border-color: var(--primary, #2E7D32);
+    background: rgba(46, 125, 50, 0.04);
+}
+
+.time-radio-label input[type="radio"] {
+    display: none;
+}
+
+.time-radio-label.selected {
+    background: var(--primary, #2E7D32);
+    color: #FFFFFF;
+    border-color: var(--primary, #2E7D32);
+    font-weight: 600;
+    box-shadow: 0 2px 8px rgba(46, 125, 50, 0.25);
+}
+
+/* Manual Time Input */
+.time-manual-input {
+    padding: 7px 12px;
+    border: 1.5px dashed rgba(0, 0, 0, 0.15);
+    border-radius: 20px;
+    font-size: 11px;
+    width: 120px;
+    outline: none;
+    transition: all 0.3s ease;
+    background: #FAFAFA;
+    color: #555;
+}
+
+.time-manual-input:focus {
+    border-color: var(--primary, #2E7D32);
+    background: #FFF;
+    box-shadow: 0 0 0 2px rgba(46, 125, 50, 0.06);
+}
+
+.time-manual-input::placeholder {
+    color: #BBB;
+    font-size: 10px;
+}
+
+/* ============================================
+   8. SAVE CHECKBOX
+   ============================================ */
 .save-info-group {
-    margin-bottom: 8px;
+    margin-bottom: 6px;
 }
 
 .checkbox-label {
@@ -537,7 +398,7 @@ body.dark-mode .gps-instruction-box p {
     gap: 8px;
     cursor: pointer;
     font-size: 12px;
-    color: var(--text-secondary);
+    color: #777;
     user-select: none;
 }
 
@@ -548,7 +409,7 @@ body.dark-mode .gps-instruction-box p {
 .checkmark {
     width: 20px;
     height: 20px;
-    border: 2px solid rgba(0,0,0,0.2);
+    border: 2px solid rgba(0, 0, 0, 0.2);
     border-radius: 5px;
     display: flex;
     align-items: center;
@@ -558,8 +419,8 @@ body.dark-mode .gps-instruction-box p {
 }
 
 .checkbox-label input:checked + .checkmark {
-    background: var(--primary);
-    border-color: var(--primary);
+    background: var(--primary, #2E7D32);
+    border-color: var(--primary, #2E7D32);
 }
 
 .checkbox-label input:checked + .checkmark::after {
@@ -569,21 +430,21 @@ body.dark-mode .gps-instruction-box p {
     font-weight: 700;
 }
 
-/* ⭐ FOOTER - Sticky Bottom ⭐ */
+/* ============================================
+   9. FOOTER + ORDER BUTTON
+   ============================================ */
 .checkout-footer {
-    padding: 12px 16px;
-    padding-bottom: max(12px, env(safe-area-inset-bottom));
-    border-top: 1px solid rgba(0,0,0,0.06);
-    background: var(--bg-card);
+    padding: 10px 16px;
+    padding-bottom: max(10px, env(safe-area-inset-bottom));
+    border-top: 1px solid rgba(0, 0, 0, 0.06);
+    background: var(--bg-card, #FFF);
     flex-shrink: 0;
 }
 
+/* Order Button - 4 States */
 .confirm-order-btn {
     width: 100%;
-    padding: 14px;
-    background: linear-gradient(135deg, #25D366, #128C7E);
-    color: white;
-    border: none;
+    padding: 15px 24px;
     border-radius: 14px;
     font-size: 15px;
     font-weight: 700;
@@ -593,124 +454,111 @@ body.dark-mode .gps-instruction-box p {
     justify-content: center;
     gap: 8px;
     transition: all 0.3s ease;
-    box-shadow: 0 4px 15px rgba(37, 211, 102, 0.3);
+    border: none;
+    position: relative;
+    overflow: hidden;
 }
 
-.confirm-order-btn:hover {
+/* STATE 1: Waiting */
+.confirm-order-btn.state-waiting {
+    background: linear-gradient(135deg, #FF9800, #F57C00);
+    color: #FFF;
+    cursor: not-allowed;
+    opacity: 0.8;
+    box-shadow: 0 4px 15px rgba(255, 152, 0, 0.25);
+}
+
+.confirm-order-btn.state-waiting .btn-spinner {
+    display: inline-block;
+    width: 16px;
+    height: 16px;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    border-top-color: #FFF;
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+}
+
+/* STATE 2: GPS Off */
+.confirm-order-btn.state-gpsoff {
+    background: #BDBDBD;
+    color: #FFF;
+    cursor: pointer;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.confirm-order-btn.state-gpsoff:hover {
+    background: #9E9E9E;
+}
+
+/* STATE 3: Ready (Active) */
+.confirm-order-btn.state-ready {
+    background: linear-gradient(135deg, #25D366, #128C7E);
+    color: #FFF;
+    box-shadow: 0 6px 25px rgba(37, 211, 102, 0.4);
+    animation: whatsappPulse 2.5s infinite;
+}
+
+@keyframes whatsappPulse {
+    0%, 100% { box-shadow: 0 6px 25px rgba(37, 211, 102, 0.4); }
+    50% { box-shadow: 0 8px 35px rgba(37, 211, 102, 0.6); }
+}
+
+.confirm-order-btn.state-ready:hover {
     transform: translateY(-2px);
-    box-shadow: 0 6px 25px rgba(37, 211, 102, 0.45);
+    box-shadow: 0 10px 35px rgba(37, 211, 102, 0.55);
 }
 
-/* Dark Mode */
-body.dark-mode .checkout-content {
-    background: #1f2b47;
+.confirm-order-btn.state-ready::after {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: linear-gradient(45deg, transparent 40%, rgba(255, 255, 255, 0.15) 50%, transparent 60%);
+    animation: btnShine 3s infinite;
 }
 
-body.dark-mode .checkout-header {
-    background: #1f2b47;
-    border-bottom-color: rgba(255,255,255,0.06);
+@keyframes btnShine {
+    0% { transform: translateX(-100%) rotate(45deg); }
+    100% { transform: translateX(100%) rotate(45deg); }
 }
 
-body.dark-mode .checkout-footer {
-    background: #1f2b47;
-    border-top-color: rgba(255,255,255,0.06);
+/* STATE 4: Sending */
+.confirm-order-btn.state-sending {
+    background: linear-gradient(135deg, #2196F3, #1976D2);
+    color: #FFF;
+    cursor: not-allowed;
+    opacity: 0.9;
 }
 
-body.dark-mode .form-input,
-body.dark-mode .form-textarea {
-    background: rgba(255,255,255,0.04);
-    border-color: rgba(255,255,255,0.1);
-    color: #e0e0e0;
+.confirm-order-btn.state-sending .btn-spinner {
+    display: inline-block;
+    width: 18px;
+    height: 18px;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    border-top-color: #FFF;
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
 }
 
-body.dark-mode .phone-prefix {
-    background: rgba(255,255,255,0.04);
-    border-right-color: rgba(255,255,255,0.06);
+@keyframes spin {
+    to { transform: rotate(360deg); }
 }
 
-body.dark-mode .phone-input-group {
-    border-color: rgba(255,255,255,0.1);
-}
-
-body.dark-mode .checkout-order-summary {
-    background: rgba(255,255,255,0.03);
-    border-color: rgba(255,255,255,0.06);
-}
-
-/* Mobile */
-@media (max-width: 380px) {
-    .checkout-modal {
-        padding: 8px;
-    }
-    
-    .checkout-content {
-        max-height: calc(100vh - 16px);
-        border-radius: 20px;
-    }
-    
-    .checkout-header {
-        padding: 12px 14px 8px;
-    }
-    
-    .checkout-header h2 {
-        font-size: 16px;
-    }
-    
-    .checkout-form {
-        padding: 6px 14px 4px;
-    }
-    
-    .form-group {
-        margin-bottom: 10px;
-    }
-    
-    .form-input,
-    .form-textarea {
-        padding: 10px 12px;
-        font-size: 13px;
-    }
-    
-    .confirm-order-btn {
-        padding: 12px;
-        font-size: 14px;
-    }
-    
-    .checkout-footer {
-        padding: 10px 14px;
-    }
-}
-
-/* Very small screens */
-@media (max-height: 600px) {
-    .checkout-content {
-        max-height: calc(100vh - 8px);
-    }
-    
-    .checkout-header {
-        padding: 8px 14px 6px;
-    }
-    
-    .form-group {
-        margin-bottom: 8px;
-    }
-    
-    .form-input,
-    .form-textarea {
-        padding: 8px 10px;
-    }
-    
-    .confirm-order-btn {
-        padding: 10px;
-    }
+.confirm-order-btn:active {
+    transform: scale(0.97);
 }
 
 /* ============================================
-   GPS POPUP - Final Smooth Version
+   10. GPS POPUP
    ============================================ */
 .gps-popup-overlay {
     position: fixed;
-    top: 0; left: 0;
-    width: 100%; height: 100%;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
     background: rgba(0, 0, 0, 0.75);
     backdrop-filter: blur(4px);
     -webkit-backdrop-filter: blur(4px);
@@ -721,18 +569,20 @@ body.dark-mode .checkout-order-summary {
     opacity: 0;
     transition: opacity 0.3s ease;
     padding: 20px;
+    pointer-events: none;
 }
 
 .gps-popup-overlay.visible {
     opacity: 1;
+    pointer-events: all;
 }
 
 .gps-popup-card {
     background: #FFFFFF;
-    border-radius: 24px;
-    padding: 32px 24px 24px;
+    border-radius: 22px;
+    padding: 28px 22px 22px;
     text-align: center;
-    max-width: 380px;
+    max-width: 360px;
     width: 100%;
     position: relative;
     box-shadow: 0 24px 80px rgba(0, 0, 0, 0.4);
@@ -744,88 +594,80 @@ body.dark-mode .checkout-order-summary {
     100% { transform: scale(1) translateY(0); opacity: 1; }
 }
 
-/* ✕ Close Button */
 .gps-close-btn {
     position: absolute;
-    top: 12px;
-    right: 12px;
-    width: 32px;
-    height: 32px;
+    top: 10px;
+    right: 10px;
+    width: 30px;
+    height: 30px;
     border-radius: 50%;
     background: rgba(0, 0, 0, 0.06);
     border: none;
-    font-size: 16px;
+    font-size: 14px;
     color: #999;
     cursor: pointer;
     display: flex;
     align-items: center;
     justify-content: center;
     transition: all 0.2s ease;
-    z-index: 1;
 }
 
 .gps-close-btn:hover {
     background: rgba(0, 0, 0, 0.12);
     color: #333;
-    transform: rotate(90deg);
 }
 
-/* Icon */
 .gps-popup-icon {
-    font-size: 64px;
-    margin-bottom: 12px;
+    font-size: 56px;
+    margin-bottom: 10px;
     animation: gpsIconFloat 2.5s ease-in-out infinite;
 }
 
 @keyframes gpsIconFloat {
     0%, 100% { transform: translateY(0); }
-    50% { transform: translateY(-10px); }
+    50% { transform: translateY(-8px); }
 }
 
-/* Title */
 .gps-popup-title {
-    font-size: 20px;
+    font-size: 18px;
     font-weight: 800;
     color: #333;
-    margin-bottom: 8px;
+    margin-bottom: 6px;
 }
 
-/* Message */
 .gps-popup-message {
-    font-size: 14px;
+    font-size: 13px;
     color: #666;
-    line-height: 1.7;
-    margin-bottom: 14px;
+    line-height: 1.6;
+    margin-bottom: 12px;
     padding: 0 4px;
 }
 
-/* Instruction Box */
 .gps-instruction-box {
     background: #FFF8E1;
     border: 2px dashed #FFB74D;
-    border-radius: 14px;
-    padding: 12px 14px;
-    margin: 10px 0 14px;
+    border-radius: 12px;
+    padding: 10px 12px;
+    margin: 8px 0 12px;
 }
 
 .gps-instruction-box p {
     color: #E65100;
-    font-size: 13px;
+    font-size: 12px;
     font-weight: 600;
-    line-height: 1.6;
+    line-height: 1.5;
     margin: 0;
 }
 
-/* 📡 Animated Waves */
 .gps-waves {
     display: flex;
     justify-content: center;
-    gap: 8px;
-    margin: 10px 0 16px;
+    gap: 6px;
+    margin: 8px 0 14px;
 }
 
 .gps-waves span {
-    font-size: 24px;
+    font-size: 22px;
     animation: gpsWave 1.8s ease-in-out infinite;
 }
 
@@ -834,22 +676,21 @@ body.dark-mode .checkout-order-summary {
 
 @keyframes gpsWave {
     0%, 100% { opacity: 0.2; transform: translateY(0) scale(0.9); }
-    50% { opacity: 1; transform: translateY(-12px) scale(1.15); }
+    50% { opacity: 1; transform: translateY(-10px) scale(1.1); }
 }
 
-/* Buttons */
 .gps-primary-btn {
     display: block;
     width: 100%;
-    padding: 15px;
+    padding: 14px;
     background: linear-gradient(135deg, #FF9800, #F57C00);
     color: #FFF;
     border: none;
-    border-radius: 30px;
-    font-size: 15px;
+    border-radius: 25px;
+    font-size: 14px;
     font-weight: 700;
     cursor: pointer;
-    margin-top: 10px;
+    margin-top: 8px;
     transition: all 0.3s ease;
     box-shadow: 0 6px 20px rgba(255, 152, 0, 0.3);
 }
@@ -859,22 +700,18 @@ body.dark-mode .checkout-order-summary {
     box-shadow: 0 10px 28px rgba(255, 152, 0, 0.45);
 }
 
-.gps-primary-btn:active {
-    transform: scale(0.97);
-}
-
 .gps-retry-btn {
     display: block;
     width: 100%;
-    padding: 12px;
+    padding: 11px;
     background: transparent;
     color: #FF9800;
     border: 2px solid #FF9800;
-    border-radius: 30px;
-    font-size: 14px;
+    border-radius: 25px;
+    font-size: 13px;
     font-weight: 600;
     cursor: pointer;
-    margin-top: 8px;
+    margin-top: 6px;
     transition: all 0.2s ease;
 }
 
@@ -882,24 +719,108 @@ body.dark-mode .checkout-order-summary {
     background: #FFF3E0;
 }
 
-.gps-skip-btn {
-    display: block;
+/* ============================================
+   11. CONFETTI
+   ============================================ */
+.checkout-confetti-container {
+    position: absolute;
+    top: 0;
+    left: 0;
     width: 100%;
-    padding: 10px;
-    background: transparent;
-    color: #999;
-    border: none;
-    font-size: 12px;
-    cursor: pointer;
-    margin-top: 4px;
-    transition: color 0.2s ease;
+    height: 100%;
+    pointer-events: none;
+    z-index: 10;
+    overflow: hidden;
 }
 
-.gps-skip-btn:hover {
-    color: #666;
+.confetti-piece {
+    position: absolute;
+    width: 8px;
+    height: 8px;
+    border-radius: 2px;
+    animation: confettiFall 1.5s ease-out forwards;
 }
 
-/* 🌙 Dark Mode */
+@keyframes confettiFall {
+    0% { transform: translateY(-100%) rotate(0deg); opacity: 1; }
+    100% { transform: translateY(100vh) rotate(720deg); opacity: 0; }
+}
+
+/* ============================================
+   12. DARK MODE
+   ============================================ */
+body.dark-mode .checkout-content {
+    background: #1a1f2e;
+}
+
+body.dark-mode .checkout-header {
+    background: #1B5E20;
+}
+
+body.dark-mode .checkout-cart-total {
+    background: rgba(27, 94, 32, 0.1);
+    border-bottom-color: rgba(255, 255, 255, 0.06);
+    color: #BBB;
+}
+
+body.dark-mode .form-input {
+    background: #252b3b;
+    border-color: rgba(255, 255, 255, 0.1);
+    color: #DDD;
+}
+
+body.dark-mode .form-input:focus {
+    border-color: #4CAF50;
+    background: #2a3040;
+}
+
+body.dark-mode .form-input::placeholder {
+    color: #777;
+}
+
+body.dark-mode .phone-input-group {
+    border-color: rgba(255, 255, 255, 0.1);
+}
+
+body.dark-mode .phone-prefix {
+    background: rgba(255, 255, 255, 0.03);
+    border-right-color: rgba(255, 255, 255, 0.06);
+    color: #AAA;
+}
+
+body.dark-mode .time-radio-label {
+    background: #252b3b;
+    border-color: rgba(255, 255, 255, 0.1);
+    color: #AAA;
+}
+
+body.dark-mode .time-radio-label.selected {
+    background: #2E7D32;
+    color: #FFF;
+    border-color: #2E7D32;
+}
+
+body.dark-mode .time-manual-input {
+    background: #252b3b;
+    border-color: rgba(255, 255, 255, 0.1);
+    color: #DDD;
+}
+
+body.dark-mode .location-indicator.searching {
+    background: rgba(255, 152, 0, 0.15);
+    color: #FFB74D;
+}
+
+body.dark-mode .location-indicator.found {
+    background: rgba(76, 175, 80, 0.15);
+    color: #81C784;
+}
+
+body.dark-mode .location-indicator.off {
+    background: rgba(244, 67, 54, 0.15);
+    color: #EF9A9A;
+}
+
 body.dark-mode .gps-popup-card {
     background: #1E1E1E;
 }
@@ -921,25 +842,91 @@ body.dark-mode .gps-instruction-box p {
     color: #FFB74D;
 }
 
-body.dark-mode .gps-close-btn {
-    background: rgba(255, 255, 255, 0.08);
-    color: #B0B0B0;
+body.dark-mode .checkout-footer {
+    background: #1a1f2e;
+    border-top-color: rgba(255, 255, 255, 0.06);
 }
 
-body.dark-mode .gps-close-btn:hover {
-    background: rgba(255, 255, 255, 0.15);
-    color: #E0E0E0;
+/* ============================================
+   13. MOBILE
+   ============================================ */
+@media (max-width: 380px) {
+    .checkout-modal {
+        padding: 8px;
+    }
+    
+    .checkout-content {
+        max-height: 95vh;
+        max-height: 95dvh;
+        border-radius: 18px;
+    }
+    
+    .checkout-header {
+        padding: 10px 14px 10px;
+    }
+    
+    .checkout-header-icon {
+        font-size: 22px;
+    }
+    
+    .checkout-header-text h2 {
+        font-size: 15px;
+    }
+    
+    .checkout-form {
+        padding: 10px 14px 6px;
+    }
+    
+    .form-input {
+        padding: 10px 12px;
+        font-size: 13px;
+    }
+    
+    .phone-prefix {
+        padding: 10px 6px 10px 12px;
+        font-size: 13px;
+    }
+    
+    .phone-input {
+        padding: 10px 12px;
+    }
+    
+    .time-radio-label {
+        padding: 5px 10px;
+        font-size: 10px;
+    }
+    
+    .time-manual-input {
+        width: 100px;
+        padding: 5px 10px;
+        font-size: 10px;
+    }
+    
+    .confirm-order-btn {
+        padding: 13px 18px;
+        font-size: 14px;
+    }
+    
+    .checkout-footer {
+        padding: 8px 12px;
+    }
 }
 
-body.dark-mode .gps-retry-btn {
-    color: #FFB74D;
-    border-color: #FFB74D;
-}
-
-body.dark-mode .gps-retry-btn:hover {
-    background: #2D1B00;
-}
-
-body.dark-mode .gps-skip-btn:hover {
-    color: #B0B0B0;
+@media (max-height: 600px) {
+    .checkout-content {
+        max-height: 98vh;
+        max-height: 98dvh;
+    }
+    
+    .checkout-header {
+        padding: 8px 14px 8px;
+    }
+    
+    .form-group {
+        margin-bottom: 6px;
+    }
+    
+    .form-input {
+        padding: 8px 10px;
+    }
 }
