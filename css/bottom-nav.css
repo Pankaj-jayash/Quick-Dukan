@@ -3,6 +3,10 @@
    ============================================ */
 
 .bottom-nav {
+        
+     position: flex; 
+    overflow: hidden; 
+    isolation: isolate;
     display: flex;
     align-items: center;
     justify-content: space-around;
