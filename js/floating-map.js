@@ -64,6 +64,9 @@ class FloatingMapManager {
         this.RIDER_UPDATE_INTERVAL = 10000;
         this.TIMER_UPDATE_INTERVAL = 1000;
         
+        // Auto-hide timer
+        this.autoHideTimeout = null;
+        
         this.init();
     }
     
@@ -75,7 +78,8 @@ class FloatingMapManager {
         this.bindEvents();
         this.bindOnlineEvents();
         
-        setInterval(() => this.checkActiveOrder(), 15000);
+        // Check every 30 seconds (not 15)
+        setInterval(() => this.checkActiveOrder(), 30000);
         
         console.log('🗺️ Floating Map Manager Initialized (Timestamp-based Timer)');
         console.log('🏪 Shop:', this.shopLocation.name, `(${this.shopLocation.lat}, ${this.shopLocation.lng})`);
@@ -148,7 +152,6 @@ class FloatingMapManager {
             if (this.offlineBanner && this.isVisible) {
                 this.offlineBanner.style.display = 'flex';
             }
-            // Timer continues — timestamp-based, no pause needed
         });
         
         window.addEventListener('online', () => {
@@ -323,7 +326,6 @@ class FloatingMapManager {
     startTimer() {
         this.stopTimer();
         
-        // Adjust start timestamp to account for already elapsed time
         const elapsed = this.initialSeconds - this.remainingSeconds;
         this.startTimestamp = Date.now() - (elapsed * 1000);
         this.isPaused = false;
@@ -331,7 +333,6 @@ class FloatingMapManager {
         this.timerInterval = setInterval(() => {
             if (this.isPaused) return;
             
-            // Calculate elapsed time from start timestamp
             const now = Date.now();
             const totalElapsed = Math.floor((now - this.startTimestamp) / 1000);
             this.remainingSeconds = Math.max(0, this.initialSeconds - totalElapsed);
@@ -354,7 +355,6 @@ class FloatingMapManager {
         }
     }
     
-    // PWA reopen — resume timer
     resumeTimer() {
         if (this.isPaused && this.startTimestamp) {
             this.startTimestamp = Date.now() - ((this.initialSeconds - this.remainingSeconds) * 1000);
@@ -437,13 +437,23 @@ class FloatingMapManager {
     }
     
     // ============================================
-    // DELIVERY POPUP
+    // DELIVERY POPUP (Timer khatam = Map hide)
     // ============================================
     showDeliveryPopup() {
         if (window.orderPopupManager && this.activeOrder) {
             console.log('🚚 Timer ended — showing delivery popup');
             window.orderPopupManager.showDeliveryPopup(this.activeOrder);
         }
+        
+        // 🔥 Timer khatam → Map auto-hide after 3 seconds
+        if (this.autoHideTimeout) clearTimeout(this.autoHideTimeout);
+        this.autoHideTimeout = setTimeout(() => {
+            console.log('🗺️ Timer finished — Hiding map');
+            this.hide();
+            this.stopTimer();
+            this.stopRiderUpdates();
+            this.activeOrder = null;
+        }, 3000);
     }
     
     // ============================================
@@ -457,7 +467,6 @@ class FloatingMapManager {
         else if (this.noCount === 2) addSeconds = 180;
         else addSeconds = 300;
         
-        // Add time and update initial seconds for timestamp calculation
         this.remainingSeconds += addSeconds;
         this.initialSeconds = this.remainingSeconds;
         this.startTimestamp = Date.now();
@@ -479,7 +488,7 @@ class FloatingMapManager {
     }
     
     // ============================================
-    // CHECK ACTIVE ORDER
+    // 🔥 CHECK ACTIVE ORDER - Fixed Logic
     // ============================================
     checkActiveOrder() {
         if (!window.ordersManager) return;
@@ -487,31 +496,43 @@ class FloatingMapManager {
         const orders = window.ordersManager.getOrders();
         const activeOrder = orders.find(o => o.status === 'confirmed' || o.status === 'in_transit');
         
-        if (activeOrder) {
-            // Don't switch if timer already running for different order
-            if ((this.timerInterval || this.riderInterval) && this.activeOrder && this.activeOrder.id !== activeOrder.id) {
-                const ordersModal = document.getElementById('ordersModal');
-                if (ordersModal?.classList.contains('hidden')) this.show();
-                return;
-            }
-            
-            this.activeOrder = activeOrder;
-            const ordersModal = document.getElementById('ordersModal');
-            
-            if (ordersModal?.classList.contains('hidden')) {
-                if (this.timerInterval || this.riderInterval) {
-                    this.show();
-                } else if (!this.isVisible) {
-                    this.show();
-                    this.updateMapWithOrder(activeOrder);
-                } else {
-                    this.show();
-                    this.updateMapWithOrder(activeOrder);
-                }
-            }
-        } else {
+        // ❌ No active order → HIDE map, STOP everything
+        if (!activeOrder) {
             this.hide();
+            this.stopTimer();
+            this.stopRiderUpdates();
+            this.activeOrder = null;
+            return;
         }
+        
+        // ✅ Active order exists
+        const ordersModal = document.getElementById('ordersModal');
+        const isModalOpen = ordersModal && !ordersModal.classList.contains('hidden');
+        
+        // Agar modal khula hai → map hide rahega (timer background mein chalta rahega)
+        if (isModalOpen) {
+            this.hide();
+            return;
+        }
+        
+        // Modal band hai...
+        
+        // Timer already running for SAME order → show map
+        if ((this.timerInterval || this.riderInterval) && this.activeOrder?.id === activeOrder.id) {
+            if (!this.isVisible) this.show();
+            return;
+        }
+        
+        // Timer already running for DIFFERENT order → keep showing current
+        if ((this.timerInterval || this.riderInterval) && this.activeOrder?.id !== activeOrder.id) {
+            if (!this.isVisible) this.show();
+            return;
+        }
+        
+        // No timer running + new active order → start tracking
+        this.activeOrder = activeOrder;
+        this.updateMapWithOrder(activeOrder);
+        this.show();
     }
     
     // ============================================
@@ -524,7 +545,6 @@ class FloatingMapManager {
         this.container.classList.add('visible');
         this.isVisible = true;
         
-        // Hide offline banner if online
         if (navigator.onLine && this.offlineBanner) {
             this.offlineBanner.style.display = 'none';
         }
@@ -568,7 +588,6 @@ class FloatingMapManager {
         document.addEventListener('pointermove', (e) => {
             if (!this.isDragging) return;
             
-            // Use RAF for smooth 60fps
             if (this.rafId) cancelAnimationFrame(this.rafId);
             
             this.rafId = requestAnimationFrame(() => {
@@ -622,7 +641,6 @@ class FloatingMapManager {
                 this.mapElement.style.height = (newHeight - 80) + 'px';
             }
             
-            // Debounced map resize
             if (this.resizeTimeout) clearTimeout(this.resizeTimeout);
             this.resizeTimeout = setTimeout(() => {
                 if (this.map) this.map.invalidateSize();
@@ -689,9 +707,18 @@ class FloatingMapManager {
             if (e.target.closest('#btnViewFullMap')) this.openFullMap();
         });
         
+        // 🔥 Orders Modal Observer - Fixed
         const observer = new MutationObserver(() => {
             const modal = document.getElementById('ordersModal');
-            if (modal && !modal.classList.contains('hidden')) this.hide();
+            if (modal) {
+                if (!modal.classList.contains('hidden')) {
+                    // Modal opened → hide map (timer continues in background)
+                    this.hide();
+                } else {
+                    // Modal closed → check if timer should show map
+                    setTimeout(() => this.checkActiveOrder(), 500);
+                }
+            }
         });
         
         const modal = document.getElementById('ordersModal');
@@ -721,6 +748,7 @@ class FloatingMapManager {
     destroy() {
         this.stopTimer();
         this.stopRiderUpdates();
+        if (this.autoHideTimeout) clearTimeout(this.autoHideTimeout);
         if (this.rafId) cancelAnimationFrame(this.rafId);
         if (this.resizeTimeout) clearTimeout(this.resizeTimeout);
         if (this.map) { this.map.remove(); this.map = null; }
