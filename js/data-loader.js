@@ -1,5 +1,5 @@
 // ============================================
-// DATA-LOADER.JS - Load JSON Data Files
+// DATA-LOADER.JS - Load JSON Data Files v2
 // ============================================
 
 class DataLoader {
@@ -9,61 +9,149 @@ class DataLoader {
         this.categories = [];
         this.productsByCategory = {};
         this.isLoaded = false;
+        this.dataVersion = null;
     }
     
-    async loadAllData() {
+    async loadAllData(forceReload = false) {
+        // Agar force reload hai to data clear karo
+        if (forceReload) {
+            console.log('🔄 Force reload - Clearing old data');
+            this.allProducts = [];
+            this.productsByCategory = {};
+            this.isLoaded = false;
+        }
+        
+        // Agar already loaded hai aur force nahi hai to skip
+        if (this.isLoaded && !forceReload) {
+            console.log('ℹ️ Data already loaded');
+            return true;
+        }
+        
         try {
-            // Step 1: Load master index.json
-            const timestamp = Date.now();
-const masterResponse = await fetch(`data/index.json?v=${timestamp}`);
+            // Step 1: Load master index.json (force network)
+            console.log('📥 Loading index.json...');
+            const masterResponse = await fetch(`data/index.json?v=${Date.now()}`, {
+                cache: 'no-store', // ⬅️ Cache bypass
+                headers: {
+                    'Cache-Control': 'no-cache',
+                    'Pragma': 'no-cache'
+                }
+            });
+            
             if (!masterResponse.ok) throw new Error('Failed to load index.json');
             this.masterData = await masterResponse.json();
             this.categories = this.masterData.categories || [];
+            this.dataVersion = this.masterData.version || null;
             
-            // Step 2: Load all category files
-            const loadPromises = this.categories.map(cat => this.loadCategoryData(cat));
-            await Promise.all(loadPromises);
+            console.log(`📋 Found ${this.categories.length} categories`);
+            
+            // Step 2: Load all category files (parallel + force network)
+            const loadPromises = this.categories.map(cat =>
+                this.loadCategoryData(cat, forceReload)
+            );
+            
+            await Promise.allSettled(loadPromises); // AllSettled so one fail doesn't stop all
+            
+            // Check if any category loaded
+            const loadedCount = Object.keys(this.productsByCategory).length;
+            if (loadedCount === 0) {
+                throw new Error('No categories loaded');
+            }
             
             this.isLoaded = true;
+            
             console.log('✅ All data loaded successfully');
             console.log(`📦 Total Products: ${this.allProducts.length}`);
-            console.log(`📂 Total Categories: ${this.categories.length}`);
+            console.log(`📂 Categories Loaded: ${loadedCount}/${this.categories.length}`);
+            if (this.dataVersion) {
+                console.log(`📌 Data Version: ${this.dataVersion}`);
+            }
             
-            // Dispatch event
-            document.dispatchEvent(new CustomEvent('dataLoaded', { 
-                detail: { allProducts: this.allProducts, categories: this.categories } 
+            // Dispatch event with force flag
+            document.dispatchEvent(new CustomEvent('dataLoaded', {
+                detail: {
+                    allProducts: this.allProducts,
+                    categories: this.categories,
+                    forceReload: forceReload,
+                    version: this.dataVersion
+                }
             }));
             
             return true;
         } catch (error) {
             console.error('❌ Error loading data:', error);
+            
+            // Agar new data fail ho, to cached data use karo
+            if (this.allProducts.length > 0) {
+                console.warn('⚠️ Using previously loaded data');
+                return true;
+            }
+            
             return false;
         }
     }
     
-    async loadCategoryData(category) {
+    async loadCategoryData(category, forceReload = false) {
         try {
-            const timestamp = Date.now();
-const response = await fetch(`data/${category.file}?v=${timestamp}`);
-            if (!response.ok) throw new Error(`Failed to load ${category.file}`);
-            const products = await response.json();
+            const cacheBuster = forceReload ? `?v=${Date.now()}` : `?v=${this.dataVersion || Date.now()}`;
+            const url = `data/${category.file}${cacheBuster}`;
+            
+            console.log(`📥 Loading: ${category.name}${forceReload ? ' (force)' : ''}`);
+            
+            const response = await fetch(url, {
+                cache: forceReload ? 'no-store' : 'default', // ⬅️ Force bypass ya normal
+                headers: {
+                    'Cache-Control': forceReload ? 'no-cache' : 'max-age=3600',
+                    'Pragma': forceReload ? 'no-cache' : ''
+                }
+            });
+            
+            if (!response.ok) throw new Error(`Failed to load ${category.file} (${response.status})`);
+            
+            const data = await response.json();
+            const products = data.products || data;
             
             // Add category info to each product
-            const processedProducts = (products.products || products).map(product => ({
+            const processedProducts = products.map(product => ({
                 ...product,
                 categoryId: category.id,
                 categoryName: category.name,
                 categoryNameHi: category.nameHi || category.name,
             }));
             
+            // Replace old category data (don't append)
             this.productsByCategory[category.id] = processedProducts;
-            this.allProducts = [...this.allProducts, ...processedProducts];
             
-            console.log(`📁 Loaded ${category.name}: ${processedProducts.length} products`);
+            // Update allProducts array
+            this.rebuildAllProducts();
+            
+            console.log(`✅ Loaded ${category.name}: ${processedProducts.length} products`);
         } catch (error) {
-            console.error(`❌ Error loading category ${category.name}:`, error);
-            this.productsByCategory[category.id] = [];
+            console.error(`❌ Failed ${category.name}:`, error.message);
+            
+            // Keep old data if available
+            if (!this.productsByCategory[category.id]) {
+                this.productsByCategory[category.id] = [];
+            }
         }
+    }
+    
+    rebuildAllProducts() {
+        // Rebuild allProducts from productsByCategory
+        this.allProducts = [];
+        Object.values(this.productsByCategory).forEach(products => {
+            this.allProducts = [...this.allProducts, ...products];
+        });
+        
+        // Remove duplicates (by ID)
+        const seen = new Set();
+        this.allProducts = this.allProducts.filter(product => {
+            if (seen.has(product.id)) {
+                return false;
+            }
+            seen.add(product.id);
+            return true;
+        });
     }
     
     getProductsByCategory(categoryId) {
@@ -80,7 +168,6 @@ const response = await fetch(`data/${category.file}?v=${timestamp}`);
         
         const q = query.toLowerCase().trim();
         
-        // Search in both Hindi and English names
         return this.allProducts.filter(product => {
             const nameHi = (product.name && product.name.hi) ? product.name.hi.toLowerCase() : '';
             const nameEn = (product.name && product.name.en) ? product.name.en.toLowerCase() : '';
@@ -88,21 +175,20 @@ const response = await fetch(`data/${category.file}?v=${timestamp}`);
         });
     }
     
-    // Fuzzy search for spell correction
     fuzzySearch(query) {
         const q = query.toLowerCase().trim();
         const results = this.searchProducts(query);
         
         if (results.length > 0) return results;
         
-        // Try partial matching
         return this.allProducts.filter(product => {
             const nameHi = (product.name && product.name.hi) ? product.name.hi.toLowerCase() : '';
             const nameEn = (product.name && product.name.en) ? product.name.en.toLowerCase() : '';
             
-            // Check if any word in the product name contains the query
             const words = [...nameHi.split(' '), ...nameEn.split(' ')];
-            return words.some(word => word.includes(q) || this.levenshteinDistance(word, q) <= 2);
+            return words.some(word =>
+                word.includes(q) || this.levenshteinDistance(word, q) <= 2
+            );
         });
     }
     
@@ -143,11 +229,37 @@ const response = await fetch(`data/${category.file}?v=${timestamp}`);
     getMostOrderedProducts() {
         return this.allProducts.filter(p => p.mostOrdered === true);
     }
+    
+    // Get data freshness
+    getDataInfo() {
+        return {
+            version: this.dataVersion,
+            totalProducts: this.allProducts.length,
+            totalCategories: this.categories.length,
+            isLoaded: this.isLoaded,
+            lastUpdated: this.isLoaded ? new Date().toISOString() : null
+        };
+    }
 }
 
 // Initialize on DOM ready
 document.addEventListener('DOMContentLoaded', async () => {
+    console.log('🚀 Initializing DataLoader...');
     window.dataLoader = new DataLoader();
-    await window.dataLoader.loadAllData();
+    
+    // Initial load (normal, not force)
+    const success = await window.dataLoader.loadAllData();
+    
+    if (success) {
+        console.log('✅ DataLoader initialized successfully');
+    } else {
+        console.error('❌ DataLoader initialization failed');
+    }
 });
 
+// Debug helper
+window.getDataInfo = () => {
+    if (window.dataLoader) {
+        console.table(window.dataLoader.getDataInfo());
+    }
+};
