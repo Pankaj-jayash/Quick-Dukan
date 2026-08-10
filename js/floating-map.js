@@ -496,7 +496,25 @@ if (!navigator.onLine) {
     // 🔥 CHECK ACTIVE ORDER - Fixed Logic
     // ============================================
     checkActiveOrder() {
-        if (!window.ordersManager) return;
+    if (!window.ordersManager) return;
+    
+    const orders = window.ordersManager.getOrders();
+    const now = Date.now();
+    const MAX_ORDER_AGE = 60 * 60 * 1000; // 1 ghanta (60 min × 60 sec × 1000 ms)
+    
+    const activeOrder = orders.find(o => {
+        if (o.status !== 'confirmed' && o.status !== 'in_transit') return false;
+        
+        // Order age check
+        const orderTime = o.timestamp || o.date || 0;
+        if (now - orderTime > MAX_ORDER_AGE) {
+            // Auto-mark as delivered
+            o.status = 'delivered';
+            if (window.ordersManager.saveOrders) window.ordersManager.saveOrders();
+            return false;
+        }
+        return true;
+    });
         
         const orders = window.ordersManager.getOrders();
         const activeOrder = orders.find(o => o.status === 'confirmed' || o.status === 'in_transit');
