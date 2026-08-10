@@ -79,10 +79,13 @@ class App {
             this.showNetworkStatus('⚠️ आप ऑफलाइन हैं। कुछ सुविधाएँ काम नहीं करेंगी।', 'warning');
         });
         
-        // Service worker registration (for PWA later)
-        if ('serviceWorker' in navigator) {
-            console.log('📱 PWA ready for future implementation');
-        }
+if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+        navigator.serviceWorker.register('/Quick-Dukan/service-worker.js')
+            .then(reg => console.log('✅ SW Registered! Offline Ready! 🚀'))
+            .catch(err => console.error('❌ SW Failed:', err));
+    });
+}
 
         // Window resize handler
         let resizeTimeout;
