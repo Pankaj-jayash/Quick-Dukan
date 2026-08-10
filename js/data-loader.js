@@ -12,8 +12,15 @@ class DataLoader {
         this.dataVersion = null;
     }
     
-    async loadAllData(forceReload = false) {
-        // Agar force reload hai to data clear karo
+   async loadAllData(forceReload = false) {
+    // 🔥 CHECK INTERNET
+    if (!navigator.onLine) {
+        console.warn('⚠️ Offline - using cached data');
+        document.dispatchEvent(new CustomEvent('dataLoaded', {
+            detail: { allProducts: this.allProducts, categories: this.categories, offline: true }
+        }));
+        return true; // cached data se kaam chalao
+    }
         if (forceReload) {
             console.log('🔄 Force reload - Clearing old data');
             this.allProducts = [];
