@@ -1,18 +1,18 @@
 // ============================================
-// SERVICE-WORKER.JS - PWA Cache & Offline (v3)
+// SERVICE-WORKER.JS - Full Offline Support v3
 // ============================================
 
-const CACHE_VERSION = 'v3'; // ⬅️ Version update karte raho
+const CACHE_VERSION = 'v3';
 const CACHE_NAME = `quick-dukan-${CACHE_VERSION}`;
 const DATA_CACHE = `quick-dukan-data-${CACHE_VERSION}`;
 
-// Static files to cache (GitHub Pages paths)
+// Static files - MUST be cached for offline
 const STATIC_CACHE = [
     '/Quick-Dukan/',
     '/Quick-Dukan/index.html',
     '/Quick-Dukan/manifest.json',
     
-    // CSS Files
+    // CSS
     '/Quick-Dukan/css/theme.css',
     '/Quick-Dukan/css/animations.css',
     '/Quick-Dukan/css/layout.css',
@@ -35,7 +35,7 @@ const STATIC_CACHE = [
     '/Quick-Dukan/css/pull-to-refresh.css',
     '/Quick-Dukan/css/splash-screen.css',
     
-    // JS Files
+    // JS
     '/Quick-Dukan/js/config.js',
     '/Quick-Dukan/js/whatsapp.js',
     '/Quick-Dukan/js/theme.js',
@@ -73,119 +73,187 @@ const STATIC_CACHE = [
     '/Quick-Dukan/icons/icon-512.png',
 ];
 
-// Install
+// ============================================
+// INSTALL - Cache all static files
+// ============================================
 self.addEventListener('install', (event) => {
-    console.log(`🔧 Service Worker ${CACHE_VERSION} Installing...`);
+    console.log(`🔧 SW ${CACHE_VERSION} Installing...`);
+    
     event.waitUntil(
         caches.open(CACHE_NAME)
-        .then(cache => {
-            console.log('📦 Caching', STATIC_CACHE.length, 'files...');
-            return Promise.allSettled(
-                STATIC_CACHE.map(url =>
-                    cache.add(url).catch(err => {
-                        console.warn('❌ Failed:', url);
-                    })
-                )
-            );
-        })
-        .then(() => {
-            console.log('✅ Install complete, activating...');
-            return self.skipWaiting();
-        })
+            .then(cache => {
+                console.log('📦 Caching all files for offline...');
+                return Promise.allSettled(
+                    STATIC_CACHE.map(url =>
+                        cache.add(url).catch(err => {
+                            console.warn('❌ Failed to cache:', url);
+                        })
+                    )
+                );
+            })
+            .then(() => {
+                console.log('✅ All files cached! Offline ready!');
+                return self.skipWaiting();
+            })
     );
 });
 
-// Activate - Clean old caches
+// ============================================
+// ACTIVATE - Clean old caches
+// ============================================
 self.addEventListener('activate', (event) => {
-    console.log(`✅ Service Worker ${CACHE_VERSION} Activated`);
+    console.log(`✅ SW ${CACHE_VERSION} Activated`);
+    
     event.waitUntil(
         caches.keys().then(cacheNames => {
             return Promise.all(
                 cacheNames
-                .filter(cache => cache !== CACHE_NAME && cache !== DATA_CACHE)
-                .map(cache => {
-                    console.log('🗑️ Deleting:', cache);
-                    return caches.delete(cache);
-                })
+                    .filter(cache => cache !== CACHE_NAME && cache !== DATA_CACHE)
+                    .map(cache => {
+                        console.log('🗑️ Deleting old:', cache);
+                        return caches.delete(cache);
+                    })
             );
         }).then(() => {
-            console.log('👑 Claiming clients...');
+            console.log('👑 Taking control of all pages...');
             return self.clients.claim();
         })
     );
 });
 
-// Fetch Strategy
+// ============================================
+// FETCH - Offline First Strategy
+// ============================================
 self.addEventListener('fetch', (event) => {
     const { request } = event;
     const url = new URL(request.url);
-    
+
+    // Skip non-GET requests
     if (request.method !== 'GET') return;
+    
+    // Skip chrome extensions
     if (url.protocol === 'chrome-extension:') return;
     
-    // 📊 Data JSON files - Network First (with timeout fallback)
-    if (url.pathname.includes('/data/')) {
-        event.respondWith(networkFirstWithTimeout(request, 3000));
+    // Skip Google Analytics etc.
+    if (url.hostname.includes('google-analytics')) return;
+    if (url.hostname.includes('googletagmanager')) return;
+
+    // 🔥 DATA FILES - Network First, Cache Fallback
+    if (url.pathname.includes('/data/') || url.pathname.includes('.json')) {
+        event.respondWith(networkFirst(request));
         return;
     }
-    
-    // 🎨 Static Assets - Cache First (Stale While Revalidate)
-    if (url.pathname.match(/\.(css|js|png|jpg|svg|ico|woff2)$/) ||
-        url.pathname === '/Quick-Dukan/' ||
-        url.pathname.endsWith('index.html') ||
-        url.pathname.endsWith('manifest.json')) {
-        event.respondWith(staleWhileRevalidate(request));
+
+    // 🔥 STATIC FILES - Cache First, Network Fallback
+    if (url.pathname.match(/\.(css|js|png|jpg|jpeg|svg|ico|woff|woff2|ttf)$/) ||
+        url.pathname.includes('/Quick-Dukan/')) {
+        event.respondWith(cacheFirst(request));
         return;
     }
+
+    // 🔥 EXTERNAL RESOURCES - Network Only (maps, cdn etc.)
+    if (url.hostname.includes('openstreetmap') || 
+        url.hostname.includes('unpkg.com') ||
+        url.hostname.includes('leafletjs')) {
+        event.respondWith(networkOnly(request));
+        return;
+    }
+
+    // Default: Cache First
+    event.respondWith(cacheFirst(request));
 });
 
-// Network First with Timeout
-async function networkFirstWithTimeout(request, timeoutMs) {
-    const timeoutPromise = new Promise((_, reject) =>
-        setTimeout(() => reject(new Error('timeout')), timeoutMs)
-    );
+// ============================================
+// CACHE FIRST STRATEGY
+// ============================================
+async function cacheFirst(request) {
+    const cache = await caches.open(CACHE_NAME);
+    const cached = await cache.match(request);
     
+    if (cached) {
+        // Return cached, update in background
+        updateCache(request, cache);
+        return cached;
+    }
+
     try {
-        const response = await Promise.race([fetch(request), timeoutPromise]);
-        const cache = await caches.open(DATA_CACHE);
-        cache.put(request, response.clone());
+        const response = await fetch(request, { cache: 'no-store' });
+        if (response.ok) {
+            cache.put(request, response.clone());
+        }
         return response;
     } catch (err) {
-        const cached = await caches.match(request);
+        // 🔥 OFFLINE FALLBACK
+        if (request.destination === 'document') {
+            const offlinePage = await cache.match('/Quick-Dukan/index.html');
+            if (offlinePage) return offlinePage;
+        }
+        return new Response('Offline - Please connect to internet', {
+            status: 503,
+            statusText: 'Service Unavailable'
+        });
+    }
+}
+
+// ============================================
+// NETWORK FIRST STRATEGY
+// ============================================
+async function networkFirst(request) {
+    const cache = await caches.open(DATA_CACHE);
+    
+    try {
+        const response = await fetch(request, { cache: 'no-store' });
+        if (response.ok) {
+            cache.put(request, response.clone());
+        }
+        return response;
+    } catch (err) {
+        console.log('🌐 Offline - Using cached data');
+        const cached = await cache.match(request);
         if (cached) return cached;
+        
         throw err;
     }
 }
 
-// Stale While Revalidate (instant cache + background update)
-async function staleWhileRevalidate(request) {
-    const cache = await caches.open(CACHE_NAME);
-    const cached = await cache.match(request);
-    
-    const fetchPromise = fetch(request)
-        .then(response => {
-            if (response && response.status === 200) {
-                cache.put(request, response.clone());
-            }
-            return response;
-        })
-        .catch(err => console.warn('Update failed:', request.url, err));
-    
-    return cached || fetchPromise;
+// ============================================
+// NETWORK ONLY
+// ============================================
+async function networkOnly(request) {
+    try {
+        return await fetch(request);
+    } catch (err) {
+        return new Response('Offline', { status: 503 });
+    }
 }
 
-// Skip waiting message
+// ============================================
+// BACKGROUND CACHE UPDATE
+// ============================================
+async function updateCache(request, cache) {
+    try {
+        const response = await fetch(request, { cache: 'no-store' });
+        if (response.ok) {
+            cache.put(request, response.clone());
+        }
+    } catch (err) {
+        // Silent fail - offline mein update nahi ho sakta
+    }
+}
+
+// ============================================
+// MESSAGE LISTENER
+// ============================================
 self.addEventListener('message', (event) => {
     if (event.data === 'SKIP_WAITING') {
         self.skipWaiting();
     }
-    if (event.data === 'CHECK_UPDATE') {
-        self.clients.matchAll().then(clients => {
-            clients.forEach(client => {
-                client.postMessage({ type: 'UPDATE_CHECK', version: CACHE_VERSION });
-            });
+    
+    if (event.data === 'CHECK_OFFLINE') {
+        caches.keys().then(names => {
+            console.log('📦 Cached:', names);
         });
     }
 });
 
-console.log(`🔄 Service Worker ${CACHE_VERSION} Ready`);
+console.log(`🔄 Service Worker ${CACHE_VERSION} Ready - Full Offline Support ✅`);
