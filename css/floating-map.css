@@ -389,3 +389,56 @@ body.dark-mode .floating-map-resize-handle::after {
 body.dark-mode .floating-map-resize-handle:hover::after {
     border-color: rgba(255, 255, 255, 0.35);
 } 
+
+/* ============================================
+   SIZE BUTTONS — Compact/Normal/Full
+   ============================================ */
+.floating-map-btn.size-btn {
+    width: 22px;
+    height: 22px;
+    padding: 0;
+    font-size: 10px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.2);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+    border: 1.5px solid transparent;
+}
+
+.floating-map-btn.size-btn.active {
+    background: white;
+    color: #2E7D32;
+    border-color: white;
+    font-size: 12px;
+    font-weight: bold;
+    box-shadow: 0 0 6px rgba(255,255,255,0.5);
+}
+
+.floating-map-btn.size-btn:hover {
+    background: rgba(255,255,255,0.4);
+}
+
+/* Map Header — ensure buttons fit */
+.floating-map-actions {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+/* Header text — truncate on compact */
+.map-header-text {
+    font-size: 12px;
+    white-space: nowrap;
+}
+
+/* Compact mode — hide header text, show only dots */
+.floating-map-container[style*="width: 160px"] .map-header-text {
+    display: none;
+}
+
+.floating-map-container[style*="width: 160px"] .pulse-dot {
+    margin-right: 0;
+}
