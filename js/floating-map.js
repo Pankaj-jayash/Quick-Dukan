@@ -80,6 +80,11 @@ class FloatingMapManager {
         
         // Check every 30 seconds (not 15)
         setInterval(() => this.checkActiveOrder(), 30000);
+        // Map init se pehle
+if (!navigator.onLine) {
+    console.log('⚠️ Offline - skipping map load');
+    return; // Map mat load karo
+}
         
         console.log('🗺️ Floating Map Manager Initialized (Timestamp-based Timer)');
         console.log('🏪 Shop:', this.shopLocation.name, `(${this.shopLocation.lat}, ${this.shopLocation.lng})`);
