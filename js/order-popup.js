@@ -210,45 +210,57 @@ class OrderPopupManager {
         this.activePopup = 'success';
     }
     
-    // ============================================
-    // CONFIRM ORDER — ONLY HERE MAP OPENS
-    // ============================================
-    confirmOrder(orderData) {
-        if (window.ordersManager) {
-            const orders = window.ordersManager.getOrders();
-            const order = orders[0];
+    // // ============================================
+// CONFIRM ORDER — MAP + PAYMENT POPUP OPENS
+// ============================================
+confirmOrder(orderData) {
+    if (window.ordersManager) {
+        const orders = window.ordersManager.getOrders();
+        const order = orders[0];
+        
+        if (order) {
+            window.ordersManager.updateOrderStatus(order.id, 'confirmed');
             
-            if (order) {
-                window.ordersManager.updateOrderStatus(order.id, 'confirmed');
-                
-                // MAP SIRF YAHIN SE OPEN HOGA
-                setTimeout(() => {
-                    if (window.floatingMapManager) {
-                        // Check if map already running for another order
-                        const isMapRunning = window.floatingMapManager.timerInterval || 
-                                            window.floatingMapManager.riderInterval;
-                        
-                        if (isMapRunning) {
-                            console.log('🗺️ Map already running for previous order — keeping it');
-                            this.showToast(this.getMsg('confirmed'));
-                        } else {
-                            const updatedOrder = window.ordersManager.getOrderById(order.id);
-                            if (updatedOrder && updatedOrder.tracking?.customerLocation) {
-                                window.floatingMapManager.show();
-                                window.floatingMapManager.updateMapWithOrder(updatedOrder);
-                                this.showToast(this.getMsg('mapOpened'));
-                            } else {
-                                console.warn('⚠️ No customer location found for tracking');
-                                this.showToast(this.getMsg('confirmed'));
-                            }
-                        }
-                    } else {
+            // 🔥 PAYMENT POPUP — Confirm ke baad khulega
+            setTimeout(() => {
+                if (window.paymentPopupManager) {
+                    window.paymentPopupManager.show({
+                        total: orderData.total || 0,
+                        itemCount: orderData.itemCount || 0,
+                        deliveryTime: orderData.deliveryTime || '',
+                        orderData: orderData
+                    });
+                }
+            }, 400);
+            
+            // MAP SIRF YAHIN SE OPEN HOGA
+            setTimeout(() => {
+                if (window.floatingMapManager) {
+                    // Check if map already running for another order
+                    const isMapRunning = window.floatingMapManager.timerInterval || 
+                                        window.floatingMapManager.riderInterval;
+                    
+                    if (isMapRunning) {
+                        console.log('🗺️ Map already running for previous order — keeping it');
                         this.showToast(this.getMsg('confirmed'));
+                    } else {
+                        const updatedOrder = window.ordersManager.getOrderById(order.id);
+                        if (updatedOrder && updatedOrder.tracking?.customerLocation) {
+                            window.floatingMapManager.show();
+                            window.floatingMapManager.updateMapWithOrder(updatedOrder);
+                            this.showToast(this.getMsg('mapOpened'));
+                        } else {
+                            console.warn('⚠️ No customer location found for tracking');
+                            this.showToast(this.getMsg('confirmed'));
+                        }
                     }
-                }, 800);
-            }
+                } else {
+                    this.showToast(this.getMsg('confirmed'));
+                }
+            }, 15000);
         }
     }
+}
     
     // ============================================
     // POPUP 2: CANCEL REASON
