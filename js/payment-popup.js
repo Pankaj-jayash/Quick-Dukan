@@ -368,4 +368,4 @@ document.addEventListener('DOMContentLoaded', () => {
     setTimeout(() => {
         window.paymentPopupManager = new PaymentPopupManager();
     }, 1200);
-});
+}); 
