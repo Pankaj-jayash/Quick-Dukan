@@ -153,7 +153,7 @@ class OrderPopupManager {
     // ============================================
     // POPUP 1: SUCCESS (Confirm/Cancel)
     // ============================================
-    showSuccessPopup(orderData) {
+   showSuccessPopup(orderData) {
         this.hidePopup();
         
         const overlay = document.createElement('div');
@@ -165,15 +165,131 @@ class OrderPopupManager {
         overlay.innerHTML = `
             <div class="order-popup-card">
                 <div class="popup-icon">🛵</div>
+                
+                <!-- ⚠️ WHATSAPP WARNING — Eye-catching -->
+                <div style="
+                    background: linear-gradient(135deg, #FFF8E1, #FFF3E0);
+                    border: 2.5px solid #FF6D00;
+                    border-radius: 14px;
+                    padding: 14px 16px;
+                    margin-bottom: 16px;
+                    text-align: center;
+                    box-shadow: 0 2px 12px rgba(255, 109, 0, 0.18);
+                    position: relative;
+                ">
+                    <div style="
+                        position: absolute;
+                        top: -14px;
+                        left: 50%;
+                        transform: translateX(-50%);
+                        background: #FF6D00;
+                        color: white;
+                        font-size: 10px;
+                        font-weight: 800;
+                        padding: 4px 14px;
+                        border-radius: 20px;
+                        letter-spacing: 0.5px;
+                        white-space: nowrap;
+                    ">
+                        ⚠️ ${isHindi ? 'ज़रूरी सूचना' : 'IMPORTANT'}
+                    </div>
+                    <span style="font-size: 28px; display: block; margin-top: 6px;">📱</span>
+                    <p style="
+                        font-size: 14px;
+                        font-weight: 800;
+                        color: #BF360C;
+                        margin: 8px 0 0 0;
+                        line-height: 1.6;
+                        letter-spacing: 0.2px;
+                    ">
+                        ${isHindi 
+                            ? 'क्या आपने WhatsApp पर ऑर्डर भेज दिया?'
+                            : 'Did you send the order on WhatsApp?'}
+                    </p>
+                    <p style="
+                        font-size: 12px;
+                        color: #E65100;
+                        margin: 4px 0 0 0;
+                        font-weight: 600;
+                        line-height: 1.5;
+                    ">
+                        ${isHindi 
+                            ? 'अगर हाँ, तभी नीचे <span style="background:#FFE0B2;padding:2px 8px;border-radius:4px;font-weight:800;">✅ हाँ, लाएं!</span> दबाएँ'
+                            : 'Only then press <span style="background:#FFE0B2;padding:2px 8px;border-radius:4px;font-weight:800;">✅ Yes, Send it!</span> below'}
+                    </p>
+                    <p style="
+                        font-size: 11px;
+                        color: #888;
+                        margin: 4px 0 0 0;
+                        font-style: italic;
+                    ">
+                        ${isHindi 
+                            ? 'नहीं भेजा? → पहले WhatsApp खोलकर भेजें, फिर वापस आएँ'
+                            : 'Not sent? → Open WhatsApp & send first, then come back'}
+                    </p>
+                </div>
+                
                 <h2 class="popup-title">${this.getMsg('successTitle')}</h2>
                 <p class="popup-message">${this.getMsg('successMessage')}</p>
+                
                 <div class="popup-order-info">
                     <span>📦 ${orderData.itemCount || 0} ${isHindi ? 'आइटम' : 'items'}</span>
                     <span>💰 ₹${orderData.total || 0}</span>
                     <span>⏱️ ${orderData.deliveryTime || (isHindi ? 'अभी' : 'Now')}</span>
                 </div>
+                
+                <!-- 💳 PAYMENT PREVIEW — Attractive -->
+                <div style="
+                    background: linear-gradient(135deg, #E8F5E9, #F1F8E9);
+                    border: 2px solid #4CAF50;
+                    border-radius: 14px;
+                    padding: 14px 12px;
+                    margin: 12px 0 8px 0;
+                    text-align: center;
+                    box-shadow: 0 2px 10px rgba(76, 175, 80, 0.15);
+                ">
+                    <div style="
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                        gap: 8px;
+                        margin-bottom: 6px;
+                    ">
+                        <span style="font-size: 24px;">💳</span>
+                        <span style="font-size: 24px;">📱</span>
+                        <span style="font-size: 24px;">🏍️</span>
+                    </div>
+                    <p style="
+                        font-size: 13px;
+                        font-weight: 700;
+                        color: #1B5E20;
+                        margin: 0 0 4px 0;
+                    ">
+                        ${isHindi 
+                            ? 'Confirm के बाद आप भुगतान कर पाएँगे!'
+                            : 'You can pay after confirming!'}
+                    </p>
+                    <p style="
+                        font-size: 11px;
+                        color: #2E7D32;
+                        margin: 0;
+                        font-weight: 500;
+                        line-height: 1.5;
+                    ">
+                        ${isHindi 
+                            ? 'UPI • QR Code • Google Pay • PhonePe • Paytm • Cash on Delivery'
+                            : 'UPI • QR Code • Google Pay • PhonePe • Paytm • Cash on Delivery'}
+                    </p>
+                </div>
+                
                 <div class="popup-buttons">
-                    <button class="popup-btn popup-btn-confirm" id="btnConfirmOrder" type="button">
+                    <button class="popup-btn popup-btn-confirm" id="btnConfirmOrder" type="button"
+                        style="
+                            background: linear-gradient(135deg, #2E7D32, #43A047);
+                            font-size: 15px;
+                            font-weight: 700;
+                            box-shadow: 0 4px 14px rgba(46, 125, 50, 0.35);
+                        ">
                         ${this.getMsg('confirmBtn')}
                     </button>
                     <button class="popup-btn popup-btn-cancel" id="btnCancelOrder" type="button">
