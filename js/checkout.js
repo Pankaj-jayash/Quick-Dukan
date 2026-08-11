@@ -582,7 +582,7 @@ class CheckoutManager {
                     deliveryTime: deliveryTime,
                 });
             }
-        }, 1500);
+        }, 15000);
         
         // Close after delay
         setTimeout(() => {
