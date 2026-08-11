@@ -6,9 +6,9 @@
 class PaymentPopupManager {
     constructor() {
         this.currentLang = 'hi';
-        this.upiId = '9027535231@bpl'; // 🔥 YOUR REAL UPI ID
+        this.upiId = '98979027@ybl'; // 🔥 YOUR REAL UPI ID
         this.payeeName = 'Quick Dukan';
-        this.merchantCode = 'QKDKAN';
+        this.merchantCode = 'QUICKG';
         
         this.init();
     }
