@@ -1,52 +1,45 @@
 // ============================================
-// PAYMENT-POPUP.JS (FIXED v3)
-// QR on click → Direct UPI App | No Close Button
+// PAYMENT-POPUP.JS (FIXED v3) — Working
 // ============================================
 
 class PaymentPopupManager {
     constructor() {
         this.currentLang = 'hi';
-        this.upiId = '9027535231@bpl';
+        this.upiId = '98979027@ybl';
         this.payeeName = 'Quick Dukan';
-        this.merchantCode = 'QKDKAN';
-        
+        this.merchantCode = 'QUICKG';
         this.init();
     }
-    
+
     init() {
         this.detectLanguage();
         document.addEventListener('languageChanged', () => this.detectLanguage());
         console.log('💳 Payment Popup Ready | UPI: ' + this.upiId);
     }
-    
+
     detectLanguage() {
         if (window.languageManager?.currentLang) {
             this.currentLang = window.languageManager.currentLang;
         }
     }
-    
-    // ============================================
-    // SHOW PAYMENT POPUP
-    // ============================================
+
     show(orderData) {
         const existing = document.querySelector('.payment-popup-container');
         if (existing) existing.remove();
-        
+
         const total = orderData.total || orderData.totals?.total || 0;
         const itemCount = orderData.itemCount || orderData.totals?.itemCount || 0;
         const hi = this.currentLang === 'hi';
-        
+
         this.currentOrder = orderData;
         this.currentAmount = total;
-        
         const upiUrl = this.buildUPIUrl(total);
-        
+
         const container = document.createElement('div');
         container.className = 'payment-popup-container';
         container.innerHTML = `
             <div class="payment-overlay"></div>
             <div class="payment-card">
-                <!-- Header — NO CLOSE BUTTON -->
                 <div class="payment-header">
                     <div class="payment-header-left">
                         <span class="payment-icon">💳</span>
@@ -57,7 +50,6 @@ class PaymentPopupManager {
                     </div>
                 </div>
                 
-                <!-- QR Code — CLICKABLE -->
                 <div class="payment-qr-section" id="qrSection">
                     <p class="qr-main-hint">${hi ? '👇 QR स्कैन करें या टैप करें' : '👇 Scan QR or Tap'}</p>
                     <div class="qr-container" id="qrContainer">
@@ -74,12 +66,10 @@ class PaymentPopupManager {
                     </button>
                 </div>
                 
-                <!-- OR Divider -->
                 <div class="payment-divider">
                     <span>${hi ? 'या सीधे ऐप से' : 'OR Direct App'}</span>
                 </div>
                 
-                <!-- UPI Apps -->
                 <div class="payment-apps-section">
                     <p class="apps-title">${hi ? '📱 UPI ऐप चुनें' : '📱 Choose UPI App'}</p>
                     <div class="upi-apps-grid">
@@ -105,12 +95,10 @@ class PaymentPopupManager {
                     </button>
                 </div>
                 
-                <!-- OR Divider -->
                 <div class="payment-divider">
                     <span>${hi ? 'या' : 'OR'}</span>
                 </div>
                 
-                <!-- Cash on Delivery -->
                 <div class="payment-cod-section">
                     <button class="cod-btn" id="btnCOD">
                         <span class="cod-icon">🏍️</span>
@@ -121,7 +109,6 @@ class PaymentPopupManager {
                     </button>
                 </div>
                 
-                <!-- Auto Forward -->
                 <div class="payment-auto-forward">
                     <label class="auto-forward-label">
                         <input type="checkbox" id="chkAutoForward" checked>
@@ -130,16 +117,12 @@ class PaymentPopupManager {
                 </div>
             </div>
         `;
-        
+
         document.body.appendChild(container);
         requestAnimationFrame(() => container.classList.add('show'));
-        
         this.bindEvents(container);
     }
-    
-    // ============================================
-    // BUILD UPI URL
-    // ============================================
+
     buildUPIUrl(amount) {
         const params = new URLSearchParams({
             pa: this.upiId,
@@ -154,206 +137,136 @@ class PaymentPopupManager {
         });
         return 'upi://pay?' + params.toString();
     }
-    
-    // ============================================
-    // BIND ALL EVENTS (No Close)
-    // ============================================
+
     bindEvents(container) {
         const hi = this.currentLang === 'hi';
         const amount = this.currentAmount;
         const upiUrl = this.buildUPIUrl(amount);
-        
+
+        // QR IMAGE CLICK
         const qrImage = container.querySelector('#qrImage');
-        const qrSection = container.querySelector('#qrSection');
-        
         if (qrImage) {
-            qrImage.addEventListener('click', () => {
-                console.log('🖱️ QR Clicked → Opening UPI');
+            qrImage.addEventListener('click', (e) => {
+                e.stopPropagation();
+                console.log('🖱️ QR Clicked');
                 this.openUPIUrl(upiUrl, amount);
             });
         }
-        
+
+        // QR SECTION CLICK
+        const qrSection = container.querySelector('#qrSection');
         if (qrSection) {
-            qrSection.style.cursor = 'pointer';
             qrSection.addEventListener('click', (e) => {
                 if (e.target.closest('button')) return;
-                console.log('🖱️ QR Section Clicked → Opening UPI');
+                console.log('🖱️ QR Section Clicked');
                 this.openUPIUrl(upiUrl, amount);
             });
         }
-        
-        // Copy UPI
-        container.querySelector('#btnCopyUPI').addEventListener('click', () => {
-            navigator.clipboard.writeText(this.upiId).then(() => {
-                this.showToast(hi ? '✅ UPI ID कॉपी! पेस्ट करके भुगतान करें' : '✅ UPI ID Copied!');
+
+        // COPY UPI
+        const btnCopy = container.querySelector('#btnCopyUPI');
+        if (btnCopy) {
+            btnCopy.addEventListener('click', (e) => {
+                e.stopPropagation();
+                navigator.clipboard.writeText(this.upiId).then(() => {
+                    this.showToast(hi ? '✅ UPI ID कॉपी!' : '✅ UPI ID Copied!');
+                });
             });
-        });
-        
-        // UPI App Buttons
+        }
+
+        // UPI APP BUTTONS
         container.querySelectorAll('.upi-app-btn').forEach(btn => {
-            btn.addEventListener('click', () => {
-                const app = btn.dataset.app;
-                this.openSpecificUPIApp(app, amount);
+            btn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                this.openSpecificUPIApp(btn.dataset.app, amount);
             });
         });
-        
-        // Any UPI
-        container.querySelector('#btnAnyUPI').addEventListener('click', () => {
-            this.openUPIUrl(upiUrl, amount);
-        });
-        
+
+        // ANY UPI
+        const btnAny = container.querySelector('#btnAnyUPI');
+        if (btnAny) {
+            btnAny.addEventListener('click', (e) => {
+                e.stopPropagation();
+                this.openUPIUrl(upiUrl, amount);
+            });
+        }
+
         // COD
-        container.querySelector('#btnCOD').addEventListener('click', () => {
-            this.handleCOD(container);
-        });
+        const btnCOD = container.querySelector('#btnCOD');
+        if (btnCOD) {
+            btnCOD.addEventListener('click', (e) => {
+                e.stopPropagation();
+                this.handleCOD(container);
+            });
+        }
     }
-    
-    // ============================================
-    // OPEN UPI — Generic
-    // ============================================
+
     openUPIUrl(upiUrl, amount) {
         console.log('💳 Opening UPI:', upiUrl);
-        
-        const fallbackUrl = upiUrl.replace('upi://', 'https://pay.google.com/gp/v/upi/');
-        
-        const iframe = document.createElement('iframe');
-        iframe.style.display = 'none';
-        iframe.src = upiUrl;
-        document.body.appendChild(iframe);
-        
-        setTimeout(() => {
-            try {
-                window.location.href = upiUrl;
-            } catch (e) {
-                window.open(fallbackUrl, '_blank');
-            }
-        }, 300);
-        
-        setTimeout(() => {
-            if (iframe.parentNode) iframe.remove();
-        }, 5000);
-        
+        window.location.href = upiUrl;
         this.waitForReturn();
     }
-    
-    // ============================================
-    // OPEN SPECIFIC UPI APP
-    // ============================================
+
     openSpecificUPIApp(app, amount) {
         const upiUrl = this.buildUPIUrl(amount);
-        
-        const appConfig = {
-            gpay: {
-                pkg: 'com.google.android.apps.nbu.paisa.user',
-                name: 'Google Pay',
-                intent: `intent://pay?pa=${encodeURIComponent(this.upiId)}&pn=${encodeURIComponent(this.payeeName)}&am=${amount}&cu=INR&mode=02#Intent;scheme=upi;package=com.google.android.apps.nbu.paisa.user;end`
-            },
-            phonepe: {
-                pkg: 'com.phonepe.app',
-                name: 'PhonePe',
-                intent: `intent://pay?pa=${encodeURIComponent(this.upiId)}&pn=${encodeURIComponent(this.payeeName)}&am=${amount}&cu=INR&mode=02#Intent;scheme=upi;package=com.phonepe.app;end`
-            },
-            paytm: {
-                pkg: 'net.one97.paytm',
-                name: 'Paytm',
-                intent: `intent://pay?pa=${encodeURIComponent(this.upiId)}&pn=${encodeURIComponent(this.payeeName)}&am=${amount}&cu=INR&mode=02#Intent;scheme=upi;package=net.one97.paytm;end`
-            },
-            bhim: {
-                pkg: 'in.org.npci.upiapp',
-                name: 'BHIM',
-                intent: `intent://pay?pa=${encodeURIComponent(this.upiId)}&pn=${encodeURIComponent(this.payeeName)}&am=${amount}&cu=INR&mode=02#Intent;scheme=upi;package=in.org.npci.upiapp;end`
-            }
+        const config = {
+            gpay: `intent://pay?pa=${encodeURIComponent(this.upiId)}&pn=${encodeURIComponent(this.payeeName)}&am=${amount}&cu=INR&mode=02#Intent;scheme=upi;package=com.google.android.apps.nbu.paisa.user;end`,
+            phonepe: `intent://pay?pa=${encodeURIComponent(this.upiId)}&pn=${encodeURIComponent(this.payeeName)}&am=${amount}&cu=INR&mode=02#Intent;scheme=upi;package=com.phonepe.app;end`,
+            paytm: `intent://pay?pa=${encodeURIComponent(this.upiId)}&pn=${encodeURIComponent(this.payeeName)}&am=${amount}&cu=INR&mode=02#Intent;scheme=upi;package=net.one97.paytm;end`,
+            bhim: `intent://pay?pa=${encodeURIComponent(this.upiId)}&pn=${encodeURIComponent(this.payeeName)}&am=${amount}&cu=INR&mode=02#Intent;scheme=upi;package=in.org.npci.upiapp;end`
         };
-        
-        const config = appConfig[app];
-        
-        if (config) {
-            console.log(`💳 Opening ${config.name}...`);
-            try {
-                window.location.href = config.intent;
-            } catch (e) {
-                window.open(upiUrl, '_blank');
-            }
+        const intent = config[app];
+        if (intent) {
+            console.log('💳 Opening app:', app);
+            window.location.href = intent;
         } else {
             this.openUPIUrl(upiUrl, amount);
         }
-        
         this.waitForReturn();
     }
-    
-    // ============================================
-    // WAIT FOR USER RETURN → AUTO WHATSAPP
-    // ============================================
+
     waitForReturn() {
         let handled = false;
-        
-        const handleVisibility = () => {
+        const handler = () => {
             if (document.visibilityState === 'visible' && !handled) {
                 handled = true;
-                document.removeEventListener('visibilitychange', handleVisibility);
-                
+                document.removeEventListener('visibilitychange', handler);
                 setTimeout(() => {
                     const chk = document.getElementById('chkAutoForward');
-                    if (chk?.checked) {
-                        this.autoForwardToWhatsApp();
-                    }
+                    if (chk?.checked) this.autoForwardToWhatsApp();
                 }, 2000);
             }
         };
-        
-        document.addEventListener('visibilitychange', handleVisibility);
-        
+        document.addEventListener('visibilitychange', handler);
         setTimeout(() => {
-            if (!handled) {
-                handled = true;
-                document.removeEventListener('visibilitychange', handleVisibility);
-            }
+            if (!handled) { handled = true; document.removeEventListener('visibilitychange', handler); }
         }, 60000);
     }
-    
-    // ============================================
-    // CASH ON DELIVERY
-    // ============================================
+
     handleCOD(container) {
         const hi = this.currentLang === 'hi';
-        this.showToast(hi 
-            ? '✅ कैश ऑन डिलीवरी! ₹' + this.currentAmount + ' सामान आने पर दें।' 
-            : '✅ COD! Pay ₹' + this.currentAmount + ' on delivery.');
-        
+        this.showToast(hi ? '✅ कैश ऑन डिलीवरी! ₹' + this.currentAmount + ' सामान आने पर दें।' : '✅ COD! Pay ₹' + this.currentAmount + ' on delivery.');
         const chk = container.querySelector('#chkAutoForward');
-        if (chk?.checked) {
-            setTimeout(() => this.autoForwardToWhatsApp('COD'), 2000);
-        }
-        
+        if (chk?.checked) setTimeout(() => this.autoForwardToWhatsApp('COD'), 2000);
         this.hide(container);
     }
-    
-    // ============================================
-    // AUTO WHATSAPP
-    // ============================================
+
     autoForwardToWhatsApp(mode = 'UPI') {
         const hi = this.currentLang === 'hi';
         const phone = window.CONFIG?.whatsappNumber || '919719312956';
-        
         let msg = hi ? '💳 *पेमेंट जानकारी*\n\n' : '💳 *Payment Info*\n\n';
         msg += hi ? `💰 राशि: ₹${this.currentAmount}\n` : `💰 Amount: ₹${this.currentAmount}\n`;
         msg += hi ? `💳 मोड: ${mode}\n` : `💳 Mode: ${mode}\n`;
         msg += hi ? `🆔 UPI: ${this.upiId}\n\n` : `🆔 UPI: ${this.upiId}\n\n`;
         msg += hi ? '✅ भुगतान हो गया। कृपया कन्फर्म करें।' : '✅ Payment done. Please confirm.';
-        
         window.open(`https://wa.me/${phone}?text=${encodeURIComponent(msg)}`, '_blank');
     }
-    
-    // ============================================
-    // HELPERS
-    // ============================================
+
     hide(container) {
         container.classList.remove('show');
-        setTimeout(() => {
-            if (container.parentNode) container.remove();
-        }, 300);
+        setTimeout(() => { if (container.parentNode) container.remove(); }, 300);
     }
-    
+
     showToast(msg) {
         const toast = document.getElementById('toast');
         if (!toast) return;
@@ -363,9 +276,6 @@ class PaymentPopupManager {
     }
 }
 
-// Init
 document.addEventListener('DOMContentLoaded', () => {
-    setTimeout(() => {
-        window.paymentPopupManager = new PaymentPopupManager();
-    }, 1200);
+    setTimeout(() => { window.paymentPopupManager = new PaymentPopupManager(); }, 1200);
 });
