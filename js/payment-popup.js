@@ -58,8 +58,7 @@ class PaymentPopupManager {
                             <p class="payment-amount">💰 ₹${total} (${itemCount} ${hi ? 'आइटम' : 'items'})</p>
                         </div>
                     </div>
-                    <button class="payment-close-btn" id="btnClosePayment">✕</button>
-                </div>
+                   
                 
                 <!-- 🔥 QR Code — CLICKABLE → Direct UPI App -->
                 <div class="payment-qr-section" id="qrSection">
@@ -192,7 +191,7 @@ class PaymentPopupManager {
         
         // Close
         container.querySelector('#btnClosePayment').addEventListener('click', () => this.hide(container));
-        container.querySelector('.payment-overlay').addEventListener('click', () => this.hide(container));
+        
         
         // Copy UPI
         container.querySelector('#btnCopyUPI').addEventListener('click', () => {
