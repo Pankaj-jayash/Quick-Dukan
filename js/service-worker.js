@@ -257,3 +257,32 @@ self.addEventListener('message', (event) => {
 });
 
 console.log(`🔄 Service Worker ${CACHE_VERSION} Ready - Full Offline Support ✅`);
+
+// ============================================
+// ENGAGEMENT NOTIFICATION CLICK HANDLER
+// ============================================
+self.addEventListener('notificationclick', (event) => {
+    console.log('👆 Notification clicked:', event.action);
+    
+    event.notification.close();
+    
+    if (event.action === 'dismiss' || event.action === 'dismiss-engagement') {
+        // User dismissed, do nothing
+        return;
+    }
+    
+    // Open app
+    event.waitUntil(
+        clients.matchAll({ type: 'window', includeUncontrolled: true })
+            .then(clientList => {
+                for (const client of clientList) {
+                    if (client.url.includes('/Quick-Dukan/') && 'focus' in client) {
+                        return client.focus();
+                    }
+                }
+                if (clients.openWindow) {
+                    return clients.openWindow('/Quick-Dukan/');
+                }
+            })
+    );
+});
