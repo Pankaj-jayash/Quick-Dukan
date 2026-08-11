@@ -54,9 +54,11 @@ class EngagementNotificationManager {
         
         // Start if already permitted
         if (this.permission === 'granted') {
-            console.log('🎯 Engagement notifications starting...');
-            this.scheduleNext();
-        }
+    console.log('🎯 Engagement notifications starting...');
+    // Turant pehla notification
+    setTimeout(() => this.sendRandomNotification(), 17000); // 17 sec mein
+    this.scheduleNext(); // Agla regular schedule pe
+}
         
         console.log('💬 Engagement Notification Manager Ready');
     }
