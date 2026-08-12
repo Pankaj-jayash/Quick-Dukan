@@ -395,12 +395,28 @@ class FloatingMapManager {
     stopRiderUpdates() { if (this.riderInterval) { clearInterval(this.riderInterval); this.riderInterval = null; } }
 
     updateDistanceDisplay() {
-        const el = document.getElementById('mapDistance');
-        if (!el) return;
-        const p = this.totalSteps>0 ? this.currentStep/this.totalSteps : 0;
-        const rem = this.distance*(1-p);
-        el.textContent = rem<0.05 ? 'पहुँच गया' : rem<1 ? `${Math.round(rem*1000)} m` : `${rem.toFixed(1)} km`;
+    const el = document.getElementById('mapDistance');
+    if (!el) return;
+
+    // 🔥 Timer progress ke hisaab se distance kam hogi
+    const elapsed = Date.now() - this.startTimestamp;
+    const totalTime = this.initialSeconds * 1000;
+    const progress = Math.min(elapsed / totalTime, 1);
+
+    // 🔥 Distance = total distance × (1 - progress)
+    const remaining = this.distance * (1 - progress);
+
+    if (remaining < 0.05) {
+        el.textContent = 'पहुँच गया';
+        el.style.color = '#4CAF50';
+    } else if (remaining < 1) {
+        el.textContent = `${Math.round(remaining * 1000)} m`;
+        el.style.color = '#2E7D32';
+    } else {
+        el.textContent = `${remaining.toFixed(1)} km`;
+        el.style.color = '#2E7D32';
     }
+}
 
     // ============================================
     // 🔥 DELIVERY POPUP — with Smart Retry
