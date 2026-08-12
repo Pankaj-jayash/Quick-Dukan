@@ -573,14 +573,7 @@ class FloatingMapManager {
 
     refreshSize() { if (this.map) setTimeout(() => this.map.invalidateSize(), 200); }
 
-    destroy() {
-        this.stopTimer();
-        this.stopRiderUpdates();
-        this.clearTimerStorage();
-        if (this.autoHideTimeout) clearTimeout(this.autoHideTimeout);
-        if (this.map) { this.map.remove(); this.map = null; }
-        if (this.container) { this.container.remove(); this.container = null; }
-    }
+   
 }
 
 document.addEventListener('DOMContentLoaded', () => {
