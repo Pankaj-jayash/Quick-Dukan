@@ -81,7 +81,7 @@ class App {
         
 if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {
-        navigator.serviceWorker.register('/Quick-Dukan/service-worker.js')
+        navigator.serviceWorker.register('/Quick-Dukan/js/service-worker.js')
             .then(reg => console.log('✅ SW Registered! Offline Ready! 🚀'))
             .catch(err => console.error('❌ SW Failed:', err));
     });
