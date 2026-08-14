@@ -1,5 +1,5 @@
 // ============================================
-// LOCATION.JS - Live GPS Manager v7
+// LOCATION.JS - Live GPS Manager v8
 // All Features | 2 Sec Popup Delay | Production Ready
 // ============================================
 
@@ -11,19 +11,19 @@ class LocationManager {
         this.popupVisible = false;
         this.currentLang = 'hi';
 
-        // Loop control - 🔥 FAST PROGRESSIVE
+        // Loop control - FAST PROGRESSIVE
         this.retryInterval = null;
         this.retryDelays = [1500, 2000, 3000, 4000, 5000];
         this.currentRetryAttempt = 0;
         this.maxAttempts = 15;
 
-        // GPS settings - 🔥 FASTER
+        // GPS settings - FASTER
         this.gpsTimeout = 5000;
         this.useHighAccuracy = true;
         this.maximumAge = 0;
         this.minAccuracy = 50;
 
-        // 🔥 POPUP DELAY
+        // POPUP DELAY
         this.popupDelayTimeout = null;
         this.popupDelay = 2000; // 2 seconds
 
@@ -48,17 +48,41 @@ class LocationManager {
         this.lastGeocodeTime = null;
         this.errorCount = 0;
 
-        // 🔥 Checkout integration
+        // Checkout integration
         this.bindCheckoutEvents();
-        
+
         // Auto-detect events
         this.bindAutoDetectEvents();
 
-        console.log('📍 LocationManager v7 Initialized (2s Popup Delay)');
+        // Restore saved location
+        this.restoreSavedLocation();
+
+        console.log('📍 LocationManager v8 Initialized (2s Popup Delay)');
     }
 
     // ============================================
-    // 🔥 CHECKOUT INTEGRATION
+    // RESTORE SAVED LOCATION
+    // ============================================
+    restoreSavedLocation() {
+        try {
+            const saved = localStorage.getItem('quick-dukan-live-location');
+            if (saved) {
+                const data = JSON.parse(saved);
+                if (data && data.lat && data.lng && data.timestamp) {
+                    const age = Date.now() - data.timestamp;
+                    if (age < 600000) { // 10 minutes old
+                        this.latitudeField.value = data.lat;
+                        this.longitudeField.value = data.lng;
+                        this.locationUrlField.value = data.url;
+                        console.log('📍 Restored saved location');
+                    }
+                }
+            }
+        } catch (e) {}
+    }
+
+    // ============================================
+    // CHECKOUT INTEGRATION
     // ============================================
     bindCheckoutEvents() {
         document.addEventListener('click', (e) => {
@@ -67,7 +91,7 @@ class LocationManager {
                 e.target.closest('.checkout-btn')) {
                 this.handleCheckoutStart();
             }
-            
+
             if (e.target.closest('#placeOrderBtn') || 
                 e.target.closest('[data-action="place-order"]')) {
                 this.handlePlaceOrder(e);
@@ -84,7 +108,7 @@ class LocationManager {
 
     handleCheckoutStart() {
         console.log('🛒 Checkout started - starting location...');
-        
+
         if (!this.isReady()) {
             this.start(
                 (location) => {
@@ -95,6 +119,8 @@ class LocationManager {
                     console.log('❌ Location error during checkout');
                 }
             );
+        } else {
+            this.enablePlaceOrderButton();
         }
     }
 
@@ -105,7 +131,7 @@ class LocationManager {
             this.showPopup();
             return false;
         }
-        
+
         console.log('✅ Location ready - placing order');
         return true;
     }
@@ -117,9 +143,9 @@ class LocationManager {
             this.showPopup();
             return false;
         }
-        
+
         const location = this.getData();
-        
+
         if (!this.latitudeField) {
             const latInput = document.createElement('input');
             latInput.type = 'hidden';
@@ -127,7 +153,7 @@ class LocationManager {
             latInput.value = location.lat;
             e.target.appendChild(latInput);
         }
-        
+
         if (!this.longitudeField) {
             const lngInput = document.createElement('input');
             lngInput.type = 'hidden';
@@ -135,7 +161,7 @@ class LocationManager {
             lngInput.value = location.lng;
             e.target.appendChild(lngInput);
         }
-        
+
         console.log('✅ Location added to form');
         return true;
     }
@@ -146,6 +172,14 @@ class LocationManager {
             placeOrderBtn.disabled = false;
             placeOrderBtn.classList.add('ready');
             placeOrderBtn.style.opacity = '1';
+        }
+        
+        // Also enable confirm order button in checkout
+        const confirmBtn = document.getElementById('confirmOrderBtn');
+        if (confirmBtn) {
+            confirmBtn.disabled = false;
+            confirmBtn.classList.remove('state-waiting', 'state-gpsoff');
+            confirmBtn.classList.add('state-ready');
         }
     }
 
@@ -165,12 +199,12 @@ class LocationManager {
 
         this.tryGetLocation();
         this.startLoop();
-        
-        // 🔥 Start watching for better accuracy
+
+        // Start watching for better accuracy
         setTimeout(() => this.startWatching(), 2000);
-        
+
         this.updateIndicator('searching');
-        
+
         if (this.onStateChangeCallback) {
             this.onStateChangeCallback('searching');
         }
@@ -179,7 +213,7 @@ class LocationManager {
     stop() {
         this.stopLoop();
         this.stopWatching();
-        this.clearPopupDelay(); // 🔥 Clear popup delay
+        this.clearPopupDelay();
         this.hidePopup();
         this.isSearching = false;
         this.isFound = false;
@@ -187,7 +221,7 @@ class LocationManager {
         this.onErrorCallback = null;
         this.clearLocationData();
         this.updateIndicator('off');
-        
+
         if (this.onStateChangeCallback) {
             this.onStateChangeCallback('stopped');
         }
@@ -196,7 +230,9 @@ class LocationManager {
     isReady() {
         return this.isFound && 
                this.latitudeField?.value && 
-               this.longitudeField?.value;
+               this.longitudeField?.value &&
+               parseFloat(this.latitudeField.value) !== 0 &&
+               parseFloat(this.longitudeField.value) !== 0;
     }
 
     getData() {
@@ -245,6 +281,10 @@ class LocationManager {
             off: {
                 hi: '📡 GPS बंद है',
                 en: '📡 GPS is OFF'
+            },
+            error: {
+                hi: '❌ लोकेशन नहीं मिली',
+                en: '❌ Location not found'
             }
         };
 
@@ -290,14 +330,14 @@ class LocationManager {
     }
 
     // ============================================
-    // 🔥 POPUP DELAY MANAGEMENT
+    // POPUP DELAY MANAGEMENT
     // ============================================
-    
+
     schedulePopupWithDelay() {
         this.clearPopupDelay();
-        
+
         console.log(`⏰ Scheduling popup in ${this.popupDelay}ms`);
-        
+
         this.popupDelayTimeout = setTimeout(() => {
             if (!this.isFound && !this.popupVisible) {
                 console.log('🚨 Showing popup (2s delay completed)');
@@ -305,7 +345,7 @@ class LocationManager {
             }
         }, this.popupDelay);
     }
-    
+
     clearPopupDelay() {
         if (this.popupDelayTimeout) {
             clearTimeout(this.popupDelayTimeout);
@@ -459,7 +499,7 @@ class LocationManager {
         this.isSearching = false;
         this.stopLoop();
         this.stopWatching();
-        this.clearPopupDelay(); // 🔥 Clear popup delay
+        this.clearPopupDelay();
         this.updateIndicator('found');
         this.hideGPSPopup();
 
@@ -473,6 +513,9 @@ class LocationManager {
         if (this.onStateChangeCallback) {
             this.onStateChangeCallback('found', { lat, lng, accuracy, url });
         }
+
+        // Enable order buttons
+        this.enablePlaceOrderButton();
 
         // Geocode with caching
         if (this.shouldGeocode(lat, lng)) {
@@ -492,7 +535,7 @@ class LocationManager {
 
         this.errorCount++;
 
-        // 🔥 2 SECOND DELAY SE POPUP
+        // 2 SECOND DELAY SE POPUP
         if (!this.isFound) {
             this.schedulePopupWithDelay();
         }
@@ -519,7 +562,7 @@ class LocationManager {
 
     shouldGeocode(lat, lng) {
         if (!this.lastGeocodeTime) return true;
-        
+
         const timeDiff = Date.now() - this.lastGeocodeTime;
         return timeDiff > 60000; // 1 minute baad hi dubara geocode
     }
@@ -598,7 +641,8 @@ class LocationManager {
 
             const addr = data.address;
             const city = addr.village || addr.town || addr.city || 
-                         addr.county || addr.state_district || '';
+                         addr.county || addr.state_district || 
+                         addr.municipality || addr.city_district || '';
 
             if (city && this.villageCityField && !this.villageCityField.value) {
                 this.villageCityField.value = city;
@@ -607,7 +651,8 @@ class LocationManager {
                 console.log(`🏘️ Auto-filled city: ${city}`);
             }
 
-            const landmark = addr.road || addr.neighbourhood || addr.suburb || '';
+            const landmark = addr.road || addr.neighbourhood || addr.suburb || 
+                            addr.hamlet || addr.village || '';
             if (landmark && this.landmarkField && !this.landmarkField.value) {
                 this.landmarkField.value = landmark;
                 this.landmarkField.dispatchEvent(new Event('input', { bubbles: true }));
@@ -627,7 +672,7 @@ class LocationManager {
     showGPSPopup() {
         if (this.popupVisible) return;
 
-        // Purana popup turant remove
+        // Remove old popup
         const oldPopup = document.getElementById('gpsPopup');
         if (oldPopup) {
             oldPopup.remove();
@@ -682,11 +727,11 @@ class LocationManager {
 
         this.bindPopupEvents(overlay);
         this.popupVisible = true;
-        
+
         if (this.onPopupShowCallback) {
             this.onPopupShowCallback();
         }
-        
+
         console.log('📡 GPS Popup shown');
     }
 
@@ -702,7 +747,7 @@ class LocationManager {
             }
         }
         this.popupVisible = false;
-        
+
         if (this.onPopupHideCallback) {
             this.onPopupHideCallback();
         }
@@ -810,16 +855,16 @@ class LocationManager {
 
     destroy() {
         console.log('📍 Destroying LocationManager...');
-        
+
         this.stopLoop();
         this.stopWatching();
         this.clearPopupDelay();
-        
+
         const popup = document.getElementById('gpsPopup');
         if (popup) {
             popup.remove();
         }
-        
+
         this.onFoundCallback = null;
         this.onErrorCallback = null;
         this.onStateChangeCallback = null;
@@ -827,7 +872,7 @@ class LocationManager {
         this.onPopupHideCallback = null;
         this.bestPosition = null;
         this.watchId = null;
-        
+
         console.log('✅ LocationManager destroyed');
     }
 }
@@ -835,17 +880,30 @@ class LocationManager {
 // ============================================
 // INITIALIZE
 // ============================================
+
+// Main initialization
 document.addEventListener('DOMContentLoaded', () => {
     window.locationManager = new LocationManager();
 });
 
+// Also initialize if DOM already loaded
+if (document.readyState === 'complete' || document.readyState === 'interactive') {
+    if (!window.locationManager) {
+        window.locationManager = new LocationManager();
+    }
+}
+
+// Cleanup before unload
 window.addEventListener('beforeunload', () => {
     if (window.locationManager) {
         window.locationManager.destroy();
     }
 });
 
-// 🔥 Global helper functions
+// ============================================
+// GLOBAL HELPER FUNCTIONS
+// ============================================
+
 window.getLocation = function() {
     return window.locationManager?.getData() || null;
 };
@@ -879,3 +937,5 @@ window.getLocationAccuracy = function() {
 window.isHighAccuracyLocation = function() {
     return window.locationManager?.isHighAccuracy() || false;
 };
+
+console.log('📍 LocationManager Global API Ready!');
