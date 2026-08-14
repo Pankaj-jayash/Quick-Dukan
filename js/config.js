@@ -211,4 +211,4 @@ const CONFIG = {
 };
 
 // Freeze the object so it can't be accidentally modified
-Object.freeze(CONFIG);
+Object.freeze(CONFIG); 
