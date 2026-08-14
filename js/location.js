@@ -1,6 +1,6 @@
 // ============================================
-// LOCATION.JS - Live GPS Manager v3
-// Direct Live Location | No Cache | Fast Detection
+// LOCATION.JS - Live GPS Manager v5
+// Instant Popup | All Features | Production Ready
 // ============================================
 
 class LocationManager {
@@ -11,22 +11,23 @@ class LocationManager {
         this.popupVisible = false;
         this.currentLang = 'hi';
 
-        // Loop control - 🔥 FAST PROGRESSIVE RETRY
+        // Loop control
         this.retryInterval = null;
-        this.retryDelays = [1500, 2000, 3000, 4000, 5000]; // Pehle fast, phir slow
+        this.retryDelays = [1500, 2000, 3000, 4000, 5000];
         this.currentRetryAttempt = 0;
-        this.maxAttempts = 15; // Max 15 attempts
+        this.maxAttempts = 15;
 
-        // GPS settings - 🔥 LIVE LOCATION ONLY
-        this.gpsTimeout = 5000; // 5 seconds timeout
+        // GPS settings
+        this.gpsTimeout = 5000;
         this.highAccuracy = true;
-        this.maximumAge = 0; // 🔥 NO CACHE - Sirf fresh location
-        this.timeout = 5000;
+        this.maximumAge = 0;
 
         // Callbacks
         this.onFoundCallback = null;
         this.onErrorCallback = null;
         this.onStateChangeCallback = null;
+        this.onPopupShowCallback = null; // 🔥 NEW
+        this.onPopupHideCallback = null; // 🔥 NEW
 
         // DOM refs
         this.indicatorElement = null;
@@ -36,10 +37,17 @@ class LocationManager {
         this.villageCityField = document.getElementById('villageCity');
         this.landmarkField = document.getElementById('landmark');
 
+        // 🔥 NEW: Location watch ID
+        this.watchId = null;
+        
+        // 🔥 NEW: Accuracy check
+        this.minAccuracy = 50; // 50 meters minimum accuracy
+        this.bestPosition = null;
+
         // Auto-detect events
         this.bindAutoDetectEvents();
 
-        console.log('📍 LocationManager v3 Initialized (Live Only)');
+        console.log('📍 LocationManager v5 Initialized (Complete)');
     }
 
     // ============================================
@@ -55,17 +63,19 @@ class LocationManager {
         this.isFound = false;
         this.currentRetryAttempt = 0;
 
-        // 🔥 Turant try karo
         this.tryGetLocation();
-
-        // 🔥 Fast loop start karo
         this.startLoop();
-
         this.updateIndicator('searching');
+        
+        // 🔥 State change callback
+        if (this.onStateChangeCallback) {
+            this.onStateChangeCallback('searching');
+        }
     }
 
     stop() {
         this.stopLoop();
+        this.stopWatching(); // 🔥 NEW
         this.hidePopup();
         this.isSearching = false;
         this.isFound = false;
@@ -73,6 +83,11 @@ class LocationManager {
         this.onErrorCallback = null;
         this.clearLocationData();
         this.updateIndicator('off');
+        
+        // 🔥 State change callback
+        if (this.onStateChangeCallback) {
+            this.onStateChangeCallback('stopped');
+        }
     }
 
     isReady() {
@@ -86,6 +101,8 @@ class LocationManager {
             lat: this.latitudeField?.value || '',
             lng: this.longitudeField?.value || '',
             url: this.locationUrlField?.value || '',
+            accuracy: this.bestPosition?.accuracy || null, // 🔥 NEW
+            timestamp: this.bestPosition?.timestamp || null // 🔥 NEW
         };
     }
 
@@ -139,8 +156,40 @@ class LocationManager {
         this.onStateChangeCallback = callback;
     }
 
+    // 🔥 NEW: Popup callbacks
+    onPopupShow(callback) {
+        this.onPopupShowCallback = callback;
+    }
+
+    onPopupHide(callback) {
+        this.onPopupHideCallback = callback;
+    }
+
+    // 🔥 NEW: Manual retry
+    retry() {
+        console.log('🔄 Manual retry...');
+        this.hidePopup();
+        this.isFound = false;
+        this.isSearching = true;
+        this.currentRetryAttempt = 0;
+        this.bestPosition = null;
+        this.updateIndicator('searching');
+        this.tryGetLocation();
+        this.startLoop();
+    }
+
+    // 🔥 NEW: Get accuracy
+    getAccuracy() {
+        return this.bestPosition?.accuracy || null;
+    }
+
+    // 🔥 NEW: Check if high accuracy
+    isHighAccuracy() {
+        return this.bestPosition && this.bestPosition.accuracy <= this.minAccuracy;
+    }
+
     // ============================================
-    // 🔥 FAST LIVE GPS LOOP
+    // FAST LIVE GPS LOOP
     // ============================================
 
     startLoop() {
@@ -152,7 +201,6 @@ class LocationManager {
                 return;
             }
 
-            // Max attempts check
             if (this.currentRetryAttempt >= this.maxAttempts) {
                 console.log('❌ Max attempts reached');
                 this.stopLoop();
@@ -166,7 +214,6 @@ class LocationManager {
     }
 
     getRetryDelay() {
-        // 🔥 Progressive delay - pehle fast, baad mein slow
         const index = Math.min(this.currentRetryAttempt, this.retryDelays.length - 1);
         const delay = this.retryDelays[index];
         this.currentRetryAttempt++;
@@ -191,16 +238,37 @@ class LocationManager {
 
         console.log(`📍 LIVE GPS attempt #${this.currentRetryAttempt + 1}`);
 
-        // 🔥 LIVE LOCATION - maximumAge: 0 (no cache)
         navigator.geolocation.getCurrentPosition(
             (position) => this.onLocationSuccess(position),
             (error) => this.onLocationError(error),
             {
-                enableHighAccuracy: true, // 🔥 High accuracy for live
+                enableHighAccuracy: true,
                 timeout: this.gpsTimeout,
-                maximumAge: 0 // 🔥 SIRF FRESH LOCATION
+                maximumAge: 0
             }
         );
+    }
+
+    // 🔥 NEW: Continuous watch for better accuracy
+    startWatching() {
+        if (!navigator.geolocation || this.watchId) return;
+
+        this.watchId = navigator.geolocation.watchPosition(
+            (position) => this.onWatchPosition(position),
+            (error) => this.onLocationError(error),
+            {
+                enableHighAccuracy: true,
+                timeout: this.gpsTimeout,
+                maximumAge: 0
+            }
+        );
+    }
+
+    stopWatching() {
+        if (this.watchId && navigator.geolocation) {
+            navigator.geolocation.clearWatch(this.watchId);
+            this.watchId = null;
+        }
     }
 
     // ============================================
@@ -215,23 +283,33 @@ class LocationManager {
 
         console.log(`✅ LIVE GPS SUCCESS: ${lat.toFixed(6)}, ${lng.toFixed(6)} (${Math.round(accuracy)}m)`);
 
-        // Validate coordinates
         if ((lat === 0 && lng === 0) || !isFinite(lat) || !isFinite(lng)) {
             console.error('❌ Invalid coordinates');
             return;
         }
 
-        // 🔥 Turant save
-        this.saveLocationData(lat, lng, url);
+        // 🔥 Accuracy check
+        if (accuracy > this.minAccuracy) {
+            console.log(`⚠️ Low accuracy (${Math.round(accuracy)}m) - trying for better...`);
+            
+            // Save best position
+            if (!this.bestPosition || accuracy < this.bestPosition.accuracy) {
+                this.bestPosition = { lat, lng, accuracy, url, timestamp: Date.now() };
+            }
+            
+            // Start watching for better accuracy
+            this.startWatching();
+            return;
+        }
 
-        // 🔥 Turant state update
+        this.saveLocationData(lat, lng, url);
         this.isFound = true;
         this.isSearching = false;
         this.stopLoop();
+        this.stopWatching();
         this.updateIndicator('found');
         this.hideGPSPopup();
 
-        // 🔥 Turant callback - koi wait nahi
         if (this.onFoundCallback) {
             this.onFoundCallback({ lat, lng, accuracy, url });
         }
@@ -240,8 +318,42 @@ class LocationManager {
             this.onStateChangeCallback('found', { lat, lng, accuracy, url });
         }
 
-        // 🔥 Reverse geocode background mein
         setTimeout(() => this.reverseGeocode(lat, lng), 100);
+    }
+
+    onWatchPosition(position) {
+        const lat = position.coords.latitude;
+        const lng = position.coords.longitude;
+        const accuracy = position.coords.accuracy;
+
+        console.log(`👁 Watch position: ${lat.toFixed(6)}, ${lng.toFixed(6)} (${Math.round(accuracy)}m)`);
+
+        // Update best position if better
+        if (!this.bestPosition || accuracy < this.bestPosition.accuracy) {
+            this.bestPosition = { 
+                lat, lng, accuracy, 
+                url: `https://maps.google.com/?q=${lat},${lng}`,
+                timestamp: Date.now() 
+            };
+        }
+
+        // If accuracy good enough, finalize
+        if (accuracy <= this.minAccuracy) {
+            const url = `https://maps.google.com/?q=${lat},${lng}`;
+            this.saveLocationData(lat, lng, url);
+            this.isFound = true;
+            this.isSearching = false;
+            this.stopLoop();
+            this.stopWatching();
+            this.updateIndicator('found');
+            this.hideGPSPopup();
+
+            if (this.onFoundCallback) {
+                this.onFoundCallback({ lat, lng, accuracy, url });
+            }
+
+            setTimeout(() => this.reverseGeocode(lat, lng), 100);
+        }
     }
 
     onLocationError(error) {
@@ -254,31 +366,26 @@ class LocationManager {
         const errorName = errorMessages[error.code] || 'UNKNOWN';
         console.log(`❌ GPS Error: ${errorName}`);
 
-        // 🔥 Permission denied - turant popup
-        if (error.code === 1) {
-            if (!this.popupVisible) {
-                this.showGPSPopup();
-            }
-        }
-        // 🔥 Position unavailable - 3 attempts baad popup
-        else if (error.code === 2 && this.currentRetryAttempt >= 3) {
-            if (!this.popupVisible) {
-                this.showGPSPopup();
-            }
-        }
-        // 🔥 Timeout - 2 attempts baad popup
-        else if (error.code === 3 && this.currentRetryAttempt >= 2) {
-            if (!this.popupVisible) {
-                this.showGPSPopup();
-            }
+        // 🔥 TURANT POPUP - Kisi bhi error par
+        if (!this.popupVisible && !this.isFound) {
+            console.log('🚨 Showing GPS popup immediately');
+            this.showGPSPopup();
         }
 
+        // Error callback
         if (this.onErrorCallback) {
-            this.onErrorCallback({ code: error.code, message: error.message, name: errorName });
+            this.onErrorCallback({ 
+                code: error.code, 
+                message: error.message, 
+                name: errorName 
+            });
         }
 
         if (this.onStateChangeCallback) {
-            this.onStateChangeCallback('error', { code: error.code, message: error.message });
+            this.onStateChangeCallback('error', { 
+                code: error.code, 
+                message: error.message 
+            });
         }
     }
 
@@ -291,14 +398,21 @@ class LocationManager {
         if (this.longitudeField) this.longitudeField.value = lng.toFixed(6);
         if (this.locationUrlField) this.locationUrlField.value = url;
 
-        // 🔥 Save to localStorage for order processing
+        // 🔥 Trigger input events for form validation
+        if (this.latitudeField) {
+            this.latitudeField.dispatchEvent(new Event('input', { bubbles: true }));
+        }
+        if (this.longitudeField) {
+            this.longitudeField.dispatchEvent(new Event('input', { bubbles: true }));
+        }
+
         try {
             localStorage.setItem('quick-dukan-live-location', JSON.stringify({
                 lat: lat.toFixed(6),
                 lng: lng.toFixed(6),
                 url: url,
                 timestamp: Date.now(),
-                isLive: true // 🔥 Mark as live
+                isLive: true
             }));
         } catch (e) {}
     }
@@ -314,12 +428,11 @@ class LocationManager {
     }
 
     // ============================================
-    // REVERSE GEOCODE - FAST & NON-BLOCKING
+    // REVERSE GEOCODE
     // ============================================
 
     async reverseGeocode(lat, lng) {
         try {
-            // 🔥 2 second timeout
             const controller = new AbortController();
             const timeoutId = setTimeout(() => controller.abort(), 2000);
 
@@ -345,12 +458,18 @@ class LocationManager {
             if (city && this.villageCityField && !this.villageCityField.value) {
                 this.villageCityField.value = city;
                 this.villageCityField.classList.add('valid');
+                
+                // 🔥 Trigger input event
+                this.villageCityField.dispatchEvent(new Event('input', { bubbles: true }));
                 console.log(`🏘️ Auto-filled city: ${city}`);
             }
 
             const landmark = addr.road || addr.neighbourhood || addr.suburb || '';
             if (landmark && this.landmarkField && !this.landmarkField.value) {
                 this.landmarkField.value = landmark;
+                
+                // 🔥 Trigger input event
+                this.landmarkField.dispatchEvent(new Event('input', { bubbles: true }));
                 console.log(`🏠 Auto-filled landmark: ${landmark}`);
             }
         } catch (error) {
@@ -359,7 +478,7 @@ class LocationManager {
     }
 
     // ============================================
-    // GPS POPUP
+    // GPS POPUP - TURANT SHOW
     // ============================================
 
     showGPSPopup() {
@@ -416,7 +535,13 @@ class LocationManager {
 
         this.bindPopupEvents(overlay);
         this.popupVisible = true;
-        console.log('📡 GPS Popup shown');
+        
+        // 🔥 Popup show callback
+        if (this.onPopupShowCallback) {
+            this.onPopupShowCallback();
+        }
+        
+        console.log('📡 GPS Popup shown INSTANTLY');
     }
 
     hideGPSPopup() {
@@ -434,6 +559,11 @@ class LocationManager {
             }, 300);
         }
         this.popupVisible = false;
+        
+        // 🔥 Popup hide callback
+        if (this.onPopupHideCallback) {
+            this.onPopupHideCallback();
+        }
     }
 
     bindPopupEvents(overlay) {
@@ -446,17 +576,7 @@ class LocationManager {
         });
 
         overlay.querySelector('#gpsRetryBtn')?.addEventListener('click', () => {
-            this.hideGPSPopup();
-            this.isFound = false;
-            this.isSearching = true;
-            this.currentRetryAttempt = 0;
-            this.updateIndicator('searching');
-            this.tryGetLocation();
-            this.startLoop();
-
-            if (this.onStateChangeCallback) {
-                this.onStateChangeCallback('retrying');
-            }
+            this.retry();
         });
 
         overlay.querySelector('#gpsSkipBtn')?.addEventListener('click', () => {
@@ -508,19 +628,17 @@ class LocationManager {
     }
 
     // ============================================
-    // AUTO-DETECT EVENTS - FAST
+    // AUTO-DETECT EVENTS
     // ============================================
 
     bindAutoDetectEvents() {
-        // Tab visible hone par turant retry
         document.addEventListener('visibilitychange', () => {
             if (!document.hidden && this.isSearching && !this.isFound) {
                 console.log('👁 Tab visible — LIVE GPS retry...');
-                setTimeout(() => this.tryGetLocation(), 300); // 🔥 300ms fast
+                setTimeout(() => this.tryGetLocation(), 300);
             }
         });
 
-        // Window focus par turant check
         window.addEventListener('focus', () => {
             if ((this.popupVisible || this.isSearching) && !this.isFound) {
                 console.log('👁 Window focused — checking LIVE GPS...');
@@ -530,11 +648,10 @@ class LocationManager {
                     this.updateIndicator('searching');
                     this.tryGetLocation();
                     this.startLoop();
-                }, 500); // 🔥 500ms fast
+                }, 500);
             }
         });
 
-        // Online hone par retry
         window.addEventListener('online', () => {
             if (this.isSearching && !this.isFound) {
                 console.log('🌐 Online — retrying LIVE GPS...');
@@ -553,6 +670,8 @@ class LocationManager {
         this.onFoundCallback = null;
         this.onErrorCallback = null;
         this.onStateChangeCallback = null;
+        this.onPopupShowCallback = null;
+        this.onPopupHideCallback = null;
         console.log('📍 LocationManager destroyed');
     }
 }
@@ -569,3 +688,18 @@ window.addEventListener('beforeunload', () => {
         window.locationManager.destroy();
     }
 });
+
+// 🔥 NEW: Global helper functions
+window.getLocation = function() {
+    return window.locationManager?.getData() || null;
+};
+
+window.isLocationReady = function() {
+    return window.locationManager?.isReady() || false;
+};
+
+window.retryLocation = function() {
+    if (window.locationManager) {
+        window.locationManager.retry();
+    }
+};
