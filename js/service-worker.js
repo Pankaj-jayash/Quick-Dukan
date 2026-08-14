@@ -8,73 +8,69 @@ const DATA_CACHE = `quick-dukan-data-${CACHE_VERSION}`;
 
 // Static files - MUST be cached for offline
 const STATIC_CACHE = [
-    '/',
-    '/index.html',
-    '/manifest.json',
-
+    '/Quick-Dukan/',
+    '/Quick-Dukan/index.html',
+    '/Quick-Dukan/manifest.json',
+    
     // CSS
-    '/css/theme.css',
-    '/css/animations.css',
-    '/css/layout.css',
-    '/css/header.css',
-    '/css/search.css',
-    '/css/categories.css',
-    '/css/product-card.css',
-    '/css/category-products.css',
-    '/css/recently-viewed.css',
-    '/css/most-orders.css',
-    '/css/bottom-nav.css',
-    '/css/cart.css',
-    '/css/checkout.css',
-    '/css/orders.css',
-    '/css/dark-mode.css',
-    '/css/pwa-install.css',
-    '/css/floating-cart-bubble.css',
-    '/css/order-popup.css',
-    '/css/floating-map.css',
-    '/css/pull-to-refresh.css',
-    '/css/splash-screen.css',
-    '/css/payment-popup.css',
-    '/css/location-popup.css',
-
-    // JS - Core
-    '/js/security.js',
-    '/js/config.js',
-    '/js/whatsapp.js',
-    '/js/theme.js',
-    '/js/language.js',
-    '/js/data-loader.js',
-    '/js/search.js',
-    '/js/categories.js',
-    '/js/products.js',
-    '/js/category-products.js',
-    '/js/recently-viewed.js',
-    '/js/most-orders.js',
-    '/js/cart.js',
-    '/js/bottom-nav.js',
-    '/js/back-to-top.js',
-    '/js/animations.js',
-    '/js/app.js',
-    '/js/auto-refresh.js',
-    '/js/pwa-install.js',
-    '/js/orders.js',
-    '/js/location.js',
-    '/js/pull-to-refresh.js',
-    '/js/checkout.js',
-    '/js/floating-cart-bubble.js',
-    '/js/order-popup.js',
-    '/js/floating-map.js',
-    '/js/payment-popup.js',
-
+    '/Quick-Dukan/css/theme.css',
+    '/Quick-Dukan/css/animations.css',
+    '/Quick-Dukan/css/layout.css',
+    '/Quick-Dukan/css/header.css',
+    '/Quick-Dukan/css/search.css',
+    '/Quick-Dukan/css/categories.css',
+    '/Quick-Dukan/css/product-card.css',
+    '/Quick-Dukan/css/category-products.css',
+    '/Quick-Dukan/css/recently-viewed.css',
+    '/Quick-Dukan/css/most-orders.css',
+    '/Quick-Dukan/css/bottom-nav.css',
+    '/Quick-Dukan/css/cart.css',
+    '/Quick-Dukan/css/checkout.css',
+    '/Quick-Dukan/css/orders.css',
+    '/Quick-Dukan/css/dark-mode.css',
+    '/Quick-Dukan/css/pwa-install.css',
+    '/Quick-Dukan/css/floating-cart-bubble.css',
+    '/Quick-Dukan/css/order-popup.css',
+    '/Quick-Dukan/css/floating-map.css',
+    '/Quick-Dukan/css/pull-to-refresh.css',
+    '/Quick-Dukan/css/splash-screen.css',
+    
+    // JS
+    '/Quick-Dukan/js/config.js',
+    '/Quick-Dukan/js/whatsapp.js',
+    '/Quick-Dukan/js/theme.js',
+    '/Quick-Dukan/js/language.js',
+    '/Quick-Dukan/js/data-loader.js',
+    '/Quick-Dukan/js/search.js',
+    '/Quick-Dukan/js/categories.js',
+    '/Quick-Dukan/js/products.js',
+    '/Quick-Dukan/js/category-products.js',
+    '/Quick-Dukan/js/recently-viewed.js',
+    '/Quick-Dukan/js/most-orders.js',
+    '/Quick-Dukan/js/cart.js',
+    '/Quick-Dukan/js/orders.js',
+    '/Quick-Dukan/js/checkout.js',
+    '/Quick-Dukan/js/location.js',
+    '/Quick-Dukan/js/bottom-nav.js',
+    '/Quick-Dukan/js/back-to-top.js',
+    '/Quick-Dukan/js/animations.js',
+    '/Quick-Dukan/js/app.js',
+    '/Quick-Dukan/js/auto-refresh.js',
+    '/Quick-Dukan/js/pwa-install.js',
+    '/Quick-Dukan/js/floating-cart-bubble.js',
+    '/Quick-Dukan/js/order-popup.js',
+    '/Quick-Dukan/js/floating-map.js',
+    '/Quick-Dukan/js/pull-to-refresh.js',
+    
     // Icons
-    '/icons/icon-72.png',
-    '/icons/icon-96.png',
-    '/icons/icon-128.png',
-    '/icons/icon-144.png',
-    '/icons/icon-152.png',
-    '/icons/icon-192.png',
-    '/icons/icon-384.png',
-    '/icons/icon-512.png',
+    '/Quick-Dukan/icons/icon-72.png',
+    '/Quick-Dukan/icons/icon-96.png',
+    '/Quick-Dukan/icons/icon-128.png',
+    '/Quick-Dukan/icons/icon-144.png',
+    '/Quick-Dukan/icons/icon-152.png',
+    '/Quick-Dukan/icons/icon-192.png',
+    '/Quick-Dukan/icons/icon-384.png',
+    '/Quick-Dukan/icons/icon-512.png',
 ];
 
 // ============================================
@@ -82,7 +78,7 @@ const STATIC_CACHE = [
 // ============================================
 self.addEventListener('install', (event) => {
     console.log(`🔧 SW ${CACHE_VERSION} Installing...`);
-
+    
     event.waitUntil(
         caches.open(CACHE_NAME)
             .then(cache => {
@@ -90,7 +86,7 @@ self.addEventListener('install', (event) => {
                 return Promise.allSettled(
                     STATIC_CACHE.map(url =>
                         cache.add(url).catch(err => {
-                            console.warn('❌ Failed to cache:', url, err);
+                            console.warn('❌ Failed to cache:', url);
                         })
                     )
                 );
@@ -107,7 +103,7 @@ self.addEventListener('install', (event) => {
 // ============================================
 self.addEventListener('activate', (event) => {
     console.log(`✅ SW ${CACHE_VERSION} Activated`);
-
+    
     event.waitUntil(
         caches.keys().then(cacheNames => {
             return Promise.all(
@@ -134,19 +130,13 @@ self.addEventListener('fetch', (event) => {
 
     // Skip non-GET requests
     if (request.method !== 'GET') return;
-
+    
     // Skip chrome extensions
     if (url.protocol === 'chrome-extension:') return;
-
+    
     // Skip Google Analytics etc.
     if (url.hostname.includes('google-analytics')) return;
     if (url.hostname.includes('googletagmanager')) return;
-
-    // 🔥 HTML PAGES - Network First, Cache Fallback
-    if (request.destination === 'document' || url.pathname === '/' || url.pathname === '/index.html') {
-        event.respondWith(networkFirstHTML(request));
-        return;
-    }
 
     // 🔥 DATA FILES - Network First, Cache Fallback
     if (url.pathname.includes('/data/') || url.pathname.includes('.json')) {
@@ -156,9 +146,7 @@ self.addEventListener('fetch', (event) => {
 
     // 🔥 STATIC FILES - Cache First, Network Fallback
     if (url.pathname.match(/\.(css|js|png|jpg|jpeg|svg|ico|woff|woff2|ttf)$/) ||
-        url.pathname.includes('/css/') ||
-        url.pathname.includes('/js/') ||
-        url.pathname.includes('/icons/')) {
+        url.pathname.includes('/Quick-Dukan/')) {
         event.respondWith(cacheFirst(request));
         return;
     }
@@ -166,10 +154,7 @@ self.addEventListener('fetch', (event) => {
     // 🔥 EXTERNAL RESOURCES - Network Only (maps, cdn etc.)
     if (url.hostname.includes('openstreetmap') || 
         url.hostname.includes('unpkg.com') ||
-        url.hostname.includes('leafletjs') ||
-        url.hostname.includes('cdnjs.cloudflare.com') ||
-        url.hostname.includes('fonts.googleapis.com') ||
-        url.hostname.includes('fonts.gstatic.com')) {
+        url.hostname.includes('leafletjs')) {
         event.respondWith(networkOnly(request));
         return;
     }
@@ -184,7 +169,7 @@ self.addEventListener('fetch', (event) => {
 async function cacheFirst(request) {
     const cache = await caches.open(CACHE_NAME);
     const cached = await cache.match(request);
-
+    
     if (cached) {
         // Return cached, update in background
         updateCache(request, cache);
@@ -193,14 +178,14 @@ async function cacheFirst(request) {
 
     try {
         const response = await fetch(request, { cache: 'no-store' });
-        if (response && response.ok) {
+        if (response.ok) {
             cache.put(request, response.clone());
         }
-        return response || new Response('Not Found', { status: 404 });
+        return response;
     } catch (err) {
         // 🔥 OFFLINE FALLBACK
         if (request.destination === 'document') {
-            const offlinePage = await cache.match('/index.html');
+            const offlinePage = await cache.match('/Quick-Dukan/index.html');
             if (offlinePage) return offlinePage;
         }
         return new Response('Offline - Please connect to internet', {
@@ -211,56 +196,23 @@ async function cacheFirst(request) {
 }
 
 // ============================================
-// NETWORK FIRST (for HTML Pages)
-// ============================================
-async function networkFirstHTML(request) {
-    const cache = await caches.open(CACHE_NAME);
-
-    try {
-        const response = await fetch(request, { cache: 'no-store' });
-        if (response && response.ok) {
-            cache.put(request, response.clone());
-            return response;
-        }
-        throw new Error('Network failed');
-    } catch (err) {
-        console.log('🌐 Offline - Serving cached HTML');
-        const cached = await cache.match(request);
-        if (cached) {
-            return cached;
-        }
-        // Fallback to index.html
-        const fallback = await cache.match('/index.html');
-        if (fallback) return fallback;
-        
-        return new Response('Offline - Please connect to internet', {
-            status: 503,
-            statusText: 'Service Unavailable'
-        });
-    }
-}
-
-// ============================================
-// NETWORK FIRST STRATEGY (for Data)
+// NETWORK FIRST STRATEGY
 // ============================================
 async function networkFirst(request) {
     const cache = await caches.open(DATA_CACHE);
-
+    
     try {
         const response = await fetch(request, { cache: 'no-store' });
-        if (response && response.ok) {
+        if (response.ok) {
             cache.put(request, response.clone());
         }
-        return response || new Response('Data not available', { status: 404 });
+        return response;
     } catch (err) {
         console.log('🌐 Offline - Using cached data');
         const cached = await cache.match(request);
         if (cached) return cached;
-
-        return new Response('Offline - Data not available', {
-            status: 503,
-            statusText: 'Service Unavailable'
-        });
+        
+        throw err;
     }
 }
 
@@ -269,13 +221,9 @@ async function networkFirst(request) {
 // ============================================
 async function networkOnly(request) {
     try {
-        const response = await fetch(request);
-        return response || new Response('Not Found', { status: 404 });
+        return await fetch(request);
     } catch (err) {
-        return new Response('Offline - External resource unavailable', { 
-            status: 503,
-            statusText: 'Service Unavailable'
-        });
+        return new Response('Offline', { status: 503 });
     }
 }
 
@@ -285,7 +233,7 @@ async function networkOnly(request) {
 async function updateCache(request, cache) {
     try {
         const response = await fetch(request, { cache: 'no-store' });
-        if (response && response.ok) {
+        if (response.ok) {
             cache.put(request, response.clone());
         }
     } catch (err) {
@@ -300,74 +248,41 @@ self.addEventListener('message', (event) => {
     if (event.data === 'SKIP_WAITING') {
         self.skipWaiting();
     }
-
+    
     if (event.data === 'CHECK_OFFLINE') {
         caches.keys().then(names => {
             console.log('📦 Cached:', names);
         });
     }
-
-    if (event.data === 'CLEAR_CACHE') {
-        caches.delete(CACHE_NAME).then(() => {
-            console.log('🗑️ Cache cleared');
-        });
-        caches.delete(DATA_CACHE).then(() => {
-            console.log('🗑️ Data cache cleared');
-        });
-    }
 });
+
+console.log(`🔄 Service Worker ${CACHE_VERSION} Ready - Full Offline Support ✅`);
 
 // ============================================
 // ENGAGEMENT NOTIFICATION CLICK HANDLER
 // ============================================
 self.addEventListener('notificationclick', (event) => {
     console.log('👆 Notification clicked:', event.action);
-
+    
     event.notification.close();
-
+    
     if (event.action === 'dismiss' || event.action === 'dismiss-engagement') {
         // User dismissed, do nothing
         return;
     }
-
+    
     // Open app
     event.waitUntil(
         clients.matchAll({ type: 'window', includeUncontrolled: true })
             .then(clientList => {
                 for (const client of clientList) {
-                    if (client.url.includes('/') && 'focus' in client) {
+                    if (client.url.includes('/Quick-Dukan/') && 'focus' in client) {
                         return client.focus();
                     }
                 }
                 if (clients.openWindow) {
-                    return clients.openWindow('/');
+                    return clients.openWindow('/Quick-Dukan/');
                 }
             })
     );
 });
-
-// ============================================
-// PERIODIC BACKGROUND SYNC (Optional)
-// ============================================
-self.addEventListener('periodicsync', (event) => {
-    if (event.tag === 'update-cache') {
-        event.waitUntil(updateAllCaches());
-    }
-});
-
-async function updateAllCaches() {
-    const cache = await caches.open(CACHE_NAME);
-    for (const url of STATIC_CACHE) {
-        try {
-            const response = await fetch(url, { cache: 'no-store' });
-            if (response && response.ok) {
-                cache.put(url, response.clone());
-            }
-        } catch (err) {
-            // Silent fail
-        }
-    }
-    console.log('🔄 Periodic cache update completed');
-}
-
-console.log(`🔄 Service Worker ${CACHE_VERSION} Ready - Full Offline Support ✅`);
