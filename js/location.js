@@ -1,6 +1,6 @@
 // ============================================
-// LOCATION.JS - Live GPS Manager v5
-// Instant Popup | All Features | Production Ready
+// LOCATION.JS - Complete v6
+// All Functions Connected | Production Ready
 // ============================================
 
 class LocationManager {
@@ -21,13 +21,14 @@ class LocationManager {
         this.gpsTimeout = 5000;
         this.highAccuracy = true;
         this.maximumAge = 0;
+        this.minAccuracy = 50;
 
         // Callbacks
         this.onFoundCallback = null;
         this.onErrorCallback = null;
         this.onStateChangeCallback = null;
-        this.onPopupShowCallback = null; // 🔥 NEW
-        this.onPopupHideCallback = null; // 🔥 NEW
+        this.onPopupShowCallback = null;
+        this.onPopupHideCallback = null;
 
         // DOM refs
         this.indicatorElement = null;
@@ -37,17 +38,113 @@ class LocationManager {
         this.villageCityField = document.getElementById('villageCity');
         this.landmarkField = document.getElementById('landmark');
 
-        // 🔥 NEW: Location watch ID
+        // Location watch
         this.watchId = null;
-        
-        // 🔥 NEW: Accuracy check
-        this.minAccuracy = 50; // 50 meters minimum accuracy
         this.bestPosition = null;
 
-        // Auto-detect events
-        this.bindAutoDetectEvents();
+        // 🔥 Auto-bind checkout events
+        this.bindCheckoutEvents();
 
-        console.log('📍 LocationManager v5 Initialized (Complete)');
+        this.bindAutoDetectEvents();
+        console.log('📍 LocationManager v6 Initialized (Fully Connected)');
+    }
+
+    // ============================================
+    // 🔥 CHECKOUT INTEGRATION - NEW
+    // ============================================
+    bindCheckoutEvents() {
+        // Checkout button/click handlers
+        document.addEventListener('click', (e) => {
+            // Checkout button clicked
+            if (e.target.closest('[data-action="checkout"]') || 
+                e.target.closest('#checkoutBtn') ||
+                e.target.closest('.checkout-btn')) {
+                this.handleCheckoutStart();
+            }
+            
+            // Place order button
+            if (e.target.closest('#placeOrderBtn') || 
+                e.target.closest('[data-action="place-order"]')) {
+                this.handlePlaceOrder(e);
+            }
+        });
+
+        // Form submit
+        document.addEventListener('submit', (e) => {
+            if (e.target.id === 'checkoutForm' || 
+                e.target.classList.contains('checkout-form')) {
+                this.handleFormSubmit(e);
+            }
+        });
+    }
+
+    handleCheckoutStart() {
+        console.log('🛒 Checkout started - starting location...');
+        
+        if (!this.isReady()) {
+            this.start(
+                (location) => {
+                    console.log('✅ Location ready for checkout');
+                    this.enablePlaceOrderButton();
+                },
+                (error) => {
+                    console.log('❌ Location error during checkout');
+                }
+            );
+        }
+    }
+
+    handlePlaceOrder(e) {
+        if (!this.isReady()) {
+            e.preventDefault();
+            console.log('❌ Location not ready - showing popup');
+            this.showPopup();
+            return false;
+        }
+        
+        // Location ready - order proceed karo
+        console.log('✅ Location ready - placing order');
+        return true;
+    }
+
+    handleFormSubmit(e) {
+        if (!this.isReady()) {
+            e.preventDefault();
+            console.log('❌ Form submit blocked - location not ready');
+            this.showPopup();
+            return false;
+        }
+        
+        // Location add karo form mein
+        const location = this.getData();
+        
+        if (!this.latitudeField) {
+            const latInput = document.createElement('input');
+            latInput.type = 'hidden';
+            latInput.id = 'latitude';
+            latInput.value = location.lat;
+            e.target.appendChild(latInput);
+        }
+        
+        if (!this.longitudeField) {
+            const lngInput = document.createElement('input');
+            lngInput.type = 'hidden';
+            lngInput.id = 'longitude';
+            lngInput.value = location.lng;
+            e.target.appendChild(lngInput);
+        }
+        
+        console.log('✅ Location added to form');
+        return true;
+    }
+
+    enablePlaceOrderButton() {
+        const placeOrderBtn = document.getElementById('placeOrderBtn');
+        if (placeOrderBtn) {
+            placeOrderBtn.disabled = false;
+            placeOrderBtn.classList.add('ready');
+            placeOrderBtn.style.opacity = '1';
+        }
     }
 
     // ============================================
@@ -65,9 +162,12 @@ class LocationManager {
 
         this.tryGetLocation();
         this.startLoop();
+        
+        // 🔥 Start watching for better accuracy
+        setTimeout(() => this.startWatching(), 2000);
+        
         this.updateIndicator('searching');
         
-        // 🔥 State change callback
         if (this.onStateChangeCallback) {
             this.onStateChangeCallback('searching');
         }
@@ -75,7 +175,7 @@ class LocationManager {
 
     stop() {
         this.stopLoop();
-        this.stopWatching(); // 🔥 NEW
+        this.stopWatching();
         this.hidePopup();
         this.isSearching = false;
         this.isFound = false;
@@ -84,7 +184,6 @@ class LocationManager {
         this.clearLocationData();
         this.updateIndicator('off');
         
-        // 🔥 State change callback
         if (this.onStateChangeCallback) {
             this.onStateChangeCallback('stopped');
         }
@@ -101,8 +200,8 @@ class LocationManager {
             lat: this.latitudeField?.value || '',
             lng: this.longitudeField?.value || '',
             url: this.locationUrlField?.value || '',
-            accuracy: this.bestPosition?.accuracy || null, // 🔥 NEW
-            timestamp: this.bestPosition?.timestamp || null // 🔥 NEW
+            accuracy: this.getAccuracy(),
+            isHighAccuracy: this.isHighAccuracy()
         };
     }
 
@@ -156,7 +255,6 @@ class LocationManager {
         this.onStateChangeCallback = callback;
     }
 
-    // 🔥 NEW: Popup callbacks
     onPopupShow(callback) {
         this.onPopupShowCallback = callback;
     }
@@ -165,7 +263,6 @@ class LocationManager {
         this.onPopupHideCallback = callback;
     }
 
-    // 🔥 NEW: Manual retry
     retry() {
         console.log('🔄 Manual retry...');
         this.hidePopup();
@@ -176,14 +273,13 @@ class LocationManager {
         this.updateIndicator('searching');
         this.tryGetLocation();
         this.startLoop();
+        this.startWatching();
     }
 
-    // 🔥 NEW: Get accuracy
     getAccuracy() {
         return this.bestPosition?.accuracy || null;
     }
 
-    // 🔥 NEW: Check if high accuracy
     isHighAccuracy() {
         return this.bestPosition && this.bestPosition.accuracy <= this.minAccuracy;
     }
@@ -249,9 +345,10 @@ class LocationManager {
         );
     }
 
-    // 🔥 NEW: Continuous watch for better accuracy
     startWatching() {
-        if (!navigator.geolocation || this.watchId) return;
+        if (!navigator.geolocation || this.watchId || this.isFound) return;
+
+        console.log('👁 Starting continuous location watch...');
 
         this.watchId = navigator.geolocation.watchPosition(
             (position) => this.onWatchPosition(position),
@@ -268,6 +365,7 @@ class LocationManager {
         if (this.watchId && navigator.geolocation) {
             navigator.geolocation.clearWatch(this.watchId);
             this.watchId = null;
+            console.log('👁 Stopped location watch');
         }
     }
 
@@ -288,20 +386,43 @@ class LocationManager {
             return;
         }
 
-        // 🔥 Accuracy check
-        if (accuracy > this.minAccuracy) {
-            console.log(`⚠️ Low accuracy (${Math.round(accuracy)}m) - trying for better...`);
-            
-            // Save best position
-            if (!this.bestPosition || accuracy < this.bestPosition.accuracy) {
-                this.bestPosition = { lat, lng, accuracy, url, timestamp: Date.now() };
-            }
-            
-            // Start watching for better accuracy
+        // Save best position
+        if (!this.bestPosition || accuracy < this.bestPosition.accuracy) {
+            this.bestPosition = { lat, lng, accuracy, url, timestamp: Date.now() };
+        }
+
+        // Accuracy check
+        if (accuracy > this.minAccuracy && !this.isFound) {
+            console.log(`⚠️ Low accuracy (${Math.round(accuracy)}m) - watching for better...`);
             this.startWatching();
             return;
         }
 
+        this.finalizeLocation(lat, lng, accuracy, url);
+    }
+
+    onWatchPosition(position) {
+        const lat = position.coords.latitude;
+        const lng = position.coords.longitude;
+        const accuracy = position.coords.accuracy;
+
+        console.log(`👁 Watch: ${lat.toFixed(6)}, ${lng.toFixed(6)} (${Math.round(accuracy)}m)`);
+
+        if (!this.bestPosition || accuracy < this.bestPosition.accuracy) {
+            this.bestPosition = { 
+                lat, lng, accuracy, 
+                url: `https://maps.google.com/?q=${lat},${lng}`,
+                timestamp: Date.now() 
+            };
+        }
+
+        if (accuracy <= this.minAccuracy && !this.isFound) {
+            const url = `https://maps.google.com/?q=${lat},${lng}`;
+            this.finalizeLocation(lat, lng, accuracy, url);
+        }
+    }
+
+    finalizeLocation(lat, lng, accuracy, url) {
         this.saveLocationData(lat, lng, url);
         this.isFound = true;
         this.isSearching = false;
@@ -311,7 +432,10 @@ class LocationManager {
         this.hideGPSPopup();
 
         if (this.onFoundCallback) {
-            this.onFoundCallback({ lat, lng, accuracy, url });
+            this.onFoundCallback({ 
+                lat, lng, accuracy, url,
+                isHighAccuracy: this.isHighAccuracy()
+            });
         }
 
         if (this.onStateChangeCallback) {
@@ -319,41 +443,6 @@ class LocationManager {
         }
 
         setTimeout(() => this.reverseGeocode(lat, lng), 100);
-    }
-
-    onWatchPosition(position) {
-        const lat = position.coords.latitude;
-        const lng = position.coords.longitude;
-        const accuracy = position.coords.accuracy;
-
-        console.log(`👁 Watch position: ${lat.toFixed(6)}, ${lng.toFixed(6)} (${Math.round(accuracy)}m)`);
-
-        // Update best position if better
-        if (!this.bestPosition || accuracy < this.bestPosition.accuracy) {
-            this.bestPosition = { 
-                lat, lng, accuracy, 
-                url: `https://maps.google.com/?q=${lat},${lng}`,
-                timestamp: Date.now() 
-            };
-        }
-
-        // If accuracy good enough, finalize
-        if (accuracy <= this.minAccuracy) {
-            const url = `https://maps.google.com/?q=${lat},${lng}`;
-            this.saveLocationData(lat, lng, url);
-            this.isFound = true;
-            this.isSearching = false;
-            this.stopLoop();
-            this.stopWatching();
-            this.updateIndicator('found');
-            this.hideGPSPopup();
-
-            if (this.onFoundCallback) {
-                this.onFoundCallback({ lat, lng, accuracy, url });
-            }
-
-            setTimeout(() => this.reverseGeocode(lat, lng), 100);
-        }
     }
 
     onLocationError(error) {
@@ -366,13 +455,11 @@ class LocationManager {
         const errorName = errorMessages[error.code] || 'UNKNOWN';
         console.log(`❌ GPS Error: ${errorName}`);
 
-        // 🔥 TURANT POPUP - Kisi bhi error par
         if (!this.popupVisible && !this.isFound) {
             console.log('🚨 Showing GPS popup immediately');
             this.showGPSPopup();
         }
 
-        // Error callback
         if (this.onErrorCallback) {
             this.onErrorCallback({ 
                 code: error.code, 
@@ -394,16 +481,16 @@ class LocationManager {
     // ============================================
 
     saveLocationData(lat, lng, url) {
-        if (this.latitudeField) this.latitudeField.value = lat.toFixed(6);
-        if (this.longitudeField) this.longitudeField.value = lng.toFixed(6);
-        if (this.locationUrlField) this.locationUrlField.value = url;
-
-        // 🔥 Trigger input events for form validation
         if (this.latitudeField) {
+            this.latitudeField.value = lat.toFixed(6);
             this.latitudeField.dispatchEvent(new Event('input', { bubbles: true }));
         }
         if (this.longitudeField) {
+            this.longitudeField.value = lng.toFixed(6);
             this.longitudeField.dispatchEvent(new Event('input', { bubbles: true }));
+        }
+        if (this.locationUrlField) {
+            this.locationUrlField.value = url;
         }
 
         try {
@@ -458,8 +545,6 @@ class LocationManager {
             if (city && this.villageCityField && !this.villageCityField.value) {
                 this.villageCityField.value = city;
                 this.villageCityField.classList.add('valid');
-                
-                // 🔥 Trigger input event
                 this.villageCityField.dispatchEvent(new Event('input', { bubbles: true }));
                 console.log(`🏘️ Auto-filled city: ${city}`);
             }
@@ -467,8 +552,6 @@ class LocationManager {
             const landmark = addr.road || addr.neighbourhood || addr.suburb || '';
             if (landmark && this.landmarkField && !this.landmarkField.value) {
                 this.landmarkField.value = landmark;
-                
-                // 🔥 Trigger input event
                 this.landmarkField.dispatchEvent(new Event('input', { bubbles: true }));
                 console.log(`🏠 Auto-filled landmark: ${landmark}`);
             }
@@ -536,7 +619,6 @@ class LocationManager {
         this.bindPopupEvents(overlay);
         this.popupVisible = true;
         
-        // 🔥 Popup show callback
         if (this.onPopupShowCallback) {
             this.onPopupShowCallback();
         }
@@ -560,7 +642,6 @@ class LocationManager {
         }
         this.popupVisible = false;
         
-        // 🔥 Popup hide callback
         if (this.onPopupHideCallback) {
             this.onPopupHideCallback();
         }
@@ -648,6 +729,7 @@ class LocationManager {
                     this.updateIndicator('searching');
                     this.tryGetLocation();
                     this.startLoop();
+                    this.startWatching();
                 }, 500);
             }
         });
@@ -689,7 +771,7 @@ window.addEventListener('beforeunload', () => {
     }
 });
 
-// 🔥 NEW: Global helper functions
+// 🔥 Global helper functions
 window.getLocation = function() {
     return window.locationManager?.getData() || null;
 };
@@ -702,4 +784,24 @@ window.retryLocation = function() {
     if (window.locationManager) {
         window.locationManager.retry();
     }
+};
+
+window.startLocationDetection = function(onFound, onError) {
+    if (window.locationManager) {
+        window.locationManager.start(onFound, onError);
+    }
+};
+
+window.stopLocationDetection = function() {
+    if (window.locationManager) {
+        window.locationManager.stop();
+    }
+};
+
+window.getLocationAccuracy = function() {
+    return window.locationManager?.getAccuracy() || null;
+};
+
+window.isHighAccuracyLocation = function() {
+    return window.locationManager?.isHighAccuracy() || false;
 };
