@@ -9,7 +9,7 @@ const CONFIG = {
     shopNameHi: 'क्विक दुकान',
     
     // WhatsApp
-    whatsappNumber: '919719312956',
+    whatsappNumber: '919XXXXXXXXX', // CHANGE THIS to your WhatsApp number
     
     // Colors (CSS variables are in theme.css, these are for JS reference)
     colors: {
