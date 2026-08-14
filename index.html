@@ -6,24 +6,54 @@
     <meta name="theme-color" content="#2E7D32">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
-    <title>Quick Dukan - आपकी विश्वसनीय किराना दुकान</title>
     
-    <!-- PWA Manifest -->
+    <!-- ============ SEO META TAGS ============ -->
+    <title>Quick Dukan - आपकी विश्वसनीय किराना दुकान | Grocery Delivery</title>
+    <meta name="description" content="Quick Dukan - India ki trusted grocery delivery app. Fresh fruits, vegetables, kirana items order karein. Free delivery on first order!">
+    <meta name="keywords" content="grocery delivery, kirana store, online grocery, fresh vegetables, fruits delivery, Quick Dukan, किराना सामान, ऑनलाइन किराना">
+    <meta name="robots" content="index, follow">
+    <meta name="author" content="Quick Dukan">
+    <link rel="canonical" href="https://yourdomain.com/">
+    
+    <!-- ============ OPEN GRAPH (Facebook/WhatsApp) ============ -->
+    <meta property="og:title" content="Quick Dukan - Grocery Delivery App">
+    <meta property="og:description" content="Order fresh groceries online with Quick Dukan. Free delivery on first order!">
+    <meta property="og:image" content="https://yourdomain.com/Quick-Dukan/icons/icon-512.png">
+    <meta property="og:url" content="https://yourdomain.com/">
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="Quick Dukan">
+    <meta property="og:locale" content="hi_IN">
+    
+    <!-- ============ TWITTER CARD ============ -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Quick Dukan - Grocery Delivery">
+    <meta name="twitter:description" content="Order fresh groceries online. Free delivery on first order!">
+    <meta name="twitter:image" content="https://yourdomain.com/Quick-Dukan/icons/icon-512.png">
+    <meta name="twitter:site" content="@QuickDukan">
+    
+    <!-- ============ SECURITY HEADERS ============ -->
+    <meta http-equiv="X-Content-Type-Options" content="nosniff">
+    <meta http-equiv="X-Frame-Options" content="DENY">
+    <meta http-equiv="Referrer-Policy" content="strict-origin-when-cross-origin">
+    <meta http-equiv="Permissions-Policy" content="geolocation=(self), microphone=(), camera=()">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://unpkg.com https://cdnjs.cloudflare.com; style-src 'self' 'unsafe-inline' https://unpkg.com https://fonts.googleapis.com https://cdnjs.cloudflare.com; font-src 'self' https://fonts.gstatic.com https://cdnjs.cloudflare.com; img-src 'self' data: https://*.tile.openstreetmap.org; connect-src 'self' https://*.tile.openstreetmap.org; frame-src 'none'; object-src 'none'; base-uri 'self'; form-action 'self';">
+    
+    <!-- ============ PWA ============ -->
     <link rel="manifest" href="manifest.json">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="Quick Dukan">
     <link rel="apple-touch-icon" href="/Quick-Dukan/icons/icon-192.png">
     
-    <!-- Favicon -->
+    <!-- ============ FAVICON ============ -->
     <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🛒</text></svg>">
+    <link rel="icon" type="image/png" sizes="32x32" href="/Quick-Dukan/icons/favicon-32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/Quick-Dukan/icons/favicon-16.png">
     
-    <!-- Font Preconnect for Performance -->
+    <!-- ============ FONTS (Performance Optimized) ============ -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&family=Noto+Sans+Devanagari:wght@400;500;700&display=swap" rel="stylesheet">
-
-
     
     <!-- ============ CSS FILES ============ -->
     <link rel="stylesheet" href="css/theme.css">
@@ -47,30 +77,282 @@
     <link rel="stylesheet" href="css/floating-cart-bubble.css">
     <link rel="stylesheet" href="css/order-popup.css">
     <link rel="stylesheet" href="css/floating-map.css">
-<link rel="stylesheet" href="css/payment-popup.css">
-<link rel="stylesheet" href="css/location-popup.css">
+    <link rel="stylesheet" href="css/payment-popup.css">
+    <link rel="stylesheet" href="css/location-popup.css">
     
-    <!-- Leaflet CSS -->
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <!-- ============ LEAFLET CSS (Non-blocking) ============ -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" media="print" onload="this.media='all'">
+    <noscript>
+        <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+    </noscript>
     
-    <!-- Font Awesome Icons -->
+    <!-- ============ FONT AWESOME ============ -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     
-    <!-- Inline Critical CSS for Instant Font Rendering -->
+    <!-- ============ INLINE CRITICAL CSS ============ -->
     <style>
+        /* ===== SKIP TO CONTENT (Accessibility) ===== */
+        .skip-link {
+            position: absolute;
+            left: -9999px;
+            top: 0;
+            background: #2E7D32;
+            color: white;
+            padding: 12px 20px;
+            z-index: 9999;
+            border-radius: 0 0 8px 0;
+            font-weight: 600;
+            text-decoration: none;
+        }
+        .skip-link:focus {
+            left: 10px;
+            top: 10px;
+        }
+        
+        /* ===== LOADING SKELETON ===== */
+        .skeleton-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 16px;
+            padding: 16px;
+        }
+        .skeleton-card {
+            height: 200px;
+            background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+            background-size: 200% 100%;
+            animation: shimmer 1.5s infinite;
+            border-radius: 12px;
+        }
+        .dark-mode .skeleton-card {
+            background: linear-gradient(90deg, #2a2a2a 25%, #3a3a3a 50%, #2a2a2a 75%);
+        }
+        @keyframes shimmer {
+            0% { background-position: 200% 0; }
+            100% { background-position: -200% 0; }
+        }
+        
+        /* ===== VALIDATION ERRORS ===== */
+        .validation-error {
+            display: none;
+            color: #C62828;
+            font-size: 12px;
+            margin-top: 4px;
+            font-weight: 500;
+        }
+        .form-input.error,
+        .phone-input.error,
+        .coupon-input.error {
+            border-color: #C62828 !important;
+            border-width: 2px;
+        }
+        
+        /* ===== IMAGE PROTECTION ===== */
+        img {
+            -webkit-user-drag: none;
+            user-drag: none;
+            -webkit-touch-callout: none;
+            pointer-events: auto;
+        }
+        .product-image-container {
+            position: relative;
+            user-select: none;
+            -webkit-user-select: none;
+            -webkit-touch-callout: none;
+        }
+        .product-image-container::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: transparent;
+            z-index: 1;
+            pointer-events: none;
+        }
+        
+        /* ===== FONT FALLBACK ===== */
         body {
             font-family: 'Noto Sans Devanagari', 'Poppins', sans-serif;
         }
         .fonts-loaded body {
             font-family: 'Poppins', 'Noto Sans Devanagari', sans-serif;
         }
+        
+        /* ===== SCROLLBAR STYLING ===== */
+        ::-webkit-scrollbar {
+            width: 4px;
+            height: 4px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #2E7D32;
+            border-radius: 4px;
+        }
+        .dark-mode ::-webkit-scrollbar-track {
+            background: #2a2a2a;
+        }
+        .dark-mode ::-webkit-scrollbar-thumb {
+            background: #4CAF50;
+        }
+        
+        /* ===== SELECTION COLOR ===== */
+        ::selection {
+            background: #2E7D32;
+            color: white;
+        }
+        .dark-mode ::selection {
+            background: #4CAF50;
+            color: white;
+        }
+        
+        /* ===== TAGLINE SECTION (Footer Replacement) ===== */
+        .tagline-section {
+            background: linear-gradient(135deg, #2E7D32 0%, #1B5E20 100%);
+            padding: 20px 16px;
+            margin: 16px 0 0 0;
+            border-radius: 16px 16px 0 0;
+            text-align: center;
+            box-shadow: 0 -4px 20px rgba(46, 125, 50, 0.3);
+            position: relative;
+            overflow: hidden;
+        }
+        .tagline-section::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle at 30% 50%, rgba(255,255,255,0.05) 0%, transparent 70%);
+            animation: taglineGlow 8s ease-in-out infinite;
+        }
+        @keyframes taglineGlow {
+            0%, 100% { transform: translate(0, 0); }
+            50% { transform: translate(10%, 5%); }
+        }
+        .tagline-content {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            position: relative;
+            z-index: 1;
+            flex-wrap: wrap;
+        }
+        .tagline-icon {
+            font-size: 32px;
+            animation: iconPulse 2s ease-in-out infinite;
+        }
+        .tagline-icon:last-child {
+            animation-delay: 0.5s;
+        }
+        @keyframes iconPulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.2); }
+        }
+        .tagline-text {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 2px;
+        }
+        .tagline-main {
+            font-size: 22px;
+            font-weight: 700;
+            color: #FFFFFF;
+            letter-spacing: 1px;
+            text-shadow: 0 2px 8px rgba(0,0,0,0.2);
+            font-family: 'Poppins', sans-serif;
+        }
+        .tagline-sub {
+            font-size: 16px;
+            font-weight: 500;
+            color: #A5D6A7;
+            letter-spacing: 0.5px;
+            font-family: 'Noto Sans Devanagari', sans-serif;
+        }
+        .tagline-bottom {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            margin-top: 10px;
+            position: relative;
+            z-index: 1;
+            padding-top: 10px;
+            border-top: 1px solid rgba(255,255,255,0.1);
+        }
+        .tagline-emoji {
+            font-size: 18px;
+            animation: emojiFloat 3s ease-in-out infinite;
+        }
+        .tagline-emoji:last-child {
+            animation-delay: 1.5s;
+        }
+        @keyframes emojiFloat {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-4px); }
+        }
+        .tagline-message {
+            font-size: 14px;
+            font-weight: 500;
+            color: #C8E6C9;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            font-family: 'Poppins', sans-serif;
+        }
+        
+        /* Dark Mode Support */
+        .dark-mode .tagline-section {
+            background: linear-gradient(135deg, #1B5E20 0%, #0D3B0E 100%);
+            box-shadow: 0 -4px 20px rgba(27, 94, 32, 0.4);
+        }
+        .dark-mode .tagline-main {
+            color: #E8F5E9;
+        }
+        .dark-mode .tagline-sub {
+            color: #81C784;
+        }
+        .dark-mode .tagline-message {
+            color: #A5D6A7;
+        }
+        
+        /* ===== CONSOLE PROTECTION INDICATOR ===== */
+        .console-protection {
+            position: fixed;
+            bottom: 0;
+            right: 0;
+            background: rgba(46, 125, 50, 0.1);
+            padding: 4px 10px;
+            font-size: 10px;
+            color: #2E7D32;
+            border-radius: 8px 0 0 0;
+            z-index: 99999;
+            pointer-events: none;
+            opacity: 0.5;
+        }
     </style>
 </head>
 <body>
     
-    <!-- Noscript Warning -->
+    <!-- ============================================ -->
+    <!-- SKIP TO MAIN CONTENT (Accessibility) -->
+    <!-- ============================================ -->
+    <a href="#mainContent" class="skip-link">Skip to main content</a>
+    
+    <!-- ============================================ -->
+    <!-- CONSOLE PROTECTION INDICATOR -->
+    <!-- ============================================ -->
+    <div class="console-protection" aria-hidden="true">🛡️ Secure</div>
+    
+    <!-- ============================================ -->
+    <!-- NOSCRIPT WARNING -->
+    <!-- ============================================ -->
     <noscript>
-        <div style="background: #C62828; color: white; padding: 12px; text-align: center; font-family: sans-serif;">
+        <div style="background: #C62828; color: white; padding: 12px; text-align: center; font-family: sans-serif; position: fixed; top: 0; left: 0; right: 0; z-index: 99999;">
             ⚠️ कृपया JavaScript चालू करें! हमारी साइट ठीक से काम करने के लिए JS की ज़रूरत है।
         </div>
     </noscript>
@@ -97,7 +379,7 @@
     <!-- ============================================ -->
     <!-- SECTION 1: TOP HEADER (FIXED) -->
     <!-- ============================================ -->
-    <header id="topHeader" class="top-header">
+    <header id="topHeader" class="top-header" role="banner">
         <!-- LEFT: Icon + Brand Name -->
         <div class="header-left">
             <span class="header-icon bounce-animation" aria-hidden="true">🛒</span>
@@ -148,8 +430,10 @@
                 data-lang-key="searchPlaceholder"
                 placeholder="आज क्या चाहिए? 😋" 
                 autocomplete="off"
+                aria-label="खोजें"
+                maxlength="50"
             >
-            <!-- Clear (×) Button - type karne pe show hoga -->
+            <!-- Clear (×) Button -->
             <button id="clearSearchBtn" class="clear-search-btn hidden" aria-label="साफ करें">
                 <span>✕</span>
             </button>
@@ -163,7 +447,7 @@
             </button>
         </div>
         <!-- Live Search Results Dropdown -->
-        <div id="searchResults" class="search-results hidden"></div>
+        <div id="searchResults" class="search-results hidden" role="listbox" aria-label="खोज परिणाम"></div>
         <!-- No Results Found -->
         <div id="noResults" class="no-results hidden">
             <div class="no-results-inner">
@@ -177,49 +461,61 @@
         </div>
     </div>
     
-   <!-- ============================================ -->
-<!-- SECTION 3: CATEGORIES -->
-<!-- ============================================ -->
-<div id="categoriesSection" class="categories-section">
-    <!-- Scroll Left Arrow -->
-    <button 
-        class="scroll-arrow scroll-left disabled" 
-        id="scrollLeft" 
-        aria-label="बाएँ स्क्रॉल करें" 
-        aria-disabled="true"
-    >
-        <span class="arrow-icon" aria-hidden="true">◀</span>
-    </button>
-
-    <!-- Categories Scroll Container -->
-    <div 
-        class="categories-scroll" 
-        id="categoriesScroll" 
-        role="tablist" 
-        aria-label="प्रोडक्ट कैटेगरी"
-    >
-        <!-- All categories load dynamically via JS -->
+    <!-- ============================================ -->
+    <!-- SECTION 3: CATEGORIES -->
+    <!-- ============================================ -->
+    <div id="categoriesSection" class="categories-section">
+        <!-- Scroll Left Arrow -->
+        <button 
+            class="scroll-arrow scroll-left disabled" 
+            id="scrollLeft" 
+            aria-label="बाएँ स्क्रॉल करें" 
+            aria-disabled="true"
+        >
+            <span class="arrow-icon" aria-hidden="true">◀</span>
+        </button>
+        
+        <!-- Categories Scroll Container -->
+        <div 
+            class="categories-scroll" 
+            id="categoriesScroll" 
+            role="tablist" 
+            aria-label="प्रोडक्ट कैटेगरी"
+        >
+            <!-- All categories load dynamically via JS -->
+        </div>
+        
+        <!-- Scroll Right Arrow -->
+        <button 
+            class="scroll-arrow scroll-right" 
+            id="scrollRight" 
+            aria-label="दाएँ स्क्रॉल करें"
+        >
+            <span class="arrow-icon" aria-hidden="true">▶</span>
+        </button>
     </div>
-
-    <!-- Scroll Right Arrow -->
-    <button 
-        class="scroll-arrow scroll-right" 
-        id="scrollRight" 
-        aria-label="दाएँ स्क्रॉल करें"
-    >
-        <span class="arrow-icon" aria-hidden="true">▶</span>
-    </button>
-</div>
     
     <!-- ============================================ -->
     <!-- MAIN CONTENT AREA (SCROLLABLE) -->
     <!-- ============================================ -->
     <main id="mainContent" class="main-content">
         
+        <!-- ============================================ -->
+        <!-- LOADING SKELETON -->
+        <!-- ============================================ -->
+        <div id="productsSkeleton" class="skeleton-grid" aria-hidden="true">
+            <div class="skeleton-card"></div>
+            <div class="skeleton-card"></div>
+            <div class="skeleton-card"></div>
+            <div class="skeleton-card"></div>
+            <div class="skeleton-card"></div>
+            <div class="skeleton-card"></div>
+        </div>
+        
         <!-- SECTION 5: Category Products -->
         <section id="categoryProductsSection" class="category-products-section hidden" aria-labelledby="categoryProductsTitle">
             <h2 id="categoryProductsTitle" class="section-title"></h2>
-            <div id="categoryProductsGrid" class="products-grid"></div>
+            <div id="categoryProductsGrid" class="products-grid" role="list" aria-label="कैटेगरी प्रोडक्ट"></div>
         </section>
         
         <!-- SECTION 6: Recently Viewed -->
@@ -241,20 +537,23 @@
         </section>
         
         <!-- ============================================ -->
-        <!-- FOOTER - INSIDE MAIN CONTENT (FIX) -->
+        <!-- TAGLINE SECTION (Footer Removed) -->
         <!-- ============================================ -->
-        <footer class="site-footer" role="contentinfo">
-            <div class="footer-content">
-                <p class="footer-text">© 2026 Quick Dukan. सर्वाधिकार सुरक्षित।</p>
-                <div class="footer-links">
-                    <a href="#" class="footer-link">शर्तें</a>
-                    <span class="footer-divider">|</span>
-                    <a href="#" class="footer-link">गोपनीयता</a>
-                    <span class="footer-divider">|</span>
-                    <a href="tel:+919719312956" class="footer-link">📞 संपर्क</a>
+        <div class="tagline-section" role="contentinfo" aria-label="Quick Dukan Tagline">
+            <div class="tagline-content">
+                <span class="tagline-icon" aria-hidden="true">⚡</span>
+                <div class="tagline-text">
+                    <span class="tagline-main">Quick Order, Quick Delivery</span>
+                    <span class="tagline-sub">⏱️ मिनटों में आपके दरवाज़े पर!</span>
                 </div>
+                <span class="tagline-icon" aria-hidden="true">🚚</span>
             </div>
-        </footer>
+            <div class="tagline-bottom">
+                <span class="tagline-emoji" aria-hidden="true">✨</span>
+                <span class="tagline-message">Fresh &amp; Fast - Every Time!</span>
+                <span class="tagline-emoji" aria-hidden="true">✨</span>
+            </div>
+        </div>
         
         <!-- Bottom Spacer -->
         <div class="bottom-spacer" aria-hidden="true"></div>
@@ -268,6 +567,25 @@
         <span class="back-to-top-arrow" aria-hidden="true">⬆</span>
         <span class="back-to-top-text" data-lang-key="backToTop">Back to Top</span>
     </button>
+    
+    <!-- ============================================ -->
+    <!-- FLOATING MAP CONTAINER -->
+    <!-- ============================================ -->
+    <div id="floatingMap" class="floating-map hidden" role="dialog" aria-label="लोकेशन मैप">
+        <div class="map-header">
+            <span class="map-header-icon" aria-hidden="true">📍</span>
+            <span class="map-header-title">आपकी लोकेशन</span>
+            <button id="closeMapBtn" class="close-btn" aria-label="मैप बंद करें">
+                <span aria-hidden="true">✕</span>
+            </button>
+        </div>
+        <div id="map" style="height: 200px; width: 100%;"></div>
+        <div class="map-footer">
+            <button id="refreshLocationBtn" class="refresh-location-btn">
+                <span aria-hidden="true">🔄</span> Refresh
+            </button>
+        </div>
+    </div>
     
     <!-- ============================================ -->
     <!-- SECTION 8: BOTTOM NAVBAR (FIXED) -->
@@ -300,7 +618,7 @@
     </nav>
     
     <!-- ============================================ -->
-    <!-- CART MODAL (FINAL - 40 FEATURES) -->
+    <!-- CART MODAL -->
     <!-- ============================================ -->
     <div id="cartModal" class="cart-modal hidden" role="dialog" aria-modal="true" aria-labelledby="cartTitle">
         <div class="cart-overlay"></div>
@@ -311,7 +629,7 @@
                 <div class="drag-bar"></div>
             </div>
             
-            <!-- 2. HEADER - Solid Color -->
+            <!-- 2. HEADER -->
             <div class="cart-header">
                 <div class="cart-header-left">
                     <span class="cart-header-icon" aria-hidden="true">🛒</span>
@@ -328,12 +646,12 @@
                 </div>
             </div>
             
-            <!-- 3. PROGRESS BAR - Compact + Mota -->
+            <!-- 3. PROGRESS BAR -->
             <div class="cart-progress">
                 <div class="milestones-row">
-                    <span class="milestone-icon" data-milestone="0">🥉</span>
-                    <span class="milestone-icon" data-milestone="1">🥈</span>
-                    <span class="milestone-icon" data-milestone="2">🥇</span>
+                    <span class="milestone-icon" data-milestone="0" aria-hidden="true">🥉</span>
+                    <span class="milestone-icon" data-milestone="1" aria-hidden="true">🥈</span>
+                    <span class="milestone-icon" data-milestone="2" aria-hidden="true">🥇</span>
                 </div>
                 <div class="progress-bar" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="500">
                     <div class="progress-fill" id="progressFill"></div>
@@ -344,7 +662,7 @@
                 <div class="milestone-reward hidden" id="milestoneReward"></div>
             </div>
             
-            <!-- 4. COUPON SYSTEM - Compact 1-Row -->
+            <!-- 4. COUPON SYSTEM -->
             <div class="cart-coupon">
                 <div class="coupon-input-row">
                     <input 
@@ -354,23 +672,17 @@
                         placeholder="कूपन कोड" 
                         autocomplete="off"
                         maxlength="15"
+                        aria-label="कूपन कोड डालें"
                     >
                     <button id="couponApplyBtn" class="coupon-apply-btn">लगाएं</button>
                 </div>
-                <div class="coupon-chips" id="couponChips">
-                    <!-- Dynamically filled -->
-                </div>
-                <div id="activeCouponTag" class="active-coupon-tag" style="display:none;">
-                    <!-- Active coupon tag -->
-                </div>
+                <div class="coupon-chips" id="couponChips"></div>
+                <div id="activeCouponTag" class="active-coupon-tag" style="display:none;"></div>
             </div>
             
             <!-- 5. CART ITEMS -->
             <div class="cart-items-wrapper">
-                <!-- Undo Notification -->
                 <div id="undoNotification" class="undo-notification" style="display:none;"></div>
-                
-                <!-- Cart Items List -->
                 <div id="cartItems" class="cart-items" role="list" aria-label="कार्ट में मौजूद आइटम"></div>
                 
                 <!-- Empty Cart State -->
@@ -390,7 +702,7 @@
                 </div>
             </div>
             
-            <!-- 6. SAVED ITEMS - Compact 1-Row -->
+            <!-- 6. SAVED ITEMS -->
             <div id="savedItemsSection" class="saved-items-section">
                 <div class="saved-items-header" id="savedItemsHeader">
                     <span class="saved-items-title">
@@ -399,12 +711,10 @@
                     </span>
                     <span class="saved-items-toggle">▼</span>
                 </div>
-                <div class="saved-items-list" id="savedItemsList">
-                    <!-- Dynamically filled -->
-                </div>
+                <div class="saved-items-list" id="savedItemsList"></div>
             </div>
             
-            <!-- 7. ORDER SUMMARY - Collapsible -->
+            <!-- 7. ORDER SUMMARY -->
             <div id="cartSummary" class="cart-summary">
                 <div class="summary-header" id="summaryHeader">
                     <span class="summary-header-left">
@@ -439,7 +749,7 @@
                 </div>
             </div>
             
-            <!-- 8. FOOTER - WhatsApp Focused -->
+            <!-- 8. FOOTER -->
             <div class="cart-footer">
                 <button id="sendOrderBtn" class="send-order-btn">
                     <span class="whatsapp-icon" aria-hidden="true">💬</span>
@@ -518,11 +828,14 @@
     </div>
     
     <!-- ============================================ -->
-    <!-- CHECKOUT MODAL (FINAL - Live GPS + Multilingual) -->
+    <!-- CHECKOUT MODAL -->
     <!-- ============================================ -->
     <div id="checkoutModal" class="checkout-modal hidden" role="dialog" aria-modal="true" aria-labelledby="checkoutTitle">
         <div class="checkout-overlay"></div>
         <div class="checkout-content">
+            
+            <!-- CSRF Token (Security) -->
+            <input type="hidden" id="csrfToken" value="">
             
             <!-- Header -->
             <div class="checkout-header">
@@ -550,20 +863,25 @@
                 <!-- Name -->
                 <div class="form-group">
                     <input type="text" id="customerName" class="form-input" 
-                           placeholder="👤  पूरा नाम लिखें..." autocomplete="name" required>
+                           placeholder="👤  पूरा नाम लिखें..." autocomplete="name" required
+                           aria-label="पूरा नाम" maxlength="50">
                 </div>
                 
-                <!-- Phone -->
+                <!-- Phone with Validation -->
                 <div class="form-group">
                     <div class="phone-input-group">
                         <span class="phone-prefix">+91</span>
                         <input type="tel" id="customerPhone" class="phone-input" 
-                               placeholder="📱  मोबाइल नंबर" maxlength="10" autocomplete="tel"
-                               inputmode="numeric" pattern="[0-9]{10}" required>
+                               placeholder="📱  मोबाइल नंबर" maxlength="10" 
+                               autocomplete="tel" inputmode="numeric" 
+                               pattern="[0-9]{10}" required
+                               aria-label="मोबाइल नंबर"
+                               title="कृपया 10 अंकों का सही मोबाइल नंबर डालें">
                     </div>
+                    <span class="validation-error" id="phoneError">❌ कृपया 10 अंकों का सही मोबाइल नंबर डालें</span>
                 </div>
                 
-                <!-- Location Status Indicator -->
+                <!-- Location Status -->
                 <div class="location-status">
                     <span id="locationIndicator" class="location-indicator searching">
                         <span class="location-dot searching"></span> ⏳ लोकेशन ले रहे हैं...
@@ -573,19 +891,25 @@
                 <!-- Village/City -->
                 <div class="form-group">
                     <input type="text" id="villageCity" class="form-input" 
-                           placeholder="🏘️  गाँव या शहर" required>
+                           placeholder="🏘️  गाँव या शहर" required
+                           aria-label="गाँव या शहर" maxlength="50">
                 </div>
                 
                 <!-- Nearby Place -->
                 <div class="form-group">
                     <input type="text" id="landmark" class="form-input" 
-                           placeholder="🏠  आस-पास की जगह (वैकल्पिक)">
+                           placeholder="🏠  आस-पास की जगह (वैकल्पिक)"
+                           aria-label="आस-पास की जगह" maxlength="50">
                 </div>
                 
-                <!-- Pincode (Optional) -->
+                <!-- Pincode with Validation -->
                 <div class="form-group">
                     <input type="text" id="pincode" class="form-input" 
-                           placeholder="📮  पिन कोड (वैकल्पिक)" maxlength="6" inputmode="numeric" pattern="[0-9]{6}">
+                           placeholder="📮  पिन कोड (वैकल्पिक)" maxlength="6" 
+                           inputmode="numeric" pattern="[0-9]{6}"
+                           aria-label="पिन कोड"
+                           title="कृपया 6 अंकों का सही पिन कोड डालें">
+                    <span class="validation-error" id="pincodeError">❌ कृपया 6 अंकों का सही पिन कोड डालें</span>
                 </div>
                 
                 <!-- Delivery Time -->
@@ -608,7 +932,7 @@
                             <span>शाम 7-9 बजे</span>
                         </label>
                         <input type="text" id="manualTime" class="time-manual-input" 
-                               placeholder="अपना समय...">
+                               placeholder="अपना समय..." aria-label="अपना समय" maxlength="20">
                     </div>
                 </div>
                 
@@ -625,7 +949,6 @@
                 <input type="hidden" id="latitude">
                 <input type="hidden" id="longitude">
                 <input type="hidden" id="locationUrl">
-                
             </div>
             
             <!-- Footer -->
@@ -637,7 +960,7 @@
                 </button>
             </div>
             
-            <!-- Confetti Container -->
+            <!-- Confetti -->
             <div id="checkoutConfetti" class="checkout-confetti-container"></div>
         </div>
     </div>
@@ -645,11 +968,20 @@
     <!-- ============================================ -->
     <!-- JAVASCRIPT FILES -->
     <!-- ============================================ -->
+    
+    <!-- ===== SECURITY MODULE (First Priority) ===== -->
+    <script src="js/security.js"></script>
+    
+    <!-- ===== CONFIGURATION ===== -->
     <script src="js/config.js"></script>
+    
+    <!-- ===== CORE MODULES ===== -->
     <script src="js/whatsapp.js"></script>
     <script src="js/theme.js"></script>
     <script src="js/language.js"></script>
     <script src="js/data-loader.js"></script>
+    
+    <!-- ===== FEATURE MODULES ===== -->
     <script src="js/search.js"></script>
     <script src="js/categories.js"></script>
     <script src="js/products.js"></script>
@@ -660,54 +992,72 @@
     <script src="js/bottom-nav.js"></script>
     <script src="js/back-to-top.js"></script>
     <script src="js/animations.js"></script>
-    
+    <script src="js/app.js"></script>
     <script src="js/auto-refresh.js"></script>
+    
+    <!-- ===== PWA & ORDERS ===== -->
     <script src="js/pwa-install.js"></script>
     <script src="js/orders.js"></script>
+    
+    <!-- ===== LOCATION & CHECKOUT ===== -->
     <script src="js/location.js"></script>
     <script src="js/pull-to-refresh.js"></script>
     <script src="js/checkout.js"></script>
+    
+    <!-- ===== UI HELPERS ===== -->
     <script src="js/floating-cart-bubble.js"></script>
     <script src="js/order-popup.js"></script>
-    <!-- Bottom of body, before closing </body> -->
-
-<script src="js/payment-popup.js"></script>
-
+    <script src="js/payment-popup.js"></script>
     
-    <!-- Leaflet JS -->
+    <!-- ============ LEAFLET JS ============ -->
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     
-    <!-- Floating Map -->
+    <!-- ============ FLOATING MAP ============ -->
     <script src="js/floating-map.js"></script>
     
- <script src="js/app.js"></script>
-    <!-- Font Loading Script -->
+    <!-- ============================================ -->
+    <!-- INLINE SCRIPTS -->
+    <!-- ============================================ -->
+    
+    <!-- ===== FONT LOADING ===== -->
     <script>
         document.fonts.ready.then(function() {
             document.documentElement.classList.add('fonts-loaded');
         });
     </script>
     
-    <!-- Splash Screen Handler -->
+    <!-- ===== SERVICE WORKER REGISTRATION ===== -->
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', function() {
+                navigator.serviceWorker.register('/sw.js')
+                    .then(function(registration) {
+                        console.log('✅ Service Worker registered successfully');
+                    })
+                    .catch(function(error) {
+                        console.log('❌ Service Worker registration failed:', error);
+                    });
+            });
+        }
+    </script>
+    
+    <!-- ===== SPLASH SCREEN HANDLER ===== -->
     <script>
         (function() {
             const splash = document.getElementById('splashScreen');
             if (!splash) return;
             
-            // Hide splash when page is fully loaded
             window.addEventListener('load', function() {
                 setTimeout(function() {
                     splash.classList.add('hide');
-                    // Remove from DOM after animation
                     setTimeout(function() {
                         if (splash.parentNode) {
                             splash.parentNode.removeChild(splash);
                         }
                     }, 700);
-                }, 2000); // Show for 2 seconds
+                }, 2000);
             });
             
-            // Fallback: Hide after 4 seconds if load event didn't fire
             setTimeout(function() {
                 if (splash && !splash.classList.contains('hide')) {
                     splash.classList.add('hide');
@@ -720,5 +1070,150 @@
             }, 4000);
         })();
     </script>
+    
+    <!-- ===== FORM VALIDATION ===== -->
+    <script>
+        (function() {
+            // Phone validation
+            const phoneInput = document.getElementById('customerPhone');
+            const phoneError = document.getElementById('phoneError');
+            if (phoneInput && phoneError) {
+                phoneInput.addEventListener('input', function() {
+                    const value = this.value;
+                    if (value.length > 0 && !/^[0-9]{10}$/.test(value)) {
+                        phoneError.style.display = 'block';
+                        this.classList.add('error');
+                    } else {
+                        phoneError.style.display = 'none';
+                        this.classList.remove('error');
+                    }
+                });
+                phoneInput.addEventListener('blur', function() {
+                    const value = this.value;
+                    if (value.length > 0 && value.length < 10) {
+                        phoneError.style.display = 'block';
+                        this.classList.add('error');
+                    } else {
+                        phoneError.style.display = 'none';
+                        this.classList.remove('error');
+                    }
+                });
+            }
+            
+            // Pincode validation
+            const pincodeInput = document.getElementById('pincode');
+            const pincodeError = document.getElementById('pincodeError');
+            if (pincodeInput && pincodeError) {
+                pincodeInput.addEventListener('input', function() {
+                    const value = this.value;
+                    if (value.length > 0 && !/^[0-9]{6}$/.test(value)) {
+                        pincodeError.style.display = 'block';
+                        this.classList.add('error');
+                    } else {
+                        pincodeError.style.display = 'none';
+                        this.classList.remove('error');
+                    }
+                });
+                pincodeInput.addEventListener('blur', function() {
+                    const value = this.value;
+                    if (value.length > 0 && value.length < 6) {
+                        pincodeError.style.display = 'block';
+                        this.classList.add('error');
+                    } else {
+                        pincodeError.style.display = 'none';
+                        this.classList.remove('error');
+                    }
+                });
+            }
+        })();
+    </script>
+    
+    <!-- ===== BROWSE PRODUCTS & START SHOPPING BUTTONS ===== -->
+    <script>
+        (function() {
+            document.querySelector('.browse-products-btn')?.addEventListener('click', function() {
+                const cartModal = document.getElementById('cartModal');
+                if (cartModal) cartModal.classList.add('hidden');
+                document.querySelector('[data-nav="home"]')?.click();
+            });
+            
+            document.querySelector('.start-shopping-btn')?.addEventListener('click', function() {
+                const ordersModal = document.getElementById('ordersModal');
+                if (ordersModal) ordersModal.classList.add('hidden');
+                document.querySelector('[data-nav="home"]')?.click();
+            });
+        })();
+    </script>
+    
+    <!-- ===== CSRF TOKEN GENERATION ===== -->
+    <script>
+        (function() {
+            const csrfField = document.getElementById('csrfToken');
+            if (csrfField) {
+                csrfField.value = Math.random().toString(36).substring(2, 15) + 
+                                  Math.random().toString(36).substring(2, 15) +
+                                  Date.now().toString(36);
+            }
+        })();
+    </script>
+    
+    <!-- ===== PERFORMANCE: Lazy load map ===== -->
+    <script>
+        if ('IntersectionObserver' in window) {
+            const mapElement = document.getElementById('floatingMap');
+            if (mapElement) {
+                const observer = new IntersectionObserver((entries) => {
+                    entries.forEach(entry => {
+                        if (entry.isIntersecting) {
+                            if (typeof initFloatingMap === 'function') {
+                                initFloatingMap();
+                            }
+                            observer.unobserve(entry.target);
+                        }
+                    });
+                });
+                observer.observe(mapElement);
+            }
+        }
+    </script>
+    
+    <!-- ===== IMAGE PROTECTION (Context Menu Disable) ===== -->
+    <script>
+        (function() {
+            // Disable right-click on images
+            document.addEventListener('contextmenu', function(e) {
+                if (e.target.tagName === 'IMG') {
+                    e.preventDefault();
+                    const toast = document.getElementById('toast');
+                    if (toast) {
+                        toast.textContent = '🛡️ Images download nahi kar sakte!';
+                        toast.classList.remove('hidden');
+                        clearTimeout(toast._timeout);
+                        toast._timeout = setTimeout(function() {
+                            toast.classList.add('hidden');
+                        }, 3000);
+                    }
+                    return false;
+                }
+            });
+            
+            // Disable drag
+            document.addEventListener('dragstart', function(e) {
+                if (e.target.tagName === 'IMG') {
+                    e.preventDefault();
+                    return false;
+                }
+            });
+            
+            // Disable long press (mobile)
+            document.addEventListener('touchstart', function(e) {
+                if (e.target.tagName === 'IMG') {
+                    e.preventDefault();
+                    return false;
+                }
+            }, { passive: false });
+        })();
+    </script>
+    
 </body>
 </html>
