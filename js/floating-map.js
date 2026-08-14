@@ -1,5 +1,5 @@
 // ============================================
-// FLOATING-MAP.JS - Complete Fixed v6
+// FLOATING-MAP.JS - Complete Fixed v7
 // No Drag | localStorage Timer | 1hr Expiry Fix | Smart Retry
 // ============================================
 
@@ -23,7 +23,7 @@ class FloatingMapManager {
         this.currentLang = 'hi';
         this.activeOrder = null;
 
-        // 🔥 DRAG FULLY DISABLED
+        // DRAG FULLY DISABLED
         this.isDragging = false;
 
         this.currentSize = 'normal';
@@ -44,7 +44,7 @@ class FloatingMapManager {
         this.riderInterval = null;
         this.popupShown = false;
 
-        // 🔥 SMART RETRY COUNTER
+        // SMART RETRY COUNTER
         this.retryCount = 0;
         this.RETRY_ADD_TIMES = [120, 180, 300, 0]; // 2min, 3min, 5min, band
         this.MAX_RETRY = 4;
@@ -55,9 +55,10 @@ class FloatingMapManager {
         this.SPEED_PER_KM = 5;
         this.RIDER_INTERVAL = 10000;
         this.TIMER_INTERVAL = 1000;
-        this.MAX_ORDER_AGE = 65 * 60 * 1000; // 🔥 1hr 5min
+        this.MAX_ORDER_AGE = 65 * 60 * 1000; // 1hr 5min
 
         this.autoHideTimeout = null;
+        this._toastTimer = null;
         this.init();
     }
 
@@ -69,7 +70,7 @@ class FloatingMapManager {
         this.bindOnlineEvents();
         this.restoreTimerFromStorage();
         setInterval(() => this.checkActiveOrder(), 30000);
-        console.log('🗺️ Floating Map v6 Ready (No Drag | Smart Retry | Persistent Timer)');
+        console.log('🗺️ Floating Map v7 Ready (No Drag | Smart Retry | Persistent Timer)');
     }
 
     detectLanguage() {
@@ -156,7 +157,7 @@ class FloatingMapManager {
         this.container.classList.remove('size-compact', 'size-normal', 'size-full');
         this.container.classList.add('size-' + size);
 
-        // 🔥 Reset position to CSS default (bottom-right)
+        // Reset position to CSS default (bottom-right)
         this.container.style.left = '';
         this.container.style.top = '';
         this.container.style.right = '';
@@ -186,8 +187,8 @@ class FloatingMapManager {
             zoom: 14,
             zoomControl: false,
             attributionControl: false,
-            dragging: false,       // 🔥 NO DRAG
-            scrollWheelZoom: false // 🔥 NO ZOOM
+            dragging: false,       // NO DRAG
+            scrollWheelZoom: false // NO ZOOM
         });
 
         if (navigator.onLine) {
@@ -244,7 +245,10 @@ class FloatingMapManager {
         this.activeOrder = order;
         this.retryCount = 0;
 
-        if (!order.tracking?.customerLocation) { console.warn('⚠️ No customer location'); return; }
+        if (!order.tracking?.customerLocation) { 
+            console.warn('⚠️ No customer location'); 
+            return; 
+        }
 
         const clat = order.tracking.customerLocation.lat;
         const clng = order.tracking.customerLocation.lng;
@@ -269,10 +273,11 @@ class FloatingMapManager {
         this.saveTimerToStorage();
         this.startTimer();
         this.startRiderUpdates();
+        this.show();
     }
 
     // ============================================
-    // 🔥 TIMER — localStorage persisted
+    // TIMER — localStorage persisted
     // ============================================
     saveTimerToStorage() {
         try {
@@ -297,6 +302,16 @@ class FloatingMapManager {
             if (!saved) return;
             const data = JSON.parse(saved);
             if (!data.startTimestamp) return;
+
+            // 🔥 Check if order still exists
+            if (data.orderId && window.ordersManager) {
+                const order = window.ordersManager.getOrderById(data.orderId);
+                if (!order || (order.status !== 'confirmed' && order.status !== 'in_transit')) {
+                    localStorage.removeItem('qd-map-timer');
+                    this.activeOrder = null;
+                    return;
+                }
+            }
 
             const now = Date.now();
             const elapsed = Math.floor((now - data.startTimestamp) / 1000);
@@ -370,7 +385,11 @@ class FloatingMapManager {
     updateTimerDisplay() {
         const el = document.getElementById('mapTimer');
         if (!el) return;
-        if (this.remainingSeconds <= 0) { el.textContent = '00:00'; el.style.color = '#FF1744'; return; }
+        if (this.remainingSeconds <= 0) { 
+            el.textContent = '00:00'; 
+            el.style.color = '#FF1744'; 
+            return; 
+        }
         const m = Math.floor(this.remainingSeconds/60), s = this.remainingSeconds%60;
         el.textContent = `${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
         el.style.color = this.remainingSeconds <= 60 ? '#FF1744' : '#FF6D00';
@@ -395,39 +414,42 @@ class FloatingMapManager {
     stopRiderUpdates() { if (this.riderInterval) { clearInterval(this.riderInterval); this.riderInterval = null; } }
 
     updateDistanceDisplay() {
-    const el = document.getElementById('mapDistance');
-    if (!el) return;
+        const el = document.getElementById('mapDistance');
+        if (!el) return;
 
-    // 🔥 Timer progress ke hisaab se distance kam hogi
-    const elapsed = Date.now() - this.startTimestamp;
-    const totalTime = this.initialSeconds * 1000;
-    const progress = Math.min(elapsed / totalTime, 1);
+        // Timer progress ke hisaab se distance kam hogi
+        const elapsed = Date.now() - this.startTimestamp;
+        const totalTime = this.initialSeconds * 1000;
+        const progress = Math.min(elapsed / totalTime, 1);
 
-    // 🔥 Distance = total distance × (1 - progress)
-    const remaining = this.distance * (1 - progress);
+        // Distance = total distance × (1 - progress)
+        const remaining = this.distance * (1 - progress);
 
-    if (remaining < 0.05) {
-        el.textContent = 'पहुँच गया';
-        el.style.color = '#4CAF50';
-    } else if (remaining < 1) {
-        el.textContent = `${Math.round(remaining * 1000)} m`;
-        el.style.color = '#2E7D32';
-    } else {
-        el.textContent = `${remaining.toFixed(1)} km`;
-        el.style.color = '#2E7D32';
+        if (remaining < 0.05) {
+            el.textContent = this.currentLang === 'hi' ? 'पहुँच गया' : 'Arrived!';
+            el.style.color = '#4CAF50';
+        } else if (remaining < 1) {
+            el.textContent = `${Math.round(remaining * 1000)} m`;
+            el.style.color = '#2E7D32';
+        } else {
+            el.textContent = `${remaining.toFixed(1)} km`;
+            el.style.color = '#2E7D32';
+        }
     }
-}
 
     // ============================================
-    // 🔥 DELIVERY POPUP — with Smart Retry
+    // DELIVERY POPUP — with Smart Retry
     // ============================================
     showDeliveryPopup() {
         if (window.orderPopupManager && this.activeOrder) {
             window.orderPopupManager.showDeliveryPopup(this.activeOrder);
+        } else {
+            console.log('⏰ Delivery time reached!');
+            this.showToast('⏰ Delivery time reached!');
         }
     }
 
-    // 🔥 CALLED WHEN USER SAYS "NO, NOT YET"
+    // CALLED WHEN USER SAYS "NO, NOT YET"
     addExtraTime() {
         this.retryCount++;
         console.log(`🔄 Retry #${this.retryCount}`);
@@ -467,10 +489,11 @@ class FloatingMapManager {
         const mins = Math.floor(addSeconds/60);
         const secs = addSeconds%60;
         console.log(`⏱️ +${mins}:${String(secs).padStart(2,'0')} added (Retry ${this.retryCount}/${this.MAX_RETRY})`);
+        this.showToast(`⏱️ +${mins} min added!`);
     }
 
     // ============================================
-    // 🔥 CHECK ACTIVE ORDER — Fixed 1hr 5min expiry
+    // CHECK ACTIVE ORDER — Fixed 1hr 5min expiry
     // ============================================
     checkActiveOrder() {
         if (!window.ordersManager) return;
@@ -488,18 +511,18 @@ class FloatingMapManager {
         const now = Date.now();
 
         const activeOrder = orders.find(o => {
-            // 🔥 Sirf confirmed ya in_transit
+            // Sirf confirmed ya in_transit
             if (o.status !== 'confirmed' && o.status !== 'in_transit') return false;
 
-            // 🔥 Cancelled check
+            // Cancelled check
             if (o.status === 'cancelled') return false;
 
             const orderTime = o.timestamp || o.date || 0;
-            
-            // 🔥 1hr 5min = 65 minutes
+
+            // 1hr 5min = 65 minutes
             if (orderTime > 0 && (now - orderTime) > this.MAX_ORDER_AGE) {
                 o.status = 'delivered';
-                if (window.ordersManager.saveOrders) window.ordersManager.saveOrders();
+                if (window.ordersManager.saveOrders) window.ordersManager.saveOrders(orders);
                 console.log('🕐 Order auto-delivered (65min expired)');
                 return false;
             }
@@ -525,6 +548,23 @@ class FloatingMapManager {
         this.show();
     }
 
+    // ============================================
+    // UPDATE ORDER INFO (For Track button)
+    // ============================================
+    updateOrderInfo(order) {
+        if (!order) return;
+        this.activeOrder = order;
+        
+        // Update timer display if already running
+        if (this.timerInterval) {
+            this.updateTimerDisplay();
+            this.updateDistanceDisplay();
+            this.show();
+        } else {
+            this.updateMapWithOrder(order);
+        }
+    }
+
     show() {
         if (!this.container || this.isVisible) return;
         this.container.classList.add('visible');
@@ -541,7 +581,7 @@ class FloatingMapManager {
     }
 
     // ============================================
-    // 🔥 EVENTS — Drag FULLY REMOVED
+    // EVENTS — Drag FULLY REMOVED
     // ============================================
     bindEvents() {
         document.addEventListener('click', (e) => {
@@ -575,7 +615,34 @@ class FloatingMapManager {
             if (saved && this.sizes[saved]) { this.currentSize = saved; this.applySize(saved); }
         } catch(e) {}
 
-        document.addEventListener('languageChanged', () => this.detectLanguage());
+        document.addEventListener('languageChanged', () => {
+            this.detectLanguage();
+            this.updateHeaderText();
+        });
+    }
+
+    updateHeaderText() {
+        const headerText = this.container?.querySelector('.map-header-text');
+        if (headerText) {
+            headerText.textContent = this.currentLang === 'hi' ? '🛵 लाइव ट्रैकिंग' : '🛵 Live Tracking';
+        }
+        // Update button texts
+        const callBtn = document.getElementById('btnCallShop');
+        if (callBtn) {
+            callBtn.innerHTML = `📞 ${this.currentLang === 'hi' ? 'दुकान' : 'Call Shop'}`;
+        }
+        const viewBtn = document.getElementById('btnViewFullMap');
+        if (viewBtn) {
+            viewBtn.innerHTML = `🗺️ ${this.currentLang === 'hi' ? 'पूरा मैप' : 'Full Map'}`;
+        }
+        const collapseBtn = document.getElementById('btnCollapseMap');
+        if (collapseBtn) {
+            collapseBtn.title = this.currentLang === 'hi' ? 'छोटा करें' : 'Collapse';
+        }
+        const closeBtn = document.getElementById('btnCloseMap');
+        if (closeBtn) {
+            closeBtn.title = this.currentLang === 'hi' ? 'बंद करें' : 'Close';
+        }
     }
 
     openFullMap() {
@@ -589,16 +656,68 @@ class FloatingMapManager {
 
     refreshSize() { if (this.map) setTimeout(() => this.map.invalidateSize(), 200); }
 
-   
+    // ============================================
+    // TOAST
+    // ============================================
+    showToast(msg) {
+        const toast = document.getElementById('toast');
+        if (!toast) return;
+
+        toast.textContent = msg;
+        toast.classList.remove('hidden');
+        toast.style.animation = 'none';
+        toast.offsetHeight;
+        toast.style.animation = 'slideUp 0.3s ease';
+
+        clearTimeout(this._toastTimer);
+        this._toastTimer = setTimeout(() => {
+            toast.style.animation = 'fadeOut 0.3s ease forwards';
+            setTimeout(() => toast.classList.add('hidden'), 300);
+        }, 2500);
+    }
+
+    // ============================================
+    // DESTROY
+    // ============================================
+    destroy() {
+        this.stopTimer();
+        this.stopRiderUpdates();
+        clearTimeout(this._toastTimer);
+        if (this.map) { this.map.remove(); this.map = null; }
+        if (this.container) { this.container.remove(); this.container = null; }
+        console.log('🗺️ FloatingMapManager destroyed');
+    }
 }
+
+// ============================================
+// INITIALIZE
+// ============================================
 
 document.addEventListener('DOMContentLoaded', () => {
     setTimeout(() => {
-        if (window.floatingMapManager) window.floatingMapManager.destroy();
+        if (window.floatingMapManager) {
+            window.floatingMapManager.destroy();
+        }
         window.floatingMapManager = new FloatingMapManager();
     }, 1000);
 });
 
+// Also initialize if DOM already ready
+if (document.readyState === 'complete' || document.readyState === 'interactive') {
+    if (!window.floatingMapManager) {
+        setTimeout(() => {
+            if (window.floatingMapManager) {
+                window.floatingMapManager.destroy();
+            }
+            window.floatingMapManager = new FloatingMapManager();
+        }, 1000);
+    }
+}
+
 window.addEventListener('beforeunload', () => {
-    if (window.floatingMapManager) window.floatingMapManager.destroy();
+    if (window.floatingMapManager) {
+        window.floatingMapManager.destroy();
+    }
 });
+
+console.log('🗺️ FloatingMapManager v7 Ready!');
