@@ -1,5 +1,5 @@
 // ============================================
-// ORDERS.JS - My Orders Logic (Final)
+// ORDERS.JS - My Orders Logic (Final v2.0)
 // Quick Dukan - All Statuses | GPS | Tracking | Cancel | Track Fix
 // ============================================
 
@@ -16,27 +16,30 @@ class OrdersManager {
         this.storageKey = 'quick-dukan-orders';
         this.expandedOrder = null;
         this.currentLang = 'hi';
-        
+
         // Delivery check interval
         this.deliveryCheckInterval = null;
-        
+
         // Shop location
         this.shopLocation = {
             lat: 27.6667496,
             lng: 77.7124673,
             name: 'Quick Dukan'
         };
-        
+
+        // Toast timer
+        this._toastTimer = null;
+
         if (!this.ordersModal) {
             console.error('❌ Orders Modal not found!');
             return;
         }
-        
+
         this.ordersOverlay = this.ordersModal.querySelector('.orders-overlay');
         this.init();
-        console.log('✅ Orders Manager Initialized');
+        console.log('✅ Orders Manager Initialized v2.0');
     }
-    
+
     // ============================================
     // INITIALIZATION
     // ============================================
@@ -44,26 +47,31 @@ class OrdersManager {
         this.detectLanguage();
         this.bindEvents();
         this.startDeliveryCheck();
+        
+        // Check for order on page load (for floating map)
+        setTimeout(() => {
+            this.checkActiveOrderForMap();
+        }, 2000);
     }
-    
+
     detectLanguage() {
         if (window.languageManager?.currentLang) {
             this.currentLang = window.languageManager.currentLang;
         }
     }
-    
+
     bindEvents() {
         // Close button
         this.closeOrdersBtn?.addEventListener('click', () => this.close());
-        
+
         // Overlay click
         this.ordersOverlay?.addEventListener('click', () => this.close());
-        
+
         // Filter buttons
         this.filterBtns.forEach(btn => {
             btn.addEventListener('click', () => this.setFilter(btn));
         });
-        
+
         // Start shopping button
         document.addEventListener('click', (e) => {
             if (e.target.closest('.start-shopping-btn')) {
@@ -72,7 +80,7 @@ class OrdersManager {
                 document.getElementById('allProductsSection')?.scrollIntoView({ behavior: 'smooth' });
             }
         });
-        
+
         // Bottom nav orders button
         document.addEventListener('click', (e) => {
             if (e.target.closest('[data-nav="orders"]')) {
@@ -81,36 +89,42 @@ class OrdersManager {
                 this.open();
             }
         });
-        
+
         // Escape key
         document.addEventListener('keydown', (e) => {
             if (e.key === 'Escape' && !this.ordersModal.classList.contains('hidden')) {
                 this.close();
             }
         });
-        
+
         // Language change
         document.addEventListener('languageChanged', () => {
             this.detectLanguage();
-            this.render();
+            if (!this.ordersModal.classList.contains('hidden')) {
+                this.render();
+            }
         });
     }
-    
+
     // ============================================
     // DELIVERY TIME CHECK LOOP
     // ============================================
     startDeliveryCheck() {
+        if (this.deliveryCheckInterval) {
+            clearInterval(this.deliveryCheckInterval);
+        }
+        
         this.deliveryCheckInterval = setInterval(() => {
             this.checkDeliveryTime();
         }, 60000);
-        
+
         setTimeout(() => this.checkDeliveryTime(), 5000);
     }
-    
+
     checkDeliveryTime() {
         const orders = this.getOrders();
         const now = new Date();
-        
+
         orders.forEach(order => {
             if (order.status === 'confirmed' || order.status === 'in_transit') {
                 if (order.deliveryTime && !order.deliveryPopupShown) {
@@ -124,13 +138,13 @@ class OrdersManager {
             }
         });
     }
-    
+
     parseDeliveryTime(timeStr) {
         if (!timeStr) return null;
-        
+
         const now = new Date();
         let targetHour = 18;
-        
+
         if (timeStr.includes('5-7') || timeStr.includes('शाम 5-7')) {
             targetHour = 17;
         } else if (timeStr.includes('7-9') || timeStr.includes('शाम 7-9')) {
@@ -138,20 +152,21 @@ class OrdersManager {
         } else if (timeStr.includes('अभी') || timeStr.includes('Now') || timeStr.includes('30-45')) {
             return new Date(now.getTime() + 35 * 60000);
         }
-        
+
         const target = new Date(now);
         target.setHours(targetHour, 0, 0, 0);
         return target;
     }
-    
+
     triggerDeliveryPopup(order) {
         if (window.orderPopupManager) {
             window.orderPopupManager.showDeliveryPopup(order);
         } else {
             console.log('⏰ Delivery time reached for order:', order.id);
+            this.showToast(`⏰ ${order.id} - Delivery time reached!`);
         }
     }
-    
+
     // ============================================
     // DATA PERSISTENCE
     // ============================================
@@ -164,7 +179,7 @@ class OrdersManager {
             return [];
         }
     }
-    
+
     saveOrders(orders) {
         try {
             localStorage.setItem(this.storageKey, JSON.stringify(orders));
@@ -172,21 +187,21 @@ class OrdersManager {
             console.error('Error saving orders:', e);
         }
     }
-    
+
     getOrderById(orderId) {
         const orders = this.getOrders();
         return orders.find(o => o.id === orderId) || null;
     }
-    
+
     // ============================================
     // SAVE NEW ORDER
     // ============================================
     saveOrder(orderData) {
         const orders = this.getOrders();
-        
+
         // Save customer location from checkout
         let customerLocation = null;
-        
+
         if (orderData.location && orderData.location.lat && orderData.location.lng) {
             customerLocation = {
                 lat: parseFloat(orderData.location.lat),
@@ -194,12 +209,12 @@ class OrdersManager {
             };
             console.log('📍 Customer Location Saved:', customerLocation);
         } else {
-            console.error('❌ No location in orderData!');
+            console.warn('⚠️ No location in orderData!');
         }
-        
+
         // Save customer name for celebration popup
         const customerName = orderData.customer?.name || '';
-        
+
         const newOrder = {
             id: 'ORD-' + Date.now().toString(36).toUpperCase(),
             date: new Date().toISOString(),
@@ -225,43 +240,50 @@ class OrdersManager {
                 { label: 'डिलीवर्ड', labelEn: 'Delivered', time: null, completed: false }
             ],
         };
-        
+
         orders.unshift(newOrder);
         this.saveOrders(orders);
-        console.log('✅ Order saved:', newOrder.id, '| Customer:', customerName, '| Location:', customerLocation);
-        
+        console.log('✅ Order saved:', newOrder.id, '| Customer:', customerName);
+
+        // Check if order should trigger floating map
+        if (newOrder.status === 'confirmed' || newOrder.status === 'in_transit') {
+            setTimeout(() => {
+                this.checkActiveOrderForMap();
+            }, 1000);
+        }
+
         return newOrder;
     }
-    
+
     // ============================================
     // UPDATE ORDER
     // ============================================
     updateOrderStatus(orderId, newStatus) {
         const orders = this.getOrders();
         const order = orders.find(o => o.id === orderId);
-        
+
         if (!order) {
             console.error('❌ Order not found:', orderId);
             return false;
         }
-        
+
         order.status = newStatus;
         const now = new Date().toISOString();
-        
+
         switch (newStatus) {
             case 'confirmed':
                 order.timeline[1].completed = true;
                 order.timeline[1].time = now;
                 this.startTracking(order);
                 // Notify floating map
-                if (window.floatingMapManager) {
-                    setTimeout(() => window.floatingMapManager.checkActiveOrder(), 500);
-                }
+                setTimeout(() => {
+                    this.checkActiveOrderForMap();
+                }, 500);
                 break;
-                
+
             case 'cancelled':
                 order.timeline = [
-                    { label: 'भेजा गया', labelEn: 'Sent', time: order.timeline[0].time, completed: true },
+                    { label: 'भेजा गया', labelEn: 'Sent', time: order.timeline[0]?.time || now, completed: true },
                     { label: 'रद्द', labelEn: 'Cancelled', time: now, completed: true }
                 ];
                 this.stopTracking(order);
@@ -272,7 +294,7 @@ class OrdersManager {
                     window.floatingMapManager.stopRiderUpdates();
                 }
                 break;
-                
+
             case 'delivered':
                 order.timeline[2].completed = true;
                 order.timeline[2].time = now;
@@ -284,45 +306,60 @@ class OrdersManager {
                     window.floatingMapManager.stopRiderUpdates();
                 }
                 break;
-                
+
             case 'in_transit':
+                // Update tracking progress
+                if (!order.tracking) {
+                    order.tracking = {
+                        enabled: true,
+                        currentLocation: null,
+                        customerLocation: order.location ? {
+                            lat: parseFloat(order.location.lat),
+                            lng: parseFloat(order.location.lng)
+                        } : null,
+                        riderProgress: 0.3,
+                        updates: []
+                    };
+                }
+                order.tracking.riderProgress = 0.3;
                 break;
         }
-        
+
         this.saveOrders(orders);
         console.log(`✅ Order ${orderId} updated to: ${newStatus}`);
-        
+
+        // Re-render if modal is open
         if (!this.ordersModal.classList.contains('hidden')) {
             this.render();
         }
-        
+
         return true;
     }
-    
+
     addCancelReason(orderId, reason) {
         const orders = this.getOrders();
         const order = orders.find(o => o.id === orderId);
-        
+
         if (!order) return false;
-        
+
         order.cancelReason = reason;
         this.saveOrders(orders);
-        
+
         if (!this.ordersModal.classList.contains('hidden')) {
             this.render();
         }
-        
+
         return true;
     }
-    
+
     // ============================================
-    // GPS TRACKING — MAP CALL SIRF POPUP CONFIRM SE
+    // GPS TRACKING
     // ============================================
     startTracking(order) {
         if (!order) return;
-        
+
         order.tracking.enabled = true;
-        
+
         // Use customer location from order
         if (!order.tracking.customerLocation && order.location) {
             order.tracking.customerLocation = {
@@ -330,7 +367,10 @@ class OrdersManager {
                 lng: parseFloat(order.location.lng)
             };
         }
-        
+
+        // Set initial progress
+        order.tracking.riderProgress = 0.1;
+
         // Save updated order
         const orders = this.getOrders();
         const idx = orders.findIndex(o => o.id === order.id);
@@ -338,15 +378,15 @@ class OrdersManager {
             orders[idx] = order;
             this.saveOrders(orders);
         }
-        
-        console.log('📍 Tracking started for order:', order.id, '(map opens via popup confirm)');
+
+        console.log('📍 Tracking started for order:', order.id);
     }
-    
+
     stopTracking(order) {
         if (!order) return;
-        
+
         order.tracking.enabled = false;
-        
+
         const orders = this.getOrders();
         const idx = orders.findIndex(o => o.id === order.id);
         if (idx !== -1) {
@@ -354,7 +394,30 @@ class OrdersManager {
             this.saveOrders(orders);
         }
     }
-    
+
+    // ============================================
+    // CHECK ACTIVE ORDER FOR MAP
+    // ============================================
+    checkActiveOrderForMap() {
+        const orders = this.getOrders();
+        const activeOrder = orders.find(o => 
+            o.status === 'confirmed' || o.status === 'in_transit'
+        );
+
+        if (activeOrder && window.floatingMapManager) {
+            console.log('🗺️ Active order found for map:', activeOrder.id);
+            
+            // Check if timer is already running
+            if (!window.floatingMapManager.timerInterval && !window.floatingMapManager.riderInterval) {
+                window.floatingMapManager.updateMapWithOrder(activeOrder);
+            } else {
+                // Timer already running - just show
+                window.floatingMapManager.show();
+                window.floatingMapManager.updateOrderInfo(activeOrder);
+            }
+        }
+    }
+
     // ============================================
     // CALCULATE DISTANCE
     // ============================================
@@ -368,29 +431,30 @@ class OrdersManager {
         const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
         return R * c;
     }
-    
+
     toRad(deg) {
         return deg * (Math.PI / 180);
     }
-    
+
     getTrackingInfo(order) {
         if (!order.tracking?.customerLocation) return null;
-        
+
         const distance = this.calculateDistance(
             this.shopLocation.lat, this.shopLocation.lng,
             order.tracking.customerLocation.lat, order.tracking.customerLocation.lng
         );
-        
-        const remainingDistance = distance * (1 - (order.tracking.riderProgress || 0));
-        const eta = Math.round(remainingDistance * 5);
-        
+
+        const progress = order.tracking.riderProgress || 0;
+        const remainingDistance = distance * (1 - progress);
+        const eta = Math.max(1, Math.round(remainingDistance * 5));
+
         return {
             distance: remainingDistance,
             eta: eta,
-            progress: order.tracking.riderProgress || 0
+            progress: progress
         };
     }
-    
+
     // ============================================
     // FILTER & RENDER
     // ============================================
@@ -399,83 +463,72 @@ class OrdersManager {
         if (this.activeFilter === 'all') return orders;
         return orders.filter(o => o.status === this.activeFilter);
     }
-    
+
     setFilter(btn) {
         this.filterBtns.forEach(b => b.classList.remove('active'));
         btn.classList.add('active');
         this.activeFilter = btn.getAttribute('data-filter');
         this.render();
     }
-    
+
     open() {
         if (!this.ordersModal) return;
-        
+
         this.render();
         this.ordersModal.classList.remove('hidden');
         document.body.style.overflow = 'hidden';
-        
+
         // Hide floating map when orders open
         if (window.floatingMapManager) {
             window.floatingMapManager.hide();
         }
     }
-    
+
     close() {
         if (!this.ordersModal) return;
         this.ordersModal.classList.add('hidden');
         document.body.style.overflow = '';
         this.expandedOrder = null;
-        
-        // Check if floating map should show (without resetting timer)
+
+        // Check if floating map should show
         setTimeout(() => {
-            if (window.floatingMapManager) {
-                const activeOrder = this.getOrders().find(o => 
-                    o.status === 'confirmed' || o.status === 'in_transit'
-                );
-                
-                if (activeOrder && window.floatingMapManager.timerInterval) {
-                    // Timer already running — just show, don't reset
-                    window.floatingMapManager.show();
-                } else if (activeOrder) {
-                    window.floatingMapManager.checkActiveOrder();
-                }
-            }
+            this.checkActiveOrderForMap();
         }, 300);
     }
-    
+
     render() {
         if (!this.ordersList) return;
-        
+
         const orders = this.getFilteredOrders();
         this.ordersList.innerHTML = '';
-        
+
         if (orders.length === 0) {
             if (this.emptyOrders) this.emptyOrders.classList.remove('hidden');
             return;
         }
-        
+
         if (this.emptyOrders) this.emptyOrders.classList.add('hidden');
-        
+
         orders.forEach(order => {
             const card = this.createOrderCard(order);
             this.ordersList.appendChild(card);
         });
     }
-    
+
     // ============================================
     // CREATE ORDER CARD
     // ============================================
     createOrderCard(order) {
         const card = document.createElement('div');
         card.className = 'order-card fade-in';
-        
+
         const isHindi = this.currentLang === 'hi';
         const date = new Date(order.date);
         const dateStr = date.toLocaleDateString(isHindi ? 'hi-IN' : 'en-IN', {
             day: 'numeric', month: 'short', year: 'numeric',
             hour: '2-digit', minute: '2-digit'
         });
-        
+
         const statusLabels = {
             hi: {
                 pending: '⏳ पेंडिंग',
@@ -492,36 +545,37 @@ class OrdersManager {
                 cancelled: '❌ Cancelled'
             }
         };
-        
+
         const statusText = (statusLabels[this.currentLang] || statusLabels.hi)[order.status] || '⏳ पेंडिंग';
-        
+
         const trackingInfo = this.getTrackingInfo(order);
-        
+
         let html = '';
-        
+
         // Header
         html += `
             <div class="order-card-header">
                 <div>
                     <div class="order-id">#${order.id}</div>
                     <div class="order-date">${dateStr}</div>
+                    ${order.customerName ? `<div class="order-customer">👤 ${order.customerName}</div>` : ''}
                 </div>
                 <span class="order-status ${order.status}">${statusText}</span>
             </div>
         `;
-        
+
         // Tracking bar with map integration (clickable)
         if (order.status === 'confirmed' || order.status === 'in_transit') {
             let trackingText = isHindi ? 'आपका ऑर्डर आ रहा है...' : 'Your order is on the way...';
             let distanceText = '';
-            
+
             if (trackingInfo) {
                 if (trackingInfo.distance < 1) {
                     distanceText = `${Math.round(trackingInfo.distance * 1000)} m`;
                 } else {
                     distanceText = `${trackingInfo.distance.toFixed(1)} km`;
                 }
-                
+
                 if (trackingInfo.eta < 1) {
                     trackingText = isHindi ? 'अभी पहुँच रहा है!' : 'Arriving now!';
                 } else {
@@ -530,7 +584,7 @@ class OrdersManager {
                         : `📍 ${distanceText} away | ⏱️ ~${trackingInfo.eta} min`;
                 }
             }
-            
+
             html += `
                 <div class="order-tracking-mini" style="cursor:pointer;" 
                      onclick="window.ordersManager?.close(); setTimeout(() => window.floatingMapManager?.show(), 400);">
@@ -540,21 +594,23 @@ class OrdersManager {
                 </div>
             `;
         }
-        
+
         // Items preview
         const previewItems = order.items.slice(0, 4);
         const moreCount = order.items.length - 4;
         html += '<div class="order-items-preview">';
         previewItems.forEach(item => {
             const img = item.image || '';
-            const name = item.name?.hi || item.name?.en || '';
+            const name = typeof item.name === 'object' 
+                ? (item.name[this.currentLang] || item.name.hi || item.name.en || '') 
+                : (item.name || '');
             html += `<img src="${img}" alt="${name}" class="order-item-thumb" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 40 40%22><rect fill=%22%23f0f0f0%22 width=%2240%22 height=%2240%22 rx=%2210%22/><text x=%2220%22 y=%2228%22 text-anchor=%22middle%22 font-size=%2220%22>📦</text></svg>'">`;
         });
         if (moreCount > 0) {
             html += `<span class="order-item-more">+${moreCount}</span>`;
         }
         html += '</div>';
-        
+
         // Summary
         html += `
             <div class="order-summary">
@@ -562,7 +618,7 @@ class OrdersManager {
                 <span class="order-item-count">${order.itemCount} ${isHindi ? 'आइटम' : 'items'}</span>
             </div>
         `;
-        
+
         // Delivery time
         if (order.deliveryTime) {
             html += `
@@ -571,7 +627,7 @@ class OrdersManager {
                 </div>
             `;
         }
-        
+
         // Cancel reason
         if (order.status === 'cancelled' && order.cancelReason) {
             html += `
@@ -581,17 +637,17 @@ class OrdersManager {
                 </div>
             `;
         }
-        
+
         // Timeline
         html += '<div class="order-timeline">';
         order.timeline.forEach((step, i) => {
             if (i > 0) {
                 html += `<div class="timeline-line ${step.completed ? 'completed' : ''}"></div>`;
             }
-            
+
             const isCancelled = step.label === 'रद्द' || step.label === 'Cancelled';
             const isActive = !step.completed && (i === 0 || order.timeline[i - 1].completed);
-            
+
             html += `
                 <div class="timeline-step ${step.completed ? 'completed' : ''} ${isActive ? 'active' : ''} ${isCancelled ? 'cancelled-step' : ''}">
                     <div class="timeline-dot"></div>
@@ -600,7 +656,7 @@ class OrdersManager {
             `;
         });
         html += '</div>';
-        
+
         // Actions
         html += '<div class="order-actions">';
         html += `
@@ -611,7 +667,7 @@ class OrdersManager {
                 📋 ${isHindi ? 'डिटेल' : 'Details'}
             </button>
         `;
-        
+
         if (order.status === 'confirmed' || order.status === 'in_transit') {
             html += `
                 <button class="order-action-btn track-order-btn" data-order-id="${order.id}">
@@ -620,40 +676,44 @@ class OrdersManager {
             `;
         }
         html += '</div>';
-        
+
         // Detail view
         html += `
             <div class="order-detail hidden" id="detail-${order.id}">
                 ${order.items.map(item => {
-                    const name = item.name?.hi || item.name?.en || '';
+                    const name = typeof item.name === 'object' 
+                        ? (item.name[this.currentLang] || item.name.hi || item.name.en || '') 
+                        : (item.name || '');
+                    const qty = item.quantity || 1;
+                    const price = (item.price || 0) * qty;
                     return `
                         <div class="order-detail-item">
-                            <span>${name} × ${item.quantity || 1}</span>
-                            <span>₹${(item.price || 0) * (item.quantity || 1)}</span>
+                            <span>${name} × ${qty}</span>
+                            <span>₹${price}</span>
                         </div>
                     `;
                 }).join('')}
-                <div class="order-detail-item">
+                <div class="order-detail-item total">
                     <span>${isHindi ? 'कुल' : 'Total'}</span>
                     <span>₹${order.total}</span>
                 </div>
             </div>
         `;
-        
+
         card.innerHTML = html;
-        
+
         // Event listeners
         card.querySelector('.reorder-btn')?.addEventListener('click', (e) => {
             e.stopPropagation();
             this.reorder(order);
         });
-        
+
         card.querySelector('.view-detail-btn')?.addEventListener('click', (e) => {
             e.stopPropagation();
             this.toggleDetail(order.id);
         });
-        
-        // 🔥 TRACK BUTTON FIX — Don't reset timer if already running
+
+        // TRACK BUTTON FIX — Don't reset timer if already running
         card.querySelector('.track-order-btn')?.addEventListener('click', (e) => {
             e.stopPropagation();
             this.close();
@@ -662,24 +722,24 @@ class OrdersManager {
                     // Agar timer already chal raha hai — sirf show karo, reset mat karo
                     if (window.floatingMapManager.timerInterval || window.floatingMapManager.riderInterval) {
                         window.floatingMapManager.show();
+                        window.floatingMapManager.updateOrderInfo(order);
                         console.log('🗺️ Track: Map shown (timer already running, no reset)');
                     } else {
                         // Timer nahi chal raha — full update
-                        window.floatingMapManager.show();
                         window.floatingMapManager.updateMapWithOrder(order);
                         console.log('🗺️ Track: Map updated with order (fresh start)');
                     }
                 }
             }, 300);
         });
-        
+
         return card;
     }
-    
+
     toggleDetail(orderId) {
         const detail = document.getElementById(`detail-${orderId}`);
         if (!detail) return;
-        
+
         if (this.expandedOrder === orderId) {
             detail.classList.add('hidden');
             this.expandedOrder = null;
@@ -692,12 +752,12 @@ class OrdersManager {
             this.expandedOrder = orderId;
         }
     }
-    
+
     reorder(order) {
         if (!window.cartManager) return;
-        
+
         window.cartManager.cart = [];
-        
+
         order.items.forEach(item => {
             window.cartManager.cart.push({
                 id: item.id || ('RE-' + Date.now().toString(36)),
@@ -709,26 +769,74 @@ class OrdersManager {
                 quantity: item.quantity || 1,
             });
         });
-        
+
         window.cartManager.saveCart();
         window.cartManager.updateBadge();
-        
+
         this.close();
         setTimeout(() => {
             if (window.cartManager) window.cartManager.openCart();
         }, 300);
     }
-    
+
+    // ============================================
+    // TOAST
+    // ============================================
+    showToast(msg) {
+        const toast = document.getElementById('toast');
+        if (!toast) return;
+
+        toast.textContent = msg;
+        toast.classList.remove('hidden');
+        toast.style.animation = 'none';
+        toast.offsetHeight;
+        toast.style.animation = 'slideUp 0.3s ease';
+
+        clearTimeout(this._toastTimer);
+        this._toastTimer = setTimeout(() => {
+            toast.style.animation = 'fadeOut 0.3s ease forwards';
+            setTimeout(() => toast.classList.add('hidden'), 300);
+        }, 2500);
+    }
+
+    // ============================================
+    // DESTROY
+    // ============================================
     destroy() {
         if (this.deliveryCheckInterval) {
             clearInterval(this.deliveryCheckInterval);
+            this.deliveryCheckInterval = null;
         }
+        clearTimeout(this._toastTimer);
+        console.log('🗑️ OrdersManager destroyed');
     }
 }
 
-// Initialize
+// ============================================
+// INITIALIZE
+// ============================================
+
+// Main initialization
 document.addEventListener('DOMContentLoaded', () => {
     setTimeout(() => {
         window.ordersManager = new OrdersManager();
     }, 100);
 });
+
+// Also initialize if DOM already ready
+if (document.readyState === 'complete' || document.readyState === 'interactive') {
+    if (!window.ordersManager) {
+        setTimeout(() => {
+            window.ordersManager = new OrdersManager();
+        }, 100);
+    }
+}
+
+// Cleanup
+window.addEventListener('beforeunload', () => {
+    if (window.ordersManager) {
+        window.ordersManager.destroy();
+    }
+});
+
+console.log('📋 OrdersManager Global API Ready!');
